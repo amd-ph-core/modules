@@ -1,0 +1,68 @@
+repository_type: pipeline
+
+nf_core_version: 3.3.2
+
+lint:
+  files_unchanged:
+    - .github/CONTRIBUTING.md
+    - assets/sendmail_template.txt
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-modules_logo_light.png
+    - docs/images/nf-core-modules_logo_light.png
+    - docs/images/nf-core-modules_logo_dark.png
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/CONTRIBUTING.md
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - assets/email_template.txt
+    - docs/README.md
+    - .prettierignore
+    - .prettierignore
+    - .prettierignore
+    - .prettierignore
+  nextflow_config: false
+  multiqc_config: false
+  files_exist:
+    - conf/igenomes.config
+    - conf/igenomes.config
+    - conf/igenomes_ignored.config
+    - nextflow_schema.json
+    - assets/multiqc_config.yml
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-modules_logo_light.png
+    - docs/images/nf-core-modules_logo_light.png
+    - docs/images/nf-core-modules_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - assets/email_template.html
+    - assets/sendmail_template.txt
+    - assets/email_template.txt
+  schema_lint: false
+  schema_params: false
+  schema_description: false
+  included_configs: false
+
+template:
+  org: amd-ph-core
+  name: modules
+  description: Repository to host AMD Platform tool-specific module files for the
+    Nextflow DSL2 community!
+  author: AMD Platform
+  version: 1.0.0dev
+  force: true
+  outdir: .
+  skip_features:
+    - igenomes
+    - multiqc
+    - fastqc
+    - nf_schema
+    - nf_core_configs
+    - seqera_platform
+    - gpu
+    - gitpod
+    - vscode
+    - rocrate
+    - email
+    - adaptivecard
+    - slackreport
+  is_nfcore: false
