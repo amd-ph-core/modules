@@ -1,18 +1,14 @@
 name: Run nf-test
 on:
-  push:
-    branches:
-      # https://docs.renovatebot.com/key-concepts/automerge/#branch-vs-pr-automerging
-      - "renovate/**" # branches Renovate creates
-    paths-ignore:
-      - "**/meta.yml"
   pull_request:
-    branches: [master]
     paths-ignore:
+      - "docs/**"
       - "**/meta.yml"
-  merge_group:
-    types: [checks_requested]
-    branches: [master]
+      - "**/*.md"
+      - "**/*.png"
+      - "**/*.svg"
+  release:
+    types: [published]
   workflow_dispatch:
 
 # Cancel if a newer run is started
@@ -22,26 +18,18 @@ concurrency:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # renovate: datasource=github-releases depName=askimed/nf-test versioning=semver
-  NFT_VER: "0.9.3"
+  NFT_VER: "0.9.2"
+  NFT_WORKDIR: "~"
   NXF_ANSI_LOG: false
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
-  # renovate: datasource=github-releases depName=nextflow/nextflow versioning=semver
-  NXF_VER: "25.10.2"
 
 jobs:
   nf-test-changes:
     name: nf-test-changes
-    runs-on:
-      - runs-on=${{ github.run_id }}-nf-test-changes
-      - runner=4cpu-linux-x64
-      - image=ubuntu22-full-x64
+    runs-on: # use GitHub runners
+      - "ubuntu-latest"
     outputs:
-      # Expose detected tags as 'modules' and 'workflows' output variables
-      paths: ${{ steps.list.outputs.components }}
-      modules: ${{ steps.components.outputs.modules }}
-      subworkflows: ${{ steps.components.outputs.subworkflows}}
       shard: ${{ steps.set-shards.outputs.shard }}
       total_shards: ${{ steps.set-shards.outputs.total_shards }}
     steps:
@@ -51,144 +39,92 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
           ls -la ./
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
-      - name: List nf-test files
-        id: list
-        uses: adamrtalbot/detect-nf-test-changes@de3c3c8e113031b4f15a3c1104b5f135e8346997 # v0.0.6
-        with:
-          head: ${{ github.sha }}
-          base: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || 'origin/master' }}
-          n_parents: 0
-          exclude_tags: "gpu"
-
-      - name: Separate modules and subworkflows
-        id: components
-        run: |
-          echo modules=$(echo '${{ steps.list.outputs.components }}' | jq -c '. | map(select(contains("modules"))) | map(gsub("modules/nf-core/"; ""))') >> $GITHUB_OUTPUT
-          echo subworkflows=$(echo '${{ steps.list.outputs.components }}' | jq '. | map(select(contains("subworkflows"))) | map(gsub("subworkflows/nf-core/"; ""))') >> $GITHUB_OUTPUT
-
       - name: get number of shards
         id: set-shards
-        if: ${{ steps.list.outputs.components != '[]' }}
         uses: ./.github/actions/get-shards
         env:
           NFT_VER: ${{ env.NFT_VER }}
         with:
-          max_shards: 16
-          paths: "${{ join(fromJson(steps.list.outputs.components ), ' ') }}"
+          max_shards: 7
 
       - name: debug
         run: |
-          echo ${{ steps.list.outputs.components }}
-          echo ${{ steps.components.outputs.modules }}
-          echo ${{ steps.components.outputs.subworkflows }}
           echo ${{ steps.set-shards.outputs.shard }}
           echo ${{ steps.set-shards.outputs.total_shards }}
 
   nf-test:
-    runs-on:
-      - runs-on=${{ github.run_id }}
-      - runner=4cpu-linux-${{ matrix.arch }}
-      - image=ubuntu24-full-${{ matrix.arch }}
-    name: "${{ matrix.arch }} | ${{ matrix.profile }} | ${{ matrix.shard }}"
+    name: "${{ matrix.profile }} | ${{ matrix.NXF_VER }} | ${{ matrix.shard }}/${{ needs.nf-test-changes.outputs.total_shards }}"
     needs: [nf-test-changes]
     if: ${{ needs.nf-test-changes.outputs.total_shards != '0' }}
+    runs-on: # use GitHub runners
+      - "ubuntu-latest"
     strategy:
       fail-fast: false
       matrix:
         shard: ${{ fromJson(needs.nf-test-changes.outputs.shard) }}
         profile: [conda, docker, singularity]
-        arch:
-          - x64
-          # FIXME
-          # - arm64
+        isMain:
+          - ${{ github.base_ref == 'master' || github.base_ref == 'main' }}
+        # Exclude conda and singularity on dev
+        exclude:
+          - isMain: false
+            profile: "conda"
+          - isMain: false
+            profile: "singularity"
+        NXF_VER:
+          - "24.10.5"
+          - "latest-everything"
     env:
       NXF_ANSI_LOG: false
       TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
-    outputs:
-      filtered_paths: ${{ steps.filter.outputs.filtered_paths }}
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
-      - name: Filter paths
-        id: filter
-        run: |
-          PATHS='${{ needs.nf-test-changes.outputs.paths }}'
-          FILTERED=$(jq -n -c \
-            --arg profile "${{ matrix.profile }}" \
-            --argjson input_paths "$PATHS" \
-            '
-            def get_skip_list: inputs | .[$profile] // [];
-
-            # Get skip list and filter
-            get_skip_list as $skip_patterns |
-
-            # Debug output
-            ($skip_patterns | "Skip patterns: " + (map("  - " + .) | join(","))) |
-            debug |
-
-            # Do the actual filtering
-            $input_paths | map(
-              . as $path |
-              select($skip_patterns | all(. as $pattern | ($path | startswith($pattern)) | not))
-            ) as $result |
-
-            # Debug what was skipped
-            (if ($input_paths - $result) | length > 0 then
-              "Skipped: " + (($input_paths - $result) | map("  - " + .) | join(","))
-            else
-              "No paths skipped"
-            end) |
-            debug |
-
-            $result
-            ' .github/skip_nf_test.json)
-
-          echo "filtered_paths=${FILTERED}" >> $GITHUB_OUTPUT
-
-      - name: debug
-        run: |
-          echo filtered_paths = ${{ steps.filter.outputs.filtered_paths }}
-
-      - name: Run nf-test Action
-        if: ${{steps.filter.outputs.filtered_paths != '[]'}}
-        continue-on-error: ${{ runner.arch == 'ARM64' }}
-        uses: ./.github/actions/nf-test-action
+      - name: Run nf-test
+        id: run_nf_test
+        uses: ./.github/actions/nf-test
+        continue-on-error: ${{ matrix.NXF_VER == 'latest-everything' }}
         env:
-          SENTIEON_ENCRYPTION_KEY: ${{ secrets.SENTIEON_ENCRYPTION_KEY }}
-          SENTIEON_LICENSE_MESSAGE: ${{ secrets.SENTIEON_LICENSE_MESSAGE }}
-          SENTIEON_LICSRVR_IP: ${{ secrets.SENTIEON_LICSRVR_IP }}
-          SENTIEON_AUTH_MECH: "GitHub Actions - token"
+          NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
         with:
-          profile: ${{ matrix.profile }}${{ runner.arch == 'ARM64' && ',arm64,wave' || '' }}
+          profile: ${{ matrix.profile }}
           shard: ${{ matrix.shard }}
           total_shards: ${{ env.TOTAL_SHARDS }}
-          paths: "${{ join(fromJson(steps.filter.outputs.filtered_paths), ' ') }}"
 
-  confirm-pass-nf-test:
-    runs-on:
-      - runs-on=${{ github.run_id }}-confirm-pass-nf-test
-      - runner=4cpu-linux-x64
-      - image=ubuntu22-full-x64
+      - name: Report test status
+        if: ${{ always() }}
+        run: |
+          if [[ "${{ steps.run_nf_test.outcome }}" == "failure" ]]; then
+            echo "::error::Test with ${{ matrix.NXF_VER }} failed"
+            # Add to workflow summary
+            echo "## ❌ Test failed: ${{ matrix.profile }} | ${{ matrix.NXF_VER }} | Shard ${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ matrix.NXF_VER }}" == "latest-everything" ]]; then
+              echo "::warning::Test with latest-everything failed but will not cause workflow failure. Please check if the error is expected or if it needs fixing."
+            fi
+            if [[ "${{ matrix.NXF_VER }}" != "latest-everything" ]]; then
+              exit 1
+            fi
+          fi
+
+  confirm-pass:
     needs: [nf-test]
     if: always()
+    runs-on: # use GitHub runners
+      - "ubuntu-latest"
     steps:
-      - name: One or more tests failed
+      - name: One or more tests failed (excluding latest-everything)
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
 
       - name: One or more tests cancelled
         if: ${{ contains(needs.*.result, 'cancelled') }}
-        run: exit 1
-
-      - name: If no tests run, but filtered_paths was not empty and no tests succeeded, fail
-        if: ${{ needs.nf-test.outputs.filtered_paths != '' && !contains(needs.*.result, 'success') }}
         run: exit 1
 
       - name: All tests ok
@@ -201,13 +137,4 @@ jobs:
           echo "::group::DEBUG: `needs` Contents"
           echo "DEBUG: toJSON(needs) = ${{ toJSON(needs) }}"
           echo "DEBUG: toJSON(needs.*.result) = ${{ toJSON(needs.*.result) }}"
-          echo "DEBUG: needs.nf-test.outputs.filtered_paths = ${{ needs.nf-test.outputs.filtered_paths }}"
           echo "::endgroup::"
-
-      - name: Clean Workspace # Purge the workspace in case it's running on a self-hosted runner
-        if: always()
-        run: |
-          ls -la ./
-          rm -rf ./* || true
-          rm -rf ./.??* || true
-          ls -la ./
