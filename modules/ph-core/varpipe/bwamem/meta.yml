@@ -1,0 +1,85 @@
+name: varpipe_bwamem
+description: Performs fastq alignment to a fasta reference using BWA
+keywords:
+  - mem
+  - bwa
+  - alignment
+  - map
+  - fastq
+  - bam
+  - sam
+tools:
+  - bwa:
+      description: |
+        BWA is a software package for mapping DNA sequences against
+        a large reference genome, such as the human genome.
+      homepage: http://bio-bwa.sourceforge.net/
+      documentation: https://bio-bwa.sourceforge.net/bwa.shtml
+      arxiv: arXiv:1303.3997
+      licence: ["GPL-3.0-or-later"]
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - reads:
+        type: file
+        description: list of paired fastq files.
+        ontologies: []
+  - - meta2:
+        type: map
+        description: |
+          Groovy Map containing reference information.
+          e.g. [ id:'test', single_end:false ]
+    - index:
+        type: file
+        description: BWA genome index files
+        pattern: "Directory containing BWA index *.{amb,ann,bwt,pac,sa}"
+        ontologies: []
+    - ref_dict:
+        type: file
+        description: Reference .dict file
+        pattern: "*.dict"
+        ontologies: []
+    - ref_fai:
+        type: file
+        description: Reference .fai file
+        pattern: "*.fai"
+        ontologies: []
+    - fasta:
+        type: file
+        description: Reference genome file
+        pattern: "*.fa"
+        ontologies: []
+output:
+  sam:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.sam":
+          type: file
+          description: |
+            SAM file
+          pattern: "*.sam"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

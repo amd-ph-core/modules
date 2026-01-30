@@ -1,0 +1,69 @@
+name: "varpipe_variantanalysis"
+description: A subworkflow for performing variant calling on complete and targeted genomes using GATK4 tools and annotation with SnpEff.
+keywords:
+  - variants
+  - mutation calling
+  - annotation
+  - GATK4
+  - SNP
+  - bioinformatics
+  - filtering
+  - drug resistance
+components:
+  - gatk4/mutect2
+  - gatk4/leftalignandtrimvariants
+  - gatk4/filtermutectcalls
+  - snpeff/snpeff
+input:
+  - ch_input:
+      type: file
+      description: |
+        The input channel for containing BAM files, indexes, and loci for analysis
+        Structure: [ val(meta), path(bam), path(bai), [] ]
+  - ch_fai:
+      type: file
+      description: |
+        The input channel containing reference fasta index
+        Structure: [ val(meta), path(fai) ]
+      pattern: "*.fai"
+  - ch_ref_dict:
+      type: file
+      description: |
+        Channel containing reference dictionary.
+        Structure: [ val(meta), path(dict) ]
+      pattern: "*.dict"
+output:
+  - ann_targeted:
+      type: file
+      description: |
+        Channel containing annotated files output from SnpEff
+        Structure: [ val(meta), path(vcf) ]
+      pattern: "*_DR_loci_raw_annotation.ann.vcf"
+  - ann_all:
+      type: file
+      description: |
+        Channel containing annotated files output from SnpEff
+        Structure: [ val(meta), path(vcf) ]
+      pattern: "*_full_raw_annotation.ann.vcf"
+  - ch_multiqc_inputs:
+      type: file
+      description: |
+        Channel containing multiqc input files
+        Structure: [ path(varpipe_multiqc_files) ]
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

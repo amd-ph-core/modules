@@ -1,0 +1,33 @@
+//
+// BBDUK_TRIM_2PASS: double primer trim on unaligned FASTQs
+//
+
+include { BBMAP_BBDUK as BBDUK_TRIM_1 } from "../../../modules/ph-core/bbmap/bbduk/main"
+include { BBMAP_BBDUK as BBDUK_TRIM_2 } from "../../../modules/ph-core/bbmap/bbduk/main"
+
+workflow BBDUK_TRIM_2PASS {
+    take:
+    ch_reads    // channel: [ val(meta), [ reads ] ]
+    primer_file // channel: /path/to/primer.fasta
+
+    main:
+    ch_versions      = Channel.empty()
+    ch_trimmed_reads = Channel.empty()
+    ch_mqc_logs      = Channel.empty()
+
+    BBDUK_TRIM_1(ch_reads, primer_file)
+
+    BBDUK_TRIM_2(BBDUK_TRIM_1.out.reads, primer_file)
+
+    ch_trimmed_reads = BBDUK_TRIM_2.out.reads
+    ch_versions.mix(BBDUK_TRIM_2.out.versions.first())
+    ch_mqc_logs.mix(
+        BBDUK_TRIM_1.out.log.collect { it[1] },
+        BBDUK_TRIM_2.out.log.collect { it[1] },
+    )
+
+    emit:
+    trimmed_reads = ch_trimmed_reads
+    versions      = ch_versions
+    mqc_logs      = ch_mqc_logs
+}

@@ -1,0 +1,42 @@
+nextflow_workflow {
+
+    name "Test Subworkflow BBDUK_TRIM_2PASS"
+    script "../main.nf"
+    workflow "BBDUK_TRIM_2PASS"
+    config "./nextflow.config"
+
+    tag "subworkflows"
+    tag "subworkflows_phcore"
+    tag "subworkflows/bbduk_trim_2pass"
+    tag "bbmap/bbduk"
+    tag "samtools/sort"
+    tag "samtools/index"
+
+    test("sarscov2 - paired end w/ contams - fastq") {
+
+        when {
+            workflow {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    [  file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
+                ]
+                input[1] = [
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/transcriptome.fasta', checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                    workflow.out.trimmed_reads,
+                    workflow.out.versions
+                ).match() }
+            )
+        }
+    }
+}

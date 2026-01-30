@@ -1,90 +1,166 @@
-# amd-ph-core/modules
+```md
+Org: NCEZID
+Contact Email: ncezid_shareit@cdc.gov
+Status: Active
+Keywords: bioinformatics
+Version: N/A
+Contract#: 47QFCA23F0058
+```
 
-[![GitHub Actions CI Status](https://github.com/amd-ph-core/modules/actions/workflows/nf-test.yml/badge.svg)](https://github.com/amd-ph-core/modules/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/amd-ph-core/modules/actions/workflows/linting.yml/badge.svg)](https://github.com/amd-ph-core/modules/actions/workflows/linting.yml)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+# ![amd-ph-core/modules](docs/images/amd_logo.png)
+
+[![GitHub Actions Linting Status](https://github.com/amd-ph-core/modules/actions/workflows/lint.yml/badge.svg)](https://github.com/amd-ph-core/modules/actions/workflows/lint.yml)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.10.5-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
-[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.2-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.2)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.10.3-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
+(https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/amd-ph-core/modules)
 
-## Introduction
+A repository for hosting [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) module files containing AMD Platform tool-specific process definitions and their associated documentation.
 
-**amd-ph-core/modules** is a bioinformatics pipeline that ...
+## Table of contents
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+- [Using existing modules](#using-existing-modules)
+- [Adding new modules](#adding-new-modules)
+- [Help](#help)
+- [Citation](#citation)
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+## Using existing modules
 
-## Usage
+The module files hosted in this repository define a set of processes for software tools such as `varpipe/coverageanalysis`, `picard/buildbamindex`, `irma` etc. This allows you to share and add common functionality across multiple pipelines in a modular fashion.
 
-> [!NOTE]
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
+We have written a helper command in the `nf-core/tools` package that uses the GitHub API to obtain the relevant information for the module files present in the [`modules/`](modules/) directory of this repository. This includes using `git` commit hashes to track changes for reproducibility purposes, and to download and install all of the relevant module files.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+1. Install the latest version of [`nf-core/tools`](https://github.com/nf-core/tools#installation) (`>=2.0`)
+2. List the available modules:
 
-First, prepare a samplesheet with your input data that looks as follows:
+```console
+$ nf-core modules list remote
 
-`samplesheet.csv`:
+                                      ,--./,-.
+      ___     __   __   __   ___     /,-._.--~\
+|\ | |__  __ /  ` /  \ |__) |__         }  {
+| \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                      `._,._,'
 
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+nf-core/tools version 2.0
+
+INFO     Modules available from nf-core/modules (master):                       pipeline_modules.py:164
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Module Name                    ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ bandage/image                  │
+│ bcftools/consensus             │
+│ bcftools/filter                │
+│ bcftools/isec                  │
+..truncated..
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+3. Install the module in your pipeline directory:
 
--->
+```console
+$ nf-core modules --git-remote https://github.com/amd-ph-core/modules.git -b install varpipe/coverageanalysis
 
-Now, you can run the pipeline using:
+                                      ,--./,-.
+      ___     __   __   __   ___     /,-._.--~\
+|\ | |__  __ /  ` /  \ |__) |__         }  {
+| \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                      `._,._,'
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+nf-core/tools version 2.0
+
+INFO     Installing varpipe/coverageanalysis
+
+INFO     Downloaded 3 files to ./modules/nf-core/modules/varpipe/coverageanalysis
+```
+
+4. Import the module in your Nextflow script:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+nextflow.enable.dsl = 2
+
+include { VARPIPE_COVERAGEANALYSIS } from './modules/nf-core/modules/varpipe/coverageanalysis/main'
+```
+
+5. Remove the module from the pipeline repository if required:
+
+```console
+$ nf-core modules remove varpipe/coverageanalysis
+
+                                      ,--./,-.
+      ___     __   __   __   ___     /,-._.--~\
+|\ | |__  __ /  ` /  \ |__) |__         }  {
+| \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                      `._,._,'
+
+nf-core/tools version 2.0
+
+INFO     Removing varpipe/coverageanalysis
+
+INFO     Successfully removed varpipe/coverageanalysis
+```
+
+6. Check that a locally installed nf-core module is up-to-date compared to the one hosted in this repo:
+
+```console
+$ nf-core modules lint varpipe/coverageanalysis
+
+                                      ,--./,-.
+      ___     __   __   __   ___     /,-._.--~\
+|\ | |__  __ /  ` /  \ |__) |__         }  {
+| \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                      `._,._,'
+
+nf-core/tools version 2.0
+
+INFO     Linting pipeline: .
+
+INFO     Linting module: varpipe/coverageanalysis
+
+╭─────────────────────────────────────────────────────────────────────────────────╮
+│ [!] 1 Test Warning                                                              │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────┬───────────────────────────────┬──────────────────────────────────╮
+│ Module name  │ Test message                  │ File path                        │
+├──────────────┼───────────────────────────────┼──────────────────────────────────┤
+│ varpipe/coverageanalysis       │ Local copy of module outdated │ modules/ph-core/modules/varpipe/coverageanalysis/  │
+╰──────────────┴────────────────────────────── ┴──────────────────────────────────╯
+╭──────────────────────╮
+│ LINT RESULTS SUMMARY │
+├──────────────────────┤
+│ [✔]  15 Tests Passed │
+│ [!]   1 Test Warning │
+│ [✗]   0 Test Failed  │
+╰──────────────────────╯
+```
+
+<!---
+
+### Offline usage
+
+If you want to use an existing module file available in `nf-core/modules`, and you're running on a system that has no internet connection, you'll need to download the repository (e.g. `git clone https://github.com/amd-ph-core/modules.git`) and place it in a location that is visible to the file system on which you are running the pipeline. Then run the pipeline by creating a custom config file called e.g. `custom_module.conf` containing the following information:
 
 ```bash
-nextflow run amd-ph-core/modules \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+include /path/to/downloaded/modules/directory/
 ```
 
-> [!WARNING]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
+Then you can run the pipeline by directly passing the additional config file with the `-c` parameter:
 
-## Credits
+```bash
+nextflow run /path/to/pipeline/ -c /path/to/custom_module.conf
+```
 
-amd-ph-core/modules was originally written by AMD Platform.
+> Note that the nf-core/tools helper package has a `download` command to download all required pipeline
+> files + singularity containers + institutional configs + modules in one go for you, to make this process easier.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+# New test data created for the module- sequenzautils/bam2seqz
+The new test data is an output from another module- sequenzautils/bcwiggle- (which uses sarscov2 genome fasta file as an input).
+-->
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+# CI Runners
 
-## Contributions and Support
-
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
-
-## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use amd-ph-core/modules for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
-
-This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/main/LICENSE).
-
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+We are using self-hosted runners for the CI tests.

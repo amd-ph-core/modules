@@ -1,0 +1,35 @@
+name: "bbduk_trim_2pass"
+description: Trim primers on unaligned FASTQs using two BBDUK passes
+keywords:
+  - trim
+  - primer
+  - bbduk
+components:
+  - bbmap/bbduk
+input:
+  - ch_reads:
+      type: file
+      description: |
+        Input channel containing sequencing reads
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.fastq.gz"
+  - primer_file:
+      type: file
+      description: |
+        File containing adapter and/or contaminant
+        sequences for sequence kmer matching
+output:
+  - trimmed_reads:
+      type: file
+      description: Trimmed sequencing reads
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - mqc_logs:
+      type: file
+      description: Bbduk log files
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

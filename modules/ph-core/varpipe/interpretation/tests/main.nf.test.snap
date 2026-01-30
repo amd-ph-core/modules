@@ -1,0 +1,100 @@
+{
+    "varpipe interpret report [stats] [coverage] [final annotation] [variants] -stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_summary.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_interpretation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,5f5124f6054e5ef8b5362c3aa3942912"
+                ],
+                "interpretation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_interpretation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "summary": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_summary.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,5f5124f6054e5ef8b5362c3aa3942912"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-04-25T16:45:54.557357122"
+    },
+    "varpipe interpret report [stats] [coverage] [final annotation] [variants]": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_summary.txt:md5,339139edb768113c69eb3b44fcb33e7a"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_interpretation.txt:md5,498224fc10466af49f4119ebe44e8824"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,8330a9d66b2955ab2512684d4b2f1628"
+                ],
+                "interpretation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_interpretation.txt:md5,498224fc10466af49f4119ebe44e8824"
+                    ]
+                ],
+                "summary": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_summary.txt:md5,339139edb768113c69eb3b44fcb33e7a"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,8330a9d66b2955ab2512684d4b2f1628"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-05-14T11:15:10.344659867"
+    }
+}

@@ -1,0 +1,105 @@
+name: "varpipe_core"
+description: Core subworkflow for variant calling pipeline that incorporates read QC, BAM processing, variant calling, annotation, and lineage analysis.
+keywords:
+  - variant calling
+  - genomics
+  - quality control
+  - coverage analysis
+  - lineage
+  - annotation
+  - GATK4
+  - reporting
+components:
+  - "varpipe_processbam"
+  - "varpipe_variantanalysis"
+  - "cat/fastq"
+  - "trimmomatic"
+  - "picard/buildbamindex"
+  - "picard/markduplicates"
+  - "picard/samformatconverter"
+  - "picard/sortsam"
+  - "picard/createsequencedictionary"
+  - "samtools/faidx"
+  - "samtools/depth"
+  - "samtools/view"
+  - "bwa/index"
+  - "varpipe/bwamem"
+  - "gatk4/leftalignandtrimvariants"
+  - "gatk4/mutect2"
+  - "gatk4/filtermutectcalls"
+  - "snpeff/snpeff"
+  - "varpipe/parseannotations"
+  - "varpipe/createannotations"
+  - "varpipe/coverageanalysis"
+  - "varpipe/structuralvariants"
+  - "varpipe/report"
+  - "varpipe/interpretation"
+  - "varpipe/lineage"
+  - "varpipe/pdf"
+  - "varpipe/tar"
+input:
+  - ch_cleaned_reads:
+      type: file
+      description: |
+        The input channel containing clockwork decontaminated sequencing reads
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.fastq.gz"
+  - combined_outdir:
+      type: directory
+      description: |
+        The directory for combined outputs
+  - datemap:
+      type: string
+      description: |
+        Timestamp generated dynamically using Groovy's Date() constructor
+      pattern: "MM_dd_YYYY"
+  - pipeline_version:
+      type: string
+      description: |
+        Pipeline version
+      pattern: "x.x.x"
+output:
+  - ch_varpipe_output:
+      type: file
+      description: |
+        Channel containing file inputs for output tar file
+        Structure:
+        [
+        val(meta),
+        path(stats),
+        path(target_region_coverage),
+        path(genome_region_coverage),
+        path(structural_variants),
+        path(DR_loci_final_annotation),
+        path(full_final_annotation),
+        path(full_annotation),
+        path(Lineage),
+        path(lineage_report),
+        path(summary),
+        path(interpretation),
+        path(report)
+        ]
+  - ch_multiqc_inputs:
+      type: file
+      description: |
+        Channel containing multiqc input files
+        Structure: [ path(varpipe_multiqc_files) ]
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

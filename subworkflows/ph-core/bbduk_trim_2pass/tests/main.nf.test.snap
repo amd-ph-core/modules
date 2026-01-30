@@ -1,0 +1,26 @@
+{
+    "sarscov2 - paired end w/ contams - fastq": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    [
+                        "test.trim2_1.fastq.gz:md5,7423ba9ae81772a02fa033c625d08c52",
+                        "test.trim2_2.fastq.gz:md5,bf3d874d8aef8ed8b904b676ee61763b"
+                    ]
+                ]
+            ],
+            [
+                
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-18T12:08:32.0687122"
+    }
+}

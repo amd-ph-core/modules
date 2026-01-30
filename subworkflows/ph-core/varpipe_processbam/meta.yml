@@ -1,0 +1,103 @@
+name: "varpipe_processbam"
+description: A csubworkflow for processing and analyzing BAM files, including alignment, format conversion, duplicate marking, and coverage analysis.
+keywords:
+  - alignment
+  - BAM
+  - SAM
+  - mapping
+  - quality control
+  - coverage
+  - duplicates
+  - indexing
+  - reference genome
+  - sequencing
+  - BWA
+  - Picard
+  - Samtools
+  - bioinformatics
+components:
+  - bwa/index
+  - varpipe/bwamem
+  - samtools/faidx
+  - picard/sortsam
+  - picard/markduplicates
+  - picard/createsequencedictionary
+  - samtools/view
+  - picard/samformatconverter
+  - picard/buildbamindex
+  - samtools/depth
+input:
+  - ch_reads:
+      type: file
+      description: |
+        The input reads channel
+        Structure: [ val(meta), [ path(read1), path(read2) ] ]
+  - ch_ref_fasta:
+      type: file
+      description: |
+        Channel containing reference genome fasta.
+        Structure: [ val(meta), path(fasta) ]
+output:
+  - bam:
+      type: file
+      description: |
+        Processed BAM file
+        Structure: [ val(meta), path(bai) ]
+  - bai:
+      type: file
+      description: |
+        BAM index file
+        Structure: [ val(meta), path(bai) ]
+  - coverage:
+      type: file
+      description: |
+        Coverage statistics
+        Structure: [ val(meta), path(tsv) ]
+  - fai:
+      type: file
+      description: |
+        Reference fasta index
+        Structure: [ val(meta), path(fai) ]
+  - stats:
+      type: file
+      description: |
+        Alignment statistics
+        Structure: [ val(meta), path(tsv) ]
+  - unmapped:
+      type: file
+      description: |
+        Unmapped reads BAM
+        Structure: [ val(meta),path(unmapped) ]
+  - mapped:
+      type: file
+      description: |
+        Mapped reads BAM
+        Structure: [ val(meta),path(mapped) ]
+  - reference_dict:
+      type: file
+      description: |
+        Channel containing reference dictionary.
+        Structure: [ val(meta), path(dict) ]
+      pattern: "*.dict"
+  - ch_multiqc_inputs:
+      type: file
+      description: |
+        Channel containing multiqc input files
+        Structure: [ path(varpipe_multiqc_files) ]
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

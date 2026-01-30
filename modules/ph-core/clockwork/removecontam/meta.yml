@@ -1,0 +1,95 @@
+name: "clockwork_removecontam"
+description: Custom module for removing contaminants from sequencing reads using
+  Clockwork's remove_contam tool, separating decontaminated and contaminated
+  reads.
+keywords:
+  - decontamination
+  - read filtering
+  - sequencing quality
+  - genomics preprocessing
+tools:
+  - "clockwork":
+      description: "Tool for removing contaminants from sequencing reads"
+      tool_dev_url: https://github.com/iqbal-lab-org/clockwork
+      licence: ["MIT"]
+      identifier: ""
+  - "pysam":
+      description: "Python module for reading and manipulating SAM/BAM files"
+      homepage: "https://github.com/pysam-developers/pysam"
+      documentation: "https://pysam.readthedocs.io/"
+      licence: ["MIT"]
+      identifier: ""
+  - "pyfastaq":
+      description: "Python library for working with FASTA/Q files"
+      homepage: "https://github.com/sanger-pathogens/Fastaq"
+      documentation: "https://github.com/sanger-pathogens/Fastaq"
+      licence: ["GPL-3.0"]
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - contam_sam:
+        type: file
+        description: SAM file with potential contaminated reads
+        pattern: "*.sam"
+        ontologies: []
+  - ref_metadata:
+      type: file
+      description: Reference metadata for contamination detection
+      pattern: "*.{tsv,csv}"
+      ontologies:
+        - edam: http://edamontology.org/format_3475 # TSV
+        - edam: http://edamontology.org/format_3752 # CSV
+output:
+  decontaminated_fastq:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*.decontaminated.{1,2}.fastq.gz":
+          type: file
+          description: FASTQ files containing decontaminated reads
+          pattern: "decontaminated.{1,2}.fastq.gz"
+          ontologies: []
+  contaminant_fastq:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*.contaminants.{1,2}.fastq.gz":
+          type: file
+          description: FASTQ files containing removed contaminated reads
+          pattern: "contaminant.{1,2}.fastq.gz"
+          ontologies: []
+  counts:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*.counts.tsv":
+          type: file
+          description: TSV file containing contamination counts
+          pattern: "*.counts.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@smagala"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

@@ -1,0 +1,66 @@
+{
+    "irma - sarscov2 - fastq - stub": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    "versions.yml:md5,98ceae3fd151520318a23473a2d23e2e"
+                ],
+                "amended_consensus": [
+                    
+                ],
+                "versions": [
+                    "versions.yml:md5,98ceae3fd151520318a23473a2d23e2e"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-17T18:30:01.929266"
+    },
+    "irma - sarscov2 - fastq": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.fa:md5,67c46124e6dcf096e9594b8e49fffa3f",
+                            "test.pad.fa:md5,acafe19c22167c2d313e37a1ea0a4f06"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,98ceae3fd151520318a23473a2d23e2e"
+                ],
+                "amended_consensus": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.fa:md5,67c46124e6dcf096e9594b8e49fffa3f",
+                            "test.pad.fa:md5,acafe19c22167c2d313e37a1ea0a4f06"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,98ceae3fd151520318a23473a2d23e2e"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-17T18:29:57.57126"
+    }
+}

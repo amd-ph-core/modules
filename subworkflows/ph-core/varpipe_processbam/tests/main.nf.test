@@ -1,0 +1,62 @@
+nextflow_workflow {
+
+    name "Test Subworkflow VARPIPE_PROCESSBAM"
+    script "../main.nf"
+    config "./nextflow.config"
+    workflow "VARPIPE_PROCESSBAM"
+
+    tag "subworkflows"
+    tag "subworkflows_phcore"
+    tag "subworkflows/varpipe_processbam"
+    tag "picard/buildbamindex"
+    tag "picard/markduplicates"
+    tag "picard/samformatconverter"
+    tag "picard/sortsam"
+    tag "picard/createsequencedictionary"
+    tag "samtools/faidx"
+    tag "samtools/depth"
+    tag "samtools/view"
+    tag "bwa/index"
+    tag "varpipe/bwamem"
+
+    test("varpipe-processbam subworkflow test [paired-end]") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_cleaned_read_1.fastq.gz', checkIfExists: true),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_cleaned_read_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = Channel.of([
+                [ id:'test', single_end:false ],
+                file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/ref2.fa', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert (workflow.out.reference_dict).size() > 0 },
+                { assert (workflow.out.multiqc_inputs).size() > 0 },
+                { assert snapshot(
+                    workflow.out.bam,
+                    workflow.out.bai,
+                    workflow.out.coverage,
+                    workflow.out.fai,
+                    workflow.out.stats,
+                    workflow.out.unmapped,
+                    workflow.out.mapped,
+                    workflow.out.versions
+                ).match() }
+            )
+        }
+    }
+}

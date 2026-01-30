@@ -1,0 +1,43 @@
+nextflow_workflow {
+
+    name "Test Subworkflow FASTA_NEXTCLADE_ANALYZE"
+    script "../main.nf"
+    workflow "FASTA_NEXTCLADE_ANALYZE"
+
+    tag "subworkflows_phcore"
+    tag "subworkflows"
+    tag "nextclade/run"
+    tag "nextclade/datasetget"
+    tag "subworkflows/fasta_nextclade_analyze"
+
+    test("fasta-nextclade-analyze subworkflow test - sarscov2") {
+
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [ [id: 'test_sample'], file(params.modules_testdata_base_path + "/genomics/sars-cov-2/genome/SRR29011233.fa") ]
+                )
+                input[1] = 'sars-cov-2'
+                input[2] = '2026-01-06--14-59-32Z'
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                { assert workflow.success },
+                { assert snapshot(
+                    workflow.out.csv,
+                    workflow.out.tsv,
+                    file(workflow.out.json[0][1]).readLines()[5..11],
+                    workflow.out.json_auspice,
+                    workflow.out.ndjson,
+                    workflow.out.fasta_aligned,
+                    workflow.out.fasta_translation,
+                    workflow.out.versions
+                    ).match() }
+            )
+        }
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "tuberculosis fasta -stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.bai:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                ],
+                "bai": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.bai:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-17T17:24:33.986896833"
+    },
+    "tuberculosis fasta": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.paired_end.sorted.bai:md5,704c10dd1326482448ca3073fdebc2f4"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                ],
+                "bai": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.paired_end.sorted.bai:md5,704c10dd1326482448ca3073fdebc2f4"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-17T17:24:25.356707426"
+    }
+}

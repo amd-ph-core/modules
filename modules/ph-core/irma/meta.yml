@@ -1,0 +1,49 @@
+name: "irma"
+description: write your description here
+keywords:
+  - genomics
+  - viruses
+  - viral assembly
+  - variant calling
+  - phasing analysis
+tools:
+  - "irma":
+      description: "IRMA: Iterative Refinement Meta-Assembler for the robust assembly, variant calling, and phasing of highly variable RNA viruses."
+      homepage: https://wonder.cdc.gov/amd/flu/irma
+      doi: "10.1186/s12864-016-3030-6"
+      licence: ["GPL v3 or later (GPL v3+)"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - reads:
+        type: file
+        description: List of input FastQ files
+        pattern: "*.{fastq.gz}"
+  - irma_module:
+      type: string
+      description: IRMA module name
+output:
+  amended_consensus:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*/amended_consensus/*.fa":
+          type: file
+          description: Amended consensus FASTA files generated
+          pattern: "*/amended_consensus/*.fa"
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@smagala"
+  - "@tstark-cdc"

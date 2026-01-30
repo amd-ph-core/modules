@@ -1,0 +1,85 @@
+{
+    "fasta-nextclade-analyze subworkflow test - sarscov2": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_sample"
+                    },
+                    "test_sample.csv:md5,81ef8b2a4e5b00111a1c659085edab29"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test_sample"
+                    },
+                    "test_sample.tsv:md5,46058c0bbb523be1427d76ba7d0725d1"
+                ]
+            ],
+            [
+                "  \"cladeNodeAttrKeys\": [",
+                "    {",
+                "      \"name\": \"Nextclade_pango\",",
+                "      \"displayName\": \"Pango lineage (Nextclade)\",",
+                "      \"description\": \"Pango lineage as inferred by Nextclade from the nearest neighbour in the reference tree. 98% accurate for recent sequences, for higher accuracy use dedicated pangolin software in UShER or pangoLEARN mode. Recombinants may get (wrongly) assigned to a designated recombinant lineage if they have similar breakpoints.\",",
+                "      \"hideInWeb\": false,",
+                "      \"skipAsReference\": false"
+            ],
+            [
+                [
+                    {
+                        "id": "test_sample"
+                    },
+                    "test_sample.auspice.json:md5,3d7708b50c6e8018aee88f1fc6dcceee"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test_sample"
+                    },
+                    "test_sample.ndjson:md5,bbf8ded05ce03659caac2e9e23e6a867"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test_sample"
+                    },
+                    "test_sample.aligned.fasta:md5,0c5d3f2b40c46615437910b847ed3921"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test_sample"
+                    },
+                    [
+                        "test_sample.cds_translation.E.fasta:md5,4df84b0c72250d25a4c7b6c746d6ae8b",
+                        "test_sample.cds_translation.M.fasta:md5,39eca12ccc4c988323004b4de712fdb0",
+                        "test_sample.cds_translation.N.fasta:md5,bea96a7d4e434b6278ce90e834bbe5f9",
+                        "test_sample.cds_translation.ORF1a.fasta:md5,b231c48cca60fc39415011dd1f3f4131",
+                        "test_sample.cds_translation.ORF1b.fasta:md5,0218a1a0dda47bf65c433709de39e336",
+                        "test_sample.cds_translation.ORF3a.fasta:md5,1c85711dd6a52d9920a46f9dc6ecacd4",
+                        "test_sample.cds_translation.ORF6.fasta:md5,5ce659ef192dce59ebfb479fffcb9f7f",
+                        "test_sample.cds_translation.ORF7a.fasta:md5,8bcade4fcc04a45f5f662185e73d834c",
+                        "test_sample.cds_translation.ORF7b.fasta:md5,7231f2c17dda20e2c5fa634bd65a6731",
+                        "test_sample.cds_translation.ORF8.fasta:md5,aaed68a2a96781746896395c0e8b8cb2",
+                        "test_sample.cds_translation.ORF9b.fasta:md5,eb2f01602f1c0d4797f701585e12550d",
+                        "test_sample.cds_translation.S.fasta:md5,0b7190cb47f33fb7ef33b6390b68c01b"
+                    ]
+                ]
+            ],
+            [
+                "versions.yml:md5,022fe317af3e5cf2f8257cad7d70d4e1",
+                "versions.yml:md5,5417589d5b1a02d6408a089e37abe638"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-01-08T15:20:31.439758766"
+    }
+}

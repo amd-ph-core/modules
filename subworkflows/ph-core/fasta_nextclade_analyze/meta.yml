@@ -1,0 +1,60 @@
+name: "fasta_nextclade_analyze"
+description: A subworkflow for viral genome analysis using Nextclade tools
+keywords:
+  - fasta
+  - nextclade
+  - lineage analysis
+  - sequence QC
+  - viral genomics
+  - phylogenetics
+components:
+  - nextclade/datasetget
+  - nextclade/run
+input:
+  - ch_fasta:
+      type: file
+      description: |
+        Input channel for containing sample metadata and associated fasta file
+        Structure: [ val(meta), path(fasta) ]
+  - ch_nextclade_db:
+      type: string
+      description: Name of nextclade dataset to retrieve
+      pattern: ".+"
+  - ch_nextclade_tag:
+      type: string
+      description: Version tag of the dataset to download
+      pattern: ".+"
+output:
+  - csv:
+      type: file
+      description: CSV file containing nextclade results
+  - tsv:
+      type: file
+      description: TSV file containing nextclade results
+  - json:
+      type: file
+      description: JSON file containing nextclade results
+  - json_auspice:
+      type: file
+      description: Auspice JSON V2 containing nextclade results
+  - ndjson:
+      type: file
+      description: newline-delimited JSON file containing nextclade results
+  - fasta_aligned:
+      type: file
+      description: FASTA file containing aligned sequences from nextclade results
+  - fasta_translation:
+      type: file
+      description: FASTA file containing aligned peptides from nextclade results
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@tpz3"
+  - "@anochmohan"
+  - "@tstark-cdc"
+maintainers:
+  - "@tpz3"
+  - "@anochmohan"
+  - "@tstark-cdc"

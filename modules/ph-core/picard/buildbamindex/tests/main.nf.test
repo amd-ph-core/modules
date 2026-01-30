@@ -1,0 +1,58 @@
+nextflow_process {
+
+    name "Test Process PICARD_BUILDBAMINDEX"
+    script "../main.nf"
+    process "PICARD_BUILDBAMINDEX"
+    config './nextflow.config'
+
+    tag "modules"
+    tag "modules_phcore"
+    tag "picard"
+    tag "picard/buildbamindex"
+
+    test("tuberculosis fasta") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+				    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("tuberculosis fasta -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+				    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}
