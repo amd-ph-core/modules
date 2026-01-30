@@ -9,11 +9,10 @@ Contract#: 47QFCA23F0058
 
 # ![amd-ph-core/modules](docs/images/amd_logo.png)
 
-[![GitHub Actions Linting Status](https://github.com/amd-ph-core/modules/.github/workflows/lint.yml/badge.svg)](https://github.com/amd-ph-core/modules/.github/workflows/lint.yml)
+[![GitHub Actions Linting Status](https://github.com/amd-ph-core/modules/.github/workflows/linting.yml/badge.svg)](https://github.com/amd-ph-core/modules/.github/workflows/linting.yml)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.10.3-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
-(https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
