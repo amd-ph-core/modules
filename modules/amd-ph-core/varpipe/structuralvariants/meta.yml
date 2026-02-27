@@ -1,0 +1,89 @@
+name: "varpipe_structuralvariants"
+description: Custom module for detecting structural variants in TB genomes using
+  coverage analysis
+keywords:
+  - structural variants
+  - deletions
+  - tuberculosis
+  - coverage analysis
+  - genome analysis
+tools:
+  - "structvar_parser":
+      description: "Python script assessing structural variants"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_structuralvariants/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - qc_status:
+        type: file
+        description: QC status file indicating sample quality metrics
+        pattern: "*_passed.txt"
+        ontologies: []
+    - coverage:
+        type: file
+        description: File containing per-position coverage information
+        pattern: "*.tsv"
+        ontologies:
+          - edam: http://edamontology.org/format_3475 # TSV
+    - unmapped:
+        type: file
+        description: File containing number of unmapped reads
+        pattern: "*_unmapped.txt"
+        ontologies: []
+    - mapped:
+        type: file
+        description: File containing number of mapped reads
+        pattern: "*_mapped.txt"
+        ontologies: []
+  - - meta2:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - genome_region_coverage:
+        type: file
+        description: File containing coverage statistics for genomic regions
+        pattern: "*_genome_region_coverage.txt"
+        ontologies: []
+  - bedstruct:
+      type: file
+      description: BED file containing annotated structural regions for analysis
+      pattern: "BED.txt"
+      ontologies: []
+output:
+  structural_variants:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_structural_variants.txt":
+          type: file
+          description: |
+            Structural variants report
+          pattern: "*_structural_variants.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

@@ -1,0 +1,53 @@
+
+nextflow_process {
+
+    name "Test Process NEXTCLADE_DATASETGET"
+    script "../main.nf"
+    process "NEXTCLADE_DATASETGET"
+
+    tag "modules"
+    tag "modules_phcore"
+    tag "nextclade"
+    tag "nextclade/datasetget"
+
+    test("species-tag") {
+
+        when {
+            process {
+                """
+                input[0] = 'nextstrain/sars-cov-2/wuhan-hu-1/orfs'
+				input[1] = '2026-01-06--14-59-32Z'
+
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+    test("species-tag-stub") {
+        options '-stub'
+
+        when {
+            process {
+                """
+                input[0] = 'nextstrain/sars-cov-2/wuhan-hu-1/orfs'
+				input[1] = '2026-01-06--14-59-32Z'
+
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+}

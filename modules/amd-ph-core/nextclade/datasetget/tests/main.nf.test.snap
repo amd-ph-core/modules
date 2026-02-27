@@ -1,0 +1,80 @@
+{
+    "species-tag-stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        "CHANGELOG.md:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "README.md:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "genome_annotation.gff3:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "pathogen.json:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "reference.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "sequences.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "tree.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,e2d8050ed1b40751a14790fae9b9a6fa"
+                ],
+                "dataset": [
+                    [
+                        "CHANGELOG.md:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "README.md:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "genome_annotation.gff3:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "pathogen.json:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "reference.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "sequences.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "tree.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,e2d8050ed1b40751a14790fae9b9a6fa"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-01-08T14:04:30.817068959"
+    },
+    "species-tag": {
+        "content": [
+            {
+                "0": [
+                    [
+                        "CHANGELOG.md:md5,2bc8202ead5c60d1ff0eb40ae059c67e",
+                        "README.md:md5,c69387d632361334f0d7c9b66065f947",
+                        "genome_annotation.gff3:md5,ca7fb34cad6558bc07fcef587743b934",
+                        "pathogen.json:md5,2a39f9ea6fca63a849c65ca44b8945e7",
+                        "reference.fasta:md5,c7ce05f28e4ec0322c96f24e064ef55c",
+                        "sequences.fasta:md5,c2a4d6cbb837dce22d81f9c36dd0629e",
+                        "tree.json:md5,d8b346bc3d5c017725f4025315b474d4"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,e2d8050ed1b40751a14790fae9b9a6fa"
+                ],
+                "dataset": [
+                    [
+                        "CHANGELOG.md:md5,2bc8202ead5c60d1ff0eb40ae059c67e",
+                        "README.md:md5,c69387d632361334f0d7c9b66065f947",
+                        "genome_annotation.gff3:md5,ca7fb34cad6558bc07fcef587743b934",
+                        "pathogen.json:md5,2a39f9ea6fca63a849c65ca44b8945e7",
+                        "reference.fasta:md5,c7ce05f28e4ec0322c96f24e064ef55c",
+                        "sequences.fasta:md5,c2a4d6cbb837dce22d81f9c36dd0629e",
+                        "tree.json:md5,d8b346bc3d5c017725f4025315b474d4"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,e2d8050ed1b40751a14790fae9b9a6fa"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-01-08T14:04:26.383366802"
+    }
+}

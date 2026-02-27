@@ -125,7 +125,7 @@ INFO     Linting module: varpipe/coverageanalysis
 ╭──────────────┬───────────────────────────────┬──────────────────────────────────╮
 │ Module name  │ Test message                  │ File path                        │
 ├──────────────┼───────────────────────────────┼──────────────────────────────────┤
-│ varpipe/coverageanalysis       │ Local copy of module outdated │ modules/ph-core/modules/varpipe/coverageanalysis/  │
+│ varpipe/coverageanalysis       │ Local copy of module outdated │ modules/amd-ph-core/modules/varpipe/coverageanalysis/  │
 ╰──────────────┴────────────────────────────── ┴──────────────────────────────────╯
 ╭──────────────────────╮
 │ LINT RESULTS SUMMARY │

@@ -1,0 +1,58 @@
+name: "varpipe_pdf"
+description: Custom module for generating a pdf summary report of varpipe
+  results
+keywords:
+  - structural variants
+  - summary
+  - tuberculosis
+  - pdf
+  - report
+tools:
+  - "pdf_print":
+      description: "Python script converting summary report text file to a pdf"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_pdf/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - summary:
+        type: file
+        description: File containing varpipe analysis output
+        pattern: "*_summary.txt"
+        ontologies: []
+output:
+  report:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_report.pdf":
+          type: file
+          description: |
+            Varpipe report PDF
+          pattern: "*_report.pdf"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

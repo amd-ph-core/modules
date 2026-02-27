@@ -1,0 +1,232 @@
+{
+    "tumor_normal_pair_f1r2_stubs": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "normal_id": "normal",
+                        "tumor_id": "tumour"
+                    },
+                    "test.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "normal_id": "normal",
+                        "tumor_id": "tumour"
+                    },
+                    "test.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "normal_id": "normal",
+                        "tumor_id": "tumour"
+                    },
+                    "test.vcf.gz.stats:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "normal_id": "normal",
+                        "tumor_id": "tumour"
+                    },
+                    "test.f1r2.tar.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                ]
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:53:25.269018789"
+    },
+    "generate_pon": {
+        "content": [
+            [
+                "test.vcf.gz"
+            ],
+            [
+                "test.vcf.gz.tbi"
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.vcf.gz.stats:md5,b569ce66bbffe9588b3d221e821023ee"
+                ]
+            ],
+            [
+
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:48:20.999053336"
+    },
+    "mitochondria": {
+        "content": [
+            [
+                "test.vcf.gz"
+            ],
+            [
+                "test.vcf.gz.tbi"
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.vcf.gz.stats:md5,4f77301a125913170b8e9e7828b4ca3f"
+                ]
+            ],
+            [
+
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:51:14.708521565"
+    },
+    "cram_input": {
+        "content": [
+            [
+                "test.vcf.gz"
+            ],
+            [
+                "test.vcf.gz.tbi"
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.vcf.gz.stats:md5,55ed641e16089afb33cdbc478e202d3d"
+                ]
+            ],
+            [
+
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:42:32.272384278"
+    },
+    "tumor_single": {
+        "content": [
+            [
+                "test.vcf.gz"
+            ],
+            [
+                "test.vcf.gz.tbi"
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.vcf.gz.stats:md5,55ed641e16089afb33cdbc478e202d3d"
+                ]
+            ],
+            [
+
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:37:57.380491057"
+    },
+    "tumor_normal_pair": {
+        "content": [
+            [
+                "test.vcf.gz"
+            ],
+            [
+                "test.vcf.gz.tbi"
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "normal_id": "normal",
+                        "tumor_id": "tumour"
+                    },
+                    "test.vcf.gz.stats:md5,17d2091015d04cbd4a26b7a67dc659e6"
+                ]
+            ],
+            [
+
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:28:12.594328873"
+    },
+    "tumor_normal_pair_f1r2": {
+        "content": [
+            [
+                "test.vcf.gz"
+            ],
+            [
+                "test.vcf.gz.tbi"
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "normal_id": "normal",
+                        "tumor_id": "tumour"
+                    },
+                    "test.vcf.gz.stats:md5,17d2091015d04cbd4a26b7a67dc659e6"
+                ]
+            ],
+            [
+                "test.f1r2.tar.gz"
+            ],
+            [
+                "versions.yml:md5,a90871aa5a6fcb38fda780396e003fdc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-11-21T09:33:43.766658548"
+    }
+}

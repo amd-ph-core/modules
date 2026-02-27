@@ -9,18 +9,18 @@ repos:
     rev: 0.33.1
     hooks:
       - id: check-jsonschema
-        name: "Match meta.ymls in one of the subdirectories of modules/ph-core"
-        files: ^modules/ph-core/.*/meta\.yml$
+        name: "Match meta.ymls in one of the subdirectories of modules/amd-ph-core"
+        files: ^modules/amd-ph-core/.*/meta\.yml$
         types: [yaml]
         args: ["--schemafile", "modules/yaml-schema.json"]
       - id: check-jsonschema
         name: "Validate environment.ymls against schema"
-        files: ^modules/ph-core/.*/environment\.yml$
+        files: ^modules/amd-ph-core/.*/environment\.yml$
         types: [yaml]
         args: ["--schemafile", "modules/environment-schema.json"]
       - id: check-jsonschema
-        name: "Match meta.ymls in one of the subdirectories of subworkflows/ph-core"
-        files: ^subworkflows/ph-core/.*/meta\.yml$
+        name: "Match meta.ymls in one of the subdirectories of subworkflows/amd-ph-core"
+        files: ^subworkflows/amd-ph-core/.*/meta\.yml$
         types: [yaml]
         args: ["--schemafile", "subworkflows/yaml-schema.json"]
       - id: check-github-workflows
@@ -30,5 +30,5 @@ repos:
     hooks:
       - id: ruff
         files: \.py$
-        args: [--fix, --exit-non-zero-on-fix, "--select", "I,E1,E4,E7,E9,F,UP,N"] # sort imports and fix (rules taken from ph-core/tools)
+        args: [--fix, --exit-non-zero-on-fix, "--select", "I,E1,E4,E7,E9,F,UP,N"] # sort imports and fix (rules taken from amd-ph-core/tools)
       - id: ruff-format # formatter

@@ -1,0 +1,130 @@
+name: "varpipe_coverageanalysis"
+description: Custom module for analyzing average coverage depth
+keywords:
+  - coverage
+  - tuberculosis
+  - target region coverage
+  - genome region coverage
+tools:
+  - "coverage_stats":
+      description: "Python script assessing genome coverage and depth"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_coverageanalysis/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - coverage:
+        type: file
+        description: File containing per-position coverage information
+        pattern: "*.tsv"
+        ontologies:
+          - edam: http://edamontology.org/format_3475 # TSV
+    - unmapped:
+        type: file
+        description: File containing number of unmapped reads
+        pattern: "*_unmapped.txt"
+        ontologies: []
+    - mapped:
+        type: file
+        description: File containing number of mapped reads
+        pattern: "*_mapped.txt"
+        ontologies: []
+  - amp:
+      type: file
+      description: File containing gene regions
+      pattern: "amp_bed.txt"
+      ontologies: []
+  - features:
+      type: file
+      description: Files containing feature regions
+      pattern: "*_{bed1,bed2}.txt"
+      ontologies: []
+  - pipeline_version:
+      type: string
+      description: Pipeline version
+      pattern: "x.x.x"
+      ontologies: []
+output:
+  stats:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_stats.txt":
+          type: file
+          description: |
+            Sample statistics report
+          pattern: "*_stats.txt"
+          ontologies: []
+  target_region_coverage:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_target_region_coverage.txt":
+          type: file
+          description: |
+            Target coverage report
+          pattern: "*_target_region_coverage.txt"
+          ontologies: []
+  genome_region_coverage:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_genome_region_coverage.txt":
+          type: file
+          description: |
+            Genome coverage report
+          pattern: "*_genome_region_coverage.txt"
+          ontologies: []
+  qc_failed:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_qc_log.txt":
+          type: file
+          description: |
+            QC report
+          pattern: "*_qc_log.txt"
+          ontologies: []
+  qc_passed:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - .qc_passed.txt:
+          type: file
+          description: |
+            Passed QC report
+          pattern: "*.qc_passed.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
