@@ -1,0 +1,73 @@
+name: "varpipe_parseannotations"
+description: Custom module for parsing snpeff annotation files
+keywords:
+  - annotation
+  - parse
+  - tuberculosis
+  - vcf
+tools:
+  - "parse_annotation":
+      description: "Python script to parse initial vcf annotation"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_parseanotation/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - annotation:
+        type: file
+        description: File of raw annotation
+        pattern: "*_annotation.txt"
+        ontologies: []
+  - mutationloci:
+      type: file
+      description: File containing mutation loci
+      pattern: "mutation_loci.txt"
+      ontologies: []
+output:
+  drLociFinalAnnotation:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_DR_loci_Final_annotation.txt":
+          type: file
+          description: |
+            Final DR loci annotation
+          pattern: "*_DR_loci_Final_annotation.txt"
+          ontologies: []
+  fullFinalAnnotation:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_full_Final_annotation.txt":
+          type: file
+          description: |
+            Final full annotation
+          pattern: "*_full_Final_annotation.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

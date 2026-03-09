@@ -1,0 +1,114 @@
+nextflow_workflow {
+    name "Test Subworkflow VARPIPE_VARIANTANALYSIS"
+    script "../main.nf"
+    workflow "VARPIPE_VARIANTANALYSIS"
+    config "./nextflow.config"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/varpipe_variantanalysis"
+    tag "subworkflows/../../modules/nf-core/gatk4/mutect2"
+    tag "subworkflows/../../modules/nf-core/gatk4/leftalignandtrimvariants"
+    tag "subworkflows/../../modules/nf-core/gatk4/filtermutectcalls"
+    tag "subworkflows/../../modules/nf-core/snpeff/snpeff"
+    tag "modules/nf-core/untar"
+
+    setup {
+        nfcoreInitialise("${launchDir}/library/")
+        nfcoreInstall(
+            "${launchDir}/library/",
+            [
+                [name: "gatk4/mutect2",                  sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "gatk4/leftalignandtrimvariants", sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "gatk4/filtermutectcalls",        sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "snpeff/snpeff",                  sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "untar",                          sha: "d090922b1a4b80ba283186459ababf8e308abcbb"]
+            ]
+        )
+        nfcoreLink("${launchDir}/library/", "${baseDir}/modules/")
+        run("UNTAR", alias: "UNTAR_SNPEFF") {
+            script "../../../../modules/nf-core/untar/main.nf"
+            process {
+                """
+                input[0] = Channel.of([
+                    [id: "snpeff_cache"],
+                    file(
+                        params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/kb/snpeff_cache.tar.gz",
+                        checkIfExists: true
+                    )
+                ])
+                """
+            }
+        }
+    }
+
+    test("varpipe-variantanalysis subworkflow test") {
+        when {
+            params {
+                outdir = "$outputDir"
+                workdir = "$workDir"
+            }
+            workflow {
+                """
+                // Prepare input channels
+                input[0] = Channel.of(
+                    [
+                        [ id:'test' ],
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/bam/test.bam", checkIfExists: true),
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/bam/test.bai", checkIfExists: true),
+                        []
+                    ]
+                )
+
+                input[1] = Channel.of(
+                    [
+                        [ id:'test' ],
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/bam/test.bam", checkIfExists: true),
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/bam/test.bai", checkIfExists: true),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/intervals.bed', checkIfExists: true) ]
+                )
+
+                input[2] = Channel.of(
+                    [
+                        [ id:'test' ],
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa.fai", checkIfExists: true)
+                    ]
+                )
+
+                input[3] = Channel.of(
+                    [
+                        [ id:'test' ],
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/reference-index/ref2.dict", checkIfExists: true)
+                    ]
+                )
+
+                input[4] = Channel.of(
+                    [
+                        [ id:'fasta' ],
+                        file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/kb/varpipe/ref2.fa", checkIfExists: true)
+                    ]
+                )
+                input[5] = "mtb_NC_000962_3"
+                input[6] = UNTAR_SNPEFF.out.untar.map{ meta, cache -> cache }
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.ann_targeted.size() > 0 },
+                { assert workflow.out.ann_all.size() > 0 },
+                { assert workflow.out.multiqc_inputs.size() > 0 },
+                { assert snapshot(
+                        workflow.out.versions
+                    ).match()
+                }
+            )
+        }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
+    }
+}

@@ -1,0 +1,72 @@
+name: "varpipe_lineage"
+description: Custom module for determining sample lineage
+keywords:
+  - lineage
+  - annotation
+  - tuberculosis
+tools:
+  - "lineage_parser":
+      description: "Python script assessing sample lineage classification"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_lineage/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - fullFinalAnnotation:
+        type: file
+        description: File of filtered annotation
+        pattern: "*_full_Final_annotation.txt"
+        ontologies: []
+  - lineages:
+      type: file
+      description: File containing known lineages
+      pattern: "lineage_markers.txt"
+      ontologies: []
+output:
+  lineage:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_Lineage.txt":
+          type: file
+          description: |
+            Lineage summary
+          pattern: "*_Lineage.txt"
+          ontologies: []
+  lineage_report:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*.lineage_report.txt":
+          type: file
+          description: |
+            Lineage report
+          pattern: "*.lineage_report.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

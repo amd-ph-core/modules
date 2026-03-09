@@ -1,0 +1,58 @@
+nextflow_process {
+
+    name "Test Process VARPIPE_PDF"
+    script "../main.nf"
+    process "VARPIPE_PDF"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/pdf"
+
+    test("varpipe pdf report [summary]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test1_summary.txt')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.report.size() > 0 },
+                { assert snapshot(process.out.versions).match() }
+            )
+        }
+    }
+
+    test("varpipe pdf report [summary] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test1_summary.txt')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

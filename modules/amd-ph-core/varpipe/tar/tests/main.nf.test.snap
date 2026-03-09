@@ -1,0 +1,26 @@
+{
+    "tar [varpipe outputs]": {
+        "content": [
+            [
+                "versions.yml:md5,6bcc102211483ec6c5ce5e268e277e58"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-04-23T16:13:45.656564067"
+    },
+    "tar [varpipe outputs] -stub": {
+        "content": [
+            [
+                "versions.yml:md5,6bcc102211483ec6c5ce5e268e277e58"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-04-23T16:13:51.024401421"
+    }
+}

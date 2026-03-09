@@ -1,0 +1,63 @@
+name: "fastq_clockwork_decontaminate"
+description: Subworkflow for decontaminating sequencing reads using minimap2 and Clockwork's remove_contam processing.
+keywords:
+  - decontamination
+  - read filtering
+  - sequencing quality
+  - contamination removal
+  - bacterial genomics
+components:
+  - clockwork/minimap2
+  - clockwork/removecontam
+input:
+  - ch_reads:
+      type: file
+      description: |
+        The input channel containing sequencing reads
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.fastq.gz"
+  - ch_reference:
+      type: file
+      description: |
+        Reference genome for decontamination
+        Structure [ path(reference) ]
+      pattern: "*.fa"
+  - ch_ref_metadata:
+      type: file
+      description: |
+        Reference metadata for decontamination
+        Structure [ path(ref_metadata) ]
+      pattern: "*.{tsv,csv}"
+output:
+  - counts:
+      type: file
+      description: |
+        TSV file containing contamination counts
+        Structure [ val(meta), path(counts) ]
+      pattern: "*.counts.tsv"
+  - decontaminated_fastq:
+      type: file
+      description: |
+        FASTQ files containing decontaminated reads
+        Structure [ val(meta), path(cleaned_reads) ]
+      pattern: "decontaminated.{1,2}.fastq.gz"
+  - contaminant_fastq:
+      type: file
+      description: |
+        FASTQ files containing removed contaminated reads
+        Structure [ val(meta), path(contaminant_reads) ]
+      pattern: "contaminant.{1,2}.fastq.gz"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@smagala"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

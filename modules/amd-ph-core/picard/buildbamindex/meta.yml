@@ -1,0 +1,55 @@
+name: picard_buildbamindex
+description: Builds index for an aligned BAM file allowing fast look up of data
+keywords:
+  - index
+  - bam
+  - picard
+tools:
+  - picard:
+      description: |
+        Generates a BAM index ".bai" file. This tool creates an index file for the input BAM that allows fast look-up of data in a BAM file, lke an index on a database.
+      homepage: https://broadinstitute.github.io/picard/
+      documentation: https://gatk.broadinstitute.org/hc/en-us/articles/360037227392-BuildBamIndex-Picard
+      tool_dev_url: https://github.com/broadinstitute/picard
+      licence: ["MIT"]
+      identifier: biotools:picard_tools
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - input:
+        type: file
+        description: Bam file to index
+        pattern: "*.bam"
+        ontologies: []
+output:
+  bai:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.bai":
+          type: file
+          description: BAI index
+          pattern: "*.bai"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

@@ -1,0 +1,72 @@
+{
+    "varpipe-processbam subworkflow test [paired-end]": {
+        "content": [
+            "c53d63fcfa8b1c3933612a94708689e",
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test_sdrcsm.bai:md5,f697b73da3c37bfd19d5d71393f41e38"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.tsv:md5,8d9da07d55e76f071e677e1279a77a5d"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "ref2.fa.fai:md5,582b23a33b52d218af2cc8498b64ff95"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "unmapped.bam:md5,116760ced138d18f1795b79cc428e07d"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "mapped.bam:md5,f136094ff245b3ca7c05e86497773002"
+                ]
+            ],
+            [
+                "versions.yml:md5,07bf3fc7cf98ca4e2683c00ba953acff",
+                "versions.yml:md5,0a28adf0a64795120091e52b77f9917d",
+                "versions.yml:md5,107411d5f05c5ade52c9a7e79e8e4e11",
+                "versions.yml:md5,171e9245bca8c680671bf1acd97d1d56",
+                "versions.yml:md5,32537ad67b22a054a9c251a82b486dd4",
+                "versions.yml:md5,350639575c0394c8e78968e0c6007009",
+                "versions.yml:md5,4db4be4c0b1621826dcea5cca2ea17c8",
+                "versions.yml:md5,5a6601607c0bbb26a6aaf4323a1715a7",
+                "versions.yml:md5,78b211ef0137e1d39795c92341898c78",
+                "versions.yml:md5,9359d3568b8649182aaeaa45c2ccf9a7",
+                "versions.yml:md5,a69134b233ba85ef72907990b0ffc6b8",
+                "versions.yml:md5,d07559a625a4ec155a84002f9fec274f",
+                "versions.yml:md5,deaf225634889a97ea43349634fd593b"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-03-11T11:44:38.302084637"
+    }
+}

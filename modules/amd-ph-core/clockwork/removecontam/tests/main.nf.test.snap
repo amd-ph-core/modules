@@ -1,0 +1,97 @@
+{
+    "clockwork removecontam - stub": {
+        "content": [
+            [
+                "versions.yml:md5,cbd11563140029de1513e6a8ce6e689f"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-17T17:25:19.516532066"
+    },
+    "clockwork removecontam": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.decontaminated.1.fastq.gz:md5,f13e1d8359ef86fa8f8a1ca66e33c503",
+                            "test.decontaminated.2.fastq.gz:md5,966e2638a402fa3ed3b5e4c7a33a5f69"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.contaminants.1.fastq.gz:md5,f100d5b0daa16efb094f643e51972cb1",
+                            "test.contaminants.2.fastq.gz:md5,a5bc9c81e8c3b50f799d02fbd30fefd2"
+                        ]
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.counts.tsv:md5,7123e0f98e2a9eb63e2e2a89f334b211"
+                    ]
+                ],
+                "3": [
+                    "versions.yml:md5,cbd11563140029de1513e6a8ce6e689f"
+                ],
+                "contaminant_fastq": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.contaminants.1.fastq.gz:md5,f100d5b0daa16efb094f643e51972cb1",
+                            "test.contaminants.2.fastq.gz:md5,a5bc9c81e8c3b50f799d02fbd30fefd2"
+                        ]
+                    ]
+                ],
+                "counts": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.counts.tsv:md5,7123e0f98e2a9eb63e2e2a89f334b211"
+                    ]
+                ],
+                "decontaminated_fastq": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.decontaminated.1.fastq.gz:md5,f13e1d8359ef86fa8f8a1ca66e33c503",
+                            "test.decontaminated.2.fastq.gz:md5,966e2638a402fa3ed3b5e4c7a33a5f69"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,cbd11563140029de1513e6a8ce6e689f"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-07-17T17:25:09.770397854"
+    }
+}

@@ -1,0 +1,61 @@
+nextflow_process {
+
+    name "Test Process VARPIPE_REPORT"
+    script "../main.nf"
+    process "VARPIPE_REPORT"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/report"
+
+    test("varpipe create report [stats] [coverage] [final annotation]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_stats.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_target_region_coverage.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_DR_loci_Final_annotation.txt')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe create report [stats] [coverage] [final annotation] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_stats.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_target_region_coverage.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_DR_loci_Final_annotation.txt')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

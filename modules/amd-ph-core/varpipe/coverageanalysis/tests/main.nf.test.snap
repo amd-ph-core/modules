@@ -1,0 +1,58 @@
+{
+    "varpipe coverage analysis [bam] [coverages] -stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_target_region_coverage.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_genome_region_coverage.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                "versions.yml:md5,817cdee52b21f086e52eac7a69051381"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2026-01-26T09:24:28.644843103"
+    },
+    "varpipe coverage analysis [bam] [coverages]": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_target_region_coverage.txt:md5,d7d04cff5b7194ed4ac7888773c25eca"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_genome_region_coverage.txt:md5,8ee6f9a8b985ed77c168e553df461ea1"
+                ]
+            ],
+            [
+                "versions.yml:md5,f17eed4892f91622a93fcc6e8efc32fc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2026-01-26T09:24:18.266335472"
+    }
+}

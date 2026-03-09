@@ -1,0 +1,58 @@
+nextflow_process {
+
+    name "Test Process PICARD_SAMFORMATCONVERTER"
+    script "../main.nf"
+    process "PICARD_SAMFORMATCONVERTER"
+    config './nextflow.config'
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "picard"
+    tag "picard/samformatconverter"
+
+    test("tuberculosis aligned sam") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/bam/test.sam') ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("tuberculosis aligned sam -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/bam/test.sam') ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

@@ -1,0 +1,67 @@
+nextflow_process {
+
+    name "Test Process VARPIPE_TAR"
+    script "../main.nf"
+    process "VARPIPE_TAR"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/tar"
+
+    test("tar [varpipe outputs]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                def metas = [
+                    [ id:'sample1', filenames: [file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_mapped.txt'), file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_unmapped.txt')] ],
+                    [ id:'sample2', filenames: [file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample2_mapped.txt'), file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample2_unmapped.txt')] ]
+                ]
+
+                input[0] = metas
+                input[1] = metas.collectMany { meta -> meta.filenames }
+                input[2] = 'TEST_DATE'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.varpipe_zip.size() > 0 },
+                { assert snapshot(process.out.versions).match() }
+            )
+        }
+    }
+
+    test("tar [varpipe outputs] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                def metas = [
+                    [ id:'sample1', filenames: [file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_mapped.txt'), file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_unmapped.txt')] ],
+                    [ id:'sample2', filenames: [file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample2_mapped.txt'), file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample2_unmapped.txt')] ]
+                ]
+
+                input[0] = metas
+                input[1] = metas.collectMany { meta -> meta.filenames }
+                input[2] = 'TEST_DATE'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.varpipe_zip.size() > 0 },
+                { assert snapshot(process.out.versions).match() }
+            )
+        }
+    }
+}

@@ -1,0 +1,61 @@
+nextflow_process {
+
+    name "Test Process VARPIPE_LINEAGE"
+    script "../main.nf"
+    process "VARPIPE_LINEAGE"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/lineage"
+
+    test("varpipe lineage [final annotation]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_full_Final_annotation.txt', checkIfExists: true) ]
+                ]
+
+                input[1] = [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/lineage_markers.txt', checkIfExists: true) ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe lineage [final annotation] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    [ file('test_full_Final_annotation.txt') ]
+                ]
+
+                input[1] = [ file('lineage_markers.txt') ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

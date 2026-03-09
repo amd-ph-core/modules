@@ -1,0 +1,131 @@
+name: "varpipe_core"
+description: Core subworkflow for variant calling pipeline that incorporates read QC, BAM processing, variant calling, annotation, and lineage analysis.
+keywords:
+  - variant calling
+  - genomics
+  - quality control
+  - coverage analysis
+  - lineage
+  - annotation
+  - GATK4
+  - reporting
+components:
+  - varpipe_processbam
+  - varpipe_variantanalysis
+  - trimmomatic:
+      git_remote: https://github.com/nf-core/modules.git
+  - varpipe/coverageanalysis
+  - varpipe/structuralvariants
+  - varpipe/createannotations
+  - varpipe/parseannotations
+  - varpipe/lineage
+  - varpipe/report
+  - varpipe/interpretation
+  - varpipe/pdf
+  - varpipe/tar
+input:
+  - ch_cleaned_reads:
+      type: file
+      description: |
+        The input channel containing clockwork decontaminated sequencing reads
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.fastq.gz"
+  - datestamp:
+      type: string
+      description: |
+        Timestamp string for output identification and organization.
+        Used for naming output directories and files.
+      pattern: "YYYY-MM-DD"
+  - ref_fasta:
+      type: file
+      description: |
+        Reference genome FASTA file used for alignment and variant calling.
+        Structure: [ path(params.ref_fasta) ]
+      pattern: "*.{fasta,fa,fna}"
+  - bedlist_amp:
+      type: file
+      description: |
+        BED file containing amplicon regions for coverage analysis.
+        Structure: [ path(params.bedlist_amp) ]
+      pattern: "amp_bed.txt"
+  - bedlist_one:
+      type: file
+      description: |
+        Primary BED file containing target regions for analysis.
+        Structure: [ path(params.bedlist_one) ]
+      pattern: "bed_1.txt"
+  - bedlist_two:
+      type: file
+      description: |
+        Secondary BED file containing additional target regions.
+        Structure: [ path(params.bedlist_two) ]
+      pattern: "bed_2.txt"
+  - bedstruct:
+      type: file
+      description: |
+        BED file defining structural variant regions for analysis.
+        Structure: [ path(params.bedstruct) ]
+      pattern: "BED.txt"
+  - mutationloci:
+      type: file
+      description: |
+        File containing mutation loci definitions for variant annotation.
+        Structure: [ path(params.mutationloci) ]
+      pattern: "mutation_loci.txt"
+  - intervals:
+      type: file
+      description: |
+        Genomic intervals file for targeted variant calling (e.g., GATK intervals).
+        Structure: [ path(params.intervals) ]
+      pattern: "intervals.bed"
+  - reported:
+      type: file
+      description: |
+        Configuration file defining which variants should be reported.
+        Structure: [ path(params.reported) ]
+      pattern: "reportable.txt"
+  - lineages:
+      type: file
+      description: |
+        Lineage definition file for phylogenetic classification.
+        Structure: [ path(params.lineages) ]
+      pattern: "lineage_markers.txt"
+  - snpeff_db:
+      type: string
+      description: |
+        SnpEff database name for variant annotation.
+        Structure: [ val(snpeff_db) ]
+  - snpeff_cache:
+      type: directory
+      description: |
+        SnpEff cache directory containing annotation databases.
+        Structure: [ path(params.snpeff_cache) ]
+output:
+  - lineage:
+      type: file
+      description: |
+        Lineage results for phylogenetic classification.
+  - multiqc_inputs:
+      type: file
+      description: |
+        Channel containing multiqc input files
+        Structure: [ path(varpipe_multiqc_files) ]
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

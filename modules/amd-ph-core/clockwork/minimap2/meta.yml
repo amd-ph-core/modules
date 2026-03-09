@@ -1,0 +1,64 @@
+name: "clockwork_minimap2"
+description: Custom module for mapping sequencing reads to a reference genome
+  using Minimap2, with read group assignment and alignment filtering.
+keywords:
+  - read alignment
+  - mapping
+  - sequencing
+tools:
+  - "minimap2":
+      description: "Fast and versatile sequence alignment program"
+      homepage: "https://github.com/lh3/seqtk"
+      documentation: "https://github.com/lh3/seqtk"
+      licence: ["MIT"]
+      identifier: ""
+  - "samtools":
+      description: "Tools for manipulating SAM/BAM/CRAM sequence alignment files"
+      homepage: "https://htslib.org/"
+      documentation: "https://htslib.org/doc/"
+      doi: "10.1093/bioinformatics/bty560"
+      licence: ["MIT"]
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - reads:
+        type: file
+        description: Input FASTQ files with paired-end reads
+        pattern: "*.fastq.gz"
+        ontologies:
+          - edam: http://edamontology.org/format_3989 # GZIP format
+  - reference:
+      type: file
+      description: Reference genome file
+      ontologies: []
+output:
+  sam:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*.sam":
+          type: file
+          description: SAM file containing mapped reads after filtering
+          pattern: "*.sam"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@smagala"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

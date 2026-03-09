@@ -1,0 +1,81 @@
+nextflow_workflow {
+
+    name "Test Subworkflow VARPIPE_PROCESSBAM"
+    script "../main.nf"
+    config "./nextflow.config"
+    workflow "VARPIPE_PROCESSBAM"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/varpipe_processbam"
+    tag "subworkflows/../../modules/nf-core/bwa/index"
+    tag "subworkflows/../../modules/nf-core/picard/createsequencedictionary"
+    tag "subworkflows/../../modules/nf-core/samtools/faidx"
+    tag "varpipe/bwamem"
+    tag "picard/samformatconverter"
+    tag "picard/sortsam"
+    tag "subworkflows/../../modules/nf-core/picard/markduplicates"
+    tag "picard/buildbamindex"
+    tag "subworkflows/../../modules/nf-core/samtools/view"
+    tag "subworkflows/../../modules/nf-core/samtools/depth"
+
+    setup {
+        nfcoreInitialise("${launchDir}/library/")
+        nfcoreInstall(
+            "${launchDir}/library/",
+            [
+                [name: "bwa/index",                       sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "picard/createsequencedictionary", sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "samtools/faidx",                  sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "picard/markduplicates",           sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "samtools/view",                   sha: "d090922b1a4b80ba283186459ababf8e308abcbb"],
+                [name: "samtools/depth",                  sha: "d090922b1a4b80ba283186459ababf8e308abcbb"]
+            ]
+        )
+        nfcoreLink("${launchDir}/library/", "${baseDir}/modules/")
+    }
+
+    test("varpipe-processbam subworkflow test [paired-end]") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_cleaned_read_1.fastq.gz', checkIfExists: true),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_cleaned_read_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = Channel.of([
+                [ id:'test', single_end:false ],
+                file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/ref2.fa', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert (workflow.out.reference_dict).size() > 0 },
+                { assert (workflow.out.multiqc_inputs).size() > 0 },
+                { assert snapshot(
+                    bam(workflow.out.bam[0][1]).getReadsMD5(),
+                    workflow.out.bai,
+                    workflow.out.coverage,
+                    workflow.out.fai,
+                    workflow.out.unmapped,
+                    workflow.out.mapped,
+                    workflow.out.versions
+                ).match() }
+            )
+        }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
+    }
+}

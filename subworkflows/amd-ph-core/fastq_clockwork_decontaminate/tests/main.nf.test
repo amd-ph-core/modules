@@ -1,0 +1,38 @@
+nextflow_workflow {
+
+    name "Test Workflow FASTQ_CLOCKWORK_DECONTAMINATE"
+    script "../main.nf"
+    workflow "FASTQ_CLOCKWORK_DECONTAMINATE"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/fastq_clockwork_decontaminate"
+    tag "clockwork/minimap2"
+    tag "clockwork/removecontam"
+
+    test("fastq_clockwork_decontaminate") {
+
+        when {
+            workflow {
+                """
+                // define inputs of the process here. Example:
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_1.fastq.gz', checkIfExists: true),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/clockwork/ref_preprocessing.fa.gz', checkIfExists: true)
+                input[2] = file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/clockwork/remove_contam_metadata_preprocessing.tsv', checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+
+    }
+
+}

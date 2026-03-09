@@ -1,0 +1,111 @@
+nextflow_process {
+
+    name "Test Process VARPIPE_PARSEANNOTATIONS"
+    script "../main.nf"
+    process "VARPIPE_PARSEANNOTATIONS"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/parseannotations"
+
+    test("varpipe parse DR loci annotation [vcf]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_DR_loci_annotation.txt'),
+                ]
+
+                input[1] = [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/mutation_loci.txt') ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe parse full annotation [vcf]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_full_annotation.txt')
+                ]
+
+                input[1] = [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/mutation_loci.txt') ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe parse full annotation [vcf] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_full_annotation.txt')
+                ]
+
+                input[1] = [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/mutation_loci.txt') ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe parse DR loci annotation [vcf] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_DR_loci_annotation.txt'),
+                ]
+
+                input[1] = [ file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/mutation_loci.txt') ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

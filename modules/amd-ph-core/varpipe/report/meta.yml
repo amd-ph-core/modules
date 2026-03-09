@@ -1,0 +1,66 @@
+name: "varpipe_report"
+description: Custom module for generating summary report of varpipe results
+keywords:
+  - structural variants
+  - summary
+  - tuberculosis
+  - report
+tools:
+  - "create_report":
+      description: "Python script to generate sample summary"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_report/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - statsFile:
+        type: file
+        description: File containing sample statistics
+        pattern: "*_stats.txt"
+        ontologies: []
+    - targetRegionCoverage:
+        type: file
+        description: File containing target region coverage information
+        pattern: "*_target_region_coverage.txt"
+        ontologies: []
+    - drLociFinalAnnotation:
+        type: file
+        description: File containing final, filtered annotation
+        pattern: "*_DR_loci_Final_annotation.txt"
+        ontologies: []
+output:
+  summary:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - summary.txt:
+          type: file
+          description: |
+            Sample summary
+          pattern: "*_summary.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

@@ -1,0 +1,50 @@
+{
+    "minimap2": {
+        "content": [
+            "4a9ed7e8f094a7ecb104743b1e5c01d",
+            [
+                "versions.yml:md5,08f5431660fdb76f728f33683b3460ab"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-03-10T23:18:02.467960903"
+    },
+    "minimap2 - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.contam.sam:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,08f5431660fdb76f728f33683b3460ab"
+                ],
+                "sam": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.contam.sam:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,08f5431660fdb76f728f33683b3460ab"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-03-10T22:55:48.858294721"
+    }
+}

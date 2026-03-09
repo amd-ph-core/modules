@@ -1,0 +1,113 @@
+nextflow_process {
+    name "Test Process VARPIPE_BWAMEM"
+    script "../main.nf"
+    process "VARPIPE_BWAMEM"
+    config "./nextflow.config"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "nf-core/bwa/index"
+    tag "varpipe"
+    tag "varpipe/bwamem"
+
+    setup {
+        nfcoreInitialise("${launchDir}/library/")
+        nfcoreInstall(
+            "${launchDir}/library/",
+            [
+                [name: "bwa/index", sha: "d090922b1a4b80ba283186459ababf8e308abcbb"]
+            ]
+        )
+        nfcoreLink("${launchDir}/library/", "${baseDir}/modules/")
+        run("BWA_INDEX") {
+            script "../../../../nf-core/bwa/index/main.nf"
+            process {
+                """
+                input[0] = [
+                    [id: 'test'],
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa', checkIfExists: true)
+                ]
+                """
+            }
+        }
+    }
+
+    test("BWA mem") {
+        when {
+            process {
+                """
+                // Prepare reads input
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    [
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_1.fastq.gz'),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_2.fastq.gz')
+                    ]
+                ]
+
+                input[1] = BWA_INDEX.out.index
+                    .join(
+                        Channel.of([
+                        [ id:'index' ],
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.dict', checkIfExists: true),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa.fai', checkIfExists: true),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa', checkIfExists: true)
+                    ]))
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
+    }
+
+
+    test("BWA mem -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare reads input
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    [
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_1.fastq.gz'),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/fastqs/test_2.fastq.gz')
+                    ]
+                ]
+
+                input[1] = BWA_INDEX.out.index
+                    .join(
+                        Channel.of([
+                        [ id:'index' ],
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.dict', checkIfExists: true),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa.fai', checkIfExists: true),
+                        file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa', checkIfExists: true)
+                    ]))
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
+    }
+
+}

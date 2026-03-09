@@ -1,0 +1,103 @@
+nextflow_process {
+
+    name "Test Process VARPIPE_CREATEANNOTATIONS"
+    script "../main.nf"
+    process "VARPIPE_CREATEANNOTATIONS"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/createannotations"
+
+    test("varpipe create DR loci annotation [vcf]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_DR_loci_raw_annotation.txt'),
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe create full annotation [vcf]") {
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_full_raw_annotation.txt')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe create full annotation [vcf] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_full_raw_annotation.txt')
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe create DR loci annotation [vcf] -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/annotation/test_DR_loci_raw_annotation.txt'),
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

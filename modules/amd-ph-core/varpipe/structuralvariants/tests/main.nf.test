@@ -1,0 +1,72 @@
+nextflow_process {
+    name "Test Process VARPIPE_STRUCTURALVARIANTS"
+    script "../main.nf"
+    process "VARPIPE_STRUCTURALVARIANTS"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/structuralvariants"
+
+    test("varpipe structural variant analysis [coverages]") {
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file('qc_passed.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_coverage.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_unmapped.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_mapped.txt')
+                ]
+
+                input[1] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_genome_region_coverage.txt')
+                ]
+                input[2] = file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/BED.txt')
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("varpipe coverage analysis [bam] [coverages] -stub") {
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file('qc_passed.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_coverage.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_unmapped.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_mapped.txt')
+                ]
+
+                input[1] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_genome_region_coverage.txt')
+                ]
+                input[2] = file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/BED.txt')
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

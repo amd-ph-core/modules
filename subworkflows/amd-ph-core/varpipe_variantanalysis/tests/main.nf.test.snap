@@ -1,0 +1,21 @@
+{
+    "varpipe-variantanalysis subworkflow test": {
+        "content": [
+            [
+                "versions.yml:md5,011522379b8adc656bc410df731ff465",
+                "versions.yml:md5,2596e9f9cf19fedfa3b0716b5e26354e",
+                "versions.yml:md5,6f889faa35bccd534876c9c923ef9d15",
+                "versions.yml:md5,9ff67d7155e2a47cb451cf6aa4fb336e",
+                "versions.yml:md5,c3abef706ce1c6469cc6a95987f7b086",
+                "versions.yml:md5,d0c661322e537104c8d49a93b92c3019",
+                "versions.yml:md5,d95085f17159089d1644394b0e30848c",
+                "versions.yml:md5,fbbb8011cd49cda3f350cde8974dfb3a"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-03-11T11:05:21.150340992"
+    }
+}

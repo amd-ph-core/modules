@@ -1,0 +1,96 @@
+name: "varpipe_variantanalysis"
+description: A subworkflow for performing variant calling on complete and targeted genomes using GATK4 tools and annotation with SnpEff.
+keywords:
+  - variants
+  - mutation calling
+  - annotation
+  - GATK4
+  - SNP
+  - bioinformatics
+  - filtering
+  - drug resistance
+components:
+  - gatk4/mutect2:
+      git_remote: https://github.com/nf-core/modules.git
+  - gatk4/leftalignandtrimvariants:
+      git_remote: https://github.com/nf-core/modules.git
+  - gatk4/filtermutectcalls:
+      git_remote: https://github.com/nf-core/modules.git
+  - snpeff/snpeff:
+      git_remote: https://github.com/nf-core/modules.git
+input:
+  - ch_input_all:
+      type: file
+      description: |
+        Channel containing BAM files and indices for full genome variant analysis.
+        Structure: [ val(meta), path(bam), path(bai), [] ]
+      pattern: "*.{bam,bai}"
+  - ch_input_targeted:
+      type: file
+      description: |
+        Channel containing BAM files and indices for targeted DR loci variant analysis.
+        Structure: [ val(meta), path(bam), path(bai), [] ]
+      pattern: "*.{bam,bai}"
+  - ch_fai:
+      type: file
+      description: |
+        Channel containing FASTA index files for the reference genome.
+        Structure: [ val(meta), path("*.fai") ]
+      pattern: "*.fai"
+  - ch_ref_dict:
+      type: file
+      description: |
+        Channel containing reference genome dictionary file.
+        Structure: [ val(meta), path(reference_dict) ]
+      pattern: "*.dict"
+  - ch_ref_fasta:
+      type: file
+      description: |
+        Channel containing reference genome FASTA file.
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fasta,fa,fna}"
+  - snpeff_db:
+      type: string
+      description: |
+        SnpEff database name for variant annotation.
+        Structure: [ val(snpeff_db) ]
+  - snpeff_cache:
+      type: directory
+      description: |
+        SnpEff cache directory containing annotation databases.
+        Structure: [ path(params.snpeff_cache) ]
+output:
+  - ann_all:
+      type: file
+      description: |
+        Channel containing annotated files output from SnpEff
+        Structure: [ val(meta), path(vcf) ]
+      pattern: "*_full_raw_annotation.ann.vcf"
+  - ann_targeted:
+      type: file
+      description: |
+        Channel containing annotated files output from SnpEff
+        Structure: [ val(meta), path(vcf) ]
+      pattern: "*_DR_loci_raw_annotation.ann.vcf"
+  - multiqc_inputs:
+      type: file
+      description: |
+        Channel containing multiqc input files
+        Structure: [ path(varpipe_multiqc_files) ]
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ztb2"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

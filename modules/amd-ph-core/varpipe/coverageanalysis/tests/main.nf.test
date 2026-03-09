@@ -1,0 +1,82 @@
+nextflow_process {
+    name "Test Process VARPIPE_COVERAGEANALYSIS"
+    script "../main.nf"
+    process "VARPIPE_COVERAGEANALYSIS"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "varpipe"
+    tag "varpipe/coverageanalysis"
+
+    test("varpipe coverage analysis [bam] [coverages]") {
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_coverage.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_unmapped.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_mapped.txt')
+                ]
+
+                input[1] = file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/amp_bed.txt')
+
+                input[2] = [
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/bed_1.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/bed_2.txt')
+                ]
+                input[3] = "test_version"
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    process.out.target_region_coverage,
+                    process.out.genome_region_coverage,
+                    process.out.versions
+                ).match() }
+            )
+        }
+    }
+
+    test("varpipe coverage analysis [bam] [coverages] -stub") {
+        options "-stub"
+
+        when {
+            process {
+                """
+                // Prepare input data
+                input[0] = [
+                    [ id:'test' ], // meta map
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/test_coverage.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_unmapped.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/coverage/sample1_mapped.txt')
+                ]
+
+                input[1] = file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/amp_bed.txt')
+
+                input[2] = [
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/bed_1.txt'),
+                    file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/bed_2.txt')
+                ]
+                input[3] = "test_version"
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    process.out.target_region_coverage,
+                    process.out.genome_region_coverage,
+                    process.out.versions
+                ).match() }
+            )
+        }
+    }
+}

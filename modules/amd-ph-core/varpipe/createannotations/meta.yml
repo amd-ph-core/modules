@@ -1,0 +1,69 @@
+name: "varpipe_createannotations"
+description: Custom module for annotating snpeff output files
+keywords:
+  - annotation
+  - parse
+  - tuberculosis
+  - vcf
+  - snpeff
+tools:
+  - "create_annotation":
+      description: "Python script to annotate vcf"
+      homepage: "https://github.com/amd-ph-core/modules/modules/amd-ph-core/varpipe/varpipe_createannotation/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1', single_end:false ]`
+    - annotation:
+        type: file
+        description: File of raw annotation
+        pattern: "*_annotation.txt"
+        ontologies: []
+output:
+  drLociAnnotation:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_DR_loci_annotation.txt":
+          type: file
+          description: |
+            DR loci annotation
+          pattern: "*_DR_loci_annotation.txt"
+          ontologies: []
+  fullAnnotation:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1', single_end:false ]`
+      - "*_full_annotation.txt":
+          type: file
+          description: |
+            Full annotation
+          pattern: "*_full_annotation.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

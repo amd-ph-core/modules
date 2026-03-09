@@ -1,0 +1,55 @@
+{
+    "varpipe-core subworkflow test [paired-end]": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.lineage_report.txt:md5,33de4c0178efcfe32884cba8b5884b99"
+                ]
+            ],
+            [
+                "versions.yml:md5,01d16491c9a685c0ea1ba05533c52bd7",
+                "versions.yml:md5,05df5d9b826a96910f4a6d7075266434",
+                "versions.yml:md5,0dd96d59336da8d2261e71ee62cd1aee",
+                "versions.yml:md5,18d71031bd7c4f21bae23f5c1fb79ddd",
+                "versions.yml:md5,20d00518e3029f32db54384fbfa3e4ee",
+                "versions.yml:md5,258fa5016536fe7171b53c836388ab29",
+                "versions.yml:md5,30cc548d0420a141c1e40da59aeb8085",
+                "versions.yml:md5,32bd798da61d5f94a10fc02b761991ce",
+                "versions.yml:md5,4421f6a603f88d7003e78fe54100c574",
+                "versions.yml:md5,57ea17ae174ce9ec640321497e0bc497",
+                "versions.yml:md5,5b6d121f3123b87fcaf7a9f3bb857cc5",
+                "versions.yml:md5,5d8a427fab590cb90f003d39388a001b",
+                "versions.yml:md5,633a9f389660b421bba8dfb78761cdf1",
+                "versions.yml:md5,63c7dccf550f918ea2fcb5998a420e00",
+                "versions.yml:md5,642c53e3ab228810729ee06f97fb40e4",
+                "versions.yml:md5,73c6a752e5f8e31a495e72092e0d3562",
+                "versions.yml:md5,8656a2312fc4fb2cd24ceaace578b8d3",
+                "versions.yml:md5,899949bc4665b4d0698b6e8a068d48d1",
+                "versions.yml:md5,8cf5fc28cd88a175bef6a009dcab96c3",
+                "versions.yml:md5,8f3a6867a229693ef506f5215eda9996",
+                "versions.yml:md5,93f90226e34add0d7d6aab1879cda610",
+                "versions.yml:md5,a8b3e56ce056c59378a6fde731ba28f0",
+                "versions.yml:md5,c11981d11c132e12e9e05807d15941ff",
+                "versions.yml:md5,c32b95de387331441f483ab107845695",
+                "versions.yml:md5,d9165def0d0c3fb3952b7f0012c7f617",
+                "versions.yml:md5,dba1844e65849f85bd3384986ff6e4f8",
+                "versions.yml:md5,e2b79d9a1e7daf2ab0496fef48b40794",
+                "versions.yml:md5,e342b7df18490919d1af0a1cd68e9fca",
+                "versions.yml:md5,e86a49d45bc16dc73e6fbf14a0f2af48",
+                "versions.yml:md5,e8c1a70549b2f62e0636c051c960ff42",
+                "versions.yml:md5,e9ac522920df28e6b410c804ad7083a6",
+                "versions.yml:md5,f492a753b12a3ccaf2d9343e8c185318",
+                "versions.yml:md5,fbbc2fcc2af61637a2488020a7de6435"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-03-11T10:30:04.971423643"
+    }
+}

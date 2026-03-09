@@ -1,0 +1,55 @@
+name: varpipe_tar
+description: Compresses the output files of the VarPipe workflows into a single
+  tarball
+keywords:
+  - tar
+  - archive
+  - compress
+  - varpipe
+tools:
+  - tar:
+      description: GNU tar utility for creating and manipulating archives
+      homepage: https://www.gnu.org/software/tar/
+      documentation: https://www.gnu.org/software/tar/manual/
+      identifier: ""
+input:
+  - metas:
+      type: map
+      description: List of metadata objects containing file identifiers and names
+        for each sample
+  - files:
+      type: file
+      description: Collection of output files from various VarPipe processes to be
+        archived
+      ontologies: []
+  - date:
+      type: string
+      description: Date string used for naming the output archive
+output:
+  varpipe_zip:
+    - "*.tar.gz":
+        type: file
+        description: Compressed tar archive containing all VarPipe output files
+        pattern: "*.tar.gz"
+        ontologies:
+          - edam: http://edamontology.org/format_3989 # GZIP format
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ztb2"
+  - "@lekalle"
+  - "@craulers"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"
+maintainers:
+  - "@ztb2"
+  - "@lekalle"
+  - "@supark87"
+  - "@smagala"
+  - "@tstark-cdc"

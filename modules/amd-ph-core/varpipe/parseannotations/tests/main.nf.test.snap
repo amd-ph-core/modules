@@ -1,0 +1,178 @@
+{
+    "varpipe parse full annotation [vcf]": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_full_Final_annotation.txt:md5,887915ba6876c0efe984bea7f9c60943"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,78a31018c2e8b194d02fc67f005b85ba"
+                ],
+                "drLociFinalAnnotation": [
+                    
+                ],
+                "fullFinalAnnotation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_full_Final_annotation.txt:md5,887915ba6876c0efe984bea7f9c60943"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,78a31018c2e8b194d02fc67f005b85ba"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-05-07T15:41:19.777329043"
+    },
+    "varpipe parse DR loci annotation [vcf] -stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_DR_loci_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_full_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,bf5f2704552773f2566947064409aa8c"
+                ],
+                "drLociFinalAnnotation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_DR_loci_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "fullFinalAnnotation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_full_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,bf5f2704552773f2566947064409aa8c"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-05-05T11:11:24.605441105"
+    },
+    "varpipe parse DR loci annotation [vcf]": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_DR_loci_Final_annotation.txt:md5,a51de6d8c32e239f3d0fe838801239d3"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    "versions.yml:md5,78a31018c2e8b194d02fc67f005b85ba"
+                ],
+                "drLociFinalAnnotation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_DR_loci_Final_annotation.txt:md5,a51de6d8c32e239f3d0fe838801239d3"
+                    ]
+                ],
+                "fullFinalAnnotation": [
+                    
+                ],
+                "versions": [
+                    "versions.yml:md5,78a31018c2e8b194d02fc67f005b85ba"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-05-07T15:41:13.509965662"
+    },
+    "varpipe parse full annotation [vcf] -stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_DR_loci_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_full_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,bf5f2704552773f2566947064409aa8c"
+                ],
+                "drLociFinalAnnotation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_DR_loci_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "fullFinalAnnotation": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_full_Final_annotation.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,bf5f2704552773f2566947064409aa8c"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-05-05T11:11:19.839466875"
+    }
+}
