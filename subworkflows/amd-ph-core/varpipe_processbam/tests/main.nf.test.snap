@@ -1,14 +1,14 @@
 {
     "varpipe-processbam subworkflow test [paired-end]": {
         "content": [
-            "c53d63fcfa8b1c3933612a94708689e",
+            "513d9d2bb6052e3310d59253772120c3",
             [
                 [
                     {
                         "id": "test",
                         "single_end": false
                     },
-                    "test_sdrcsm.bai:md5,f697b73da3c37bfd19d5d71393f41e38"
+                    "test_sdrcsm.bai:md5,d724e9222a64e4ddc8ca88fcfa2457b9"
                 ]
             ],
             [
@@ -17,7 +17,7 @@
                         "id": "test",
                         "single_end": false
                     },
-                    "test.tsv:md5,8d9da07d55e76f071e677e1279a77a5d"
+                    "test.tsv:md5,0c3551327db4f3f295770ef65330e498"
                 ]
             ],
             [
@@ -67,6 +67,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.3"
         },
-        "timestamp": "2026-03-11T11:44:38.302084637"
+        "timestamp": "2026-03-15T23:05:05.194206111"
     }
 }
