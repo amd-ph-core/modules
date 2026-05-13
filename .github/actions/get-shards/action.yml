@@ -20,24 +20,31 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+      with:
+        distribution: "temurin"
+        java-version: "17"
     - name: Install nf-test
-      uses: nf-core/setup-nf-test@v1
+      uses: nf-core/setup-nf-test@4069fbbaabe94c08faba4ad261bfa88225ba133f # v2
       with:
         version: ${{ env.NFT_VER }}
     - name: Get number of shards
       id: shards
       shell: bash
       run: |
+        # Prepare tag parameter if tags are provided
+        TAGS=$([ -n "${{ inputs.tags }}" ] && echo "--tag ${{ inputs.tags }}" || echo "")
+
         # Run nf-test with dynamic parameter
         nftest_output=$(nf-test test \
-          --profile +docker \
-          $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
           --dry-run \
-          --ci \
+          --profile docker \
+          --filter process,workflow \
+          ${TAGS} \
           --changed-since HEAD^) || {
-            echo "nf-test command failed with exit code $?"
+            nftest_exit=$?
+            echo "::warning::nf-test dry-run exited with code $nftest_exit (may be caused by setup block evaluation during dry-run)"
             echo "Full output: $nftest_output"
-            exit 1
         }
         echo "nf-test dry-run output: $nftest_output"
 
@@ -49,8 +56,15 @@ runs:
         if echo "$nftest_output" | grep -q 'No tests to execute'; then
           echo "No related tests found."
         else
-          # Extract the number of related tests
+          # Extract the number of related tests from "Executed N tests" (successful dry-run)
           number_of_shards=$(echo "$nftest_output" | sed -n 's|.*Executed \([0-9]*\) tests.*|\1|p')
+          # Fallback: extract from "Found N related test(s)" if dry-run failed before completing
+          if [[ -z "$number_of_shards" || "$number_of_shards" -eq 0 ]]; then
+            number_of_shards=$(echo "$nftest_output" | sed -n 's|.*Found \([0-9]*\) related test.*|\1|p')
+            if [[ -n "$number_of_shards" && "$number_of_shards" -gt 0 ]]; then
+              echo "::notice::Used 'Found N related test(s)' fallback for shard count"
+            fi
+          fi
           if [[ -n "$number_of_shards" && "$number_of_shards" -gt 0 ]]; then
             shards_to_run=$(( $number_of_shards < ${{ inputs.max_shards }} ? $number_of_shards : ${{ inputs.max_shards }} ))
             shard=$(seq 1 "$shards_to_run" | jq -R . | jq -c -s .)
