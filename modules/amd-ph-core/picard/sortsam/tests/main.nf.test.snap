@@ -12,7 +12,7 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,0cd8e4081e0aecac1a277b193a07052d"
+                    "versions.yml:md5,57fdb5903f398fd4883bb5f6f9ef167d"
                 ],
                 "bam": [
                     [
@@ -24,15 +24,15 @@
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,0cd8e4081e0aecac1a277b193a07052d"
+                    "versions.yml:md5,57fdb5903f398fd4883bb5f6f9ef167d"
                 ]
             }
         ],
+        "timestamp": "2026-05-13T18:27:35.486435535",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-03-15T15:24:41.35491393"
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        }
     },
     "test-picard-sortsam": {
         "content": [
@@ -41,10 +41,10 @@
                 "versions.yml:md5,57fdb5903f398fd4883bb5f6f9ef167d"
             ]
         ],
+        "timestamp": "2025-07-17T17:18:27.420681415",
         "meta": {
             "nf-test": "0.9.2",
             "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-07-17T17:18:27.420681415"
+        }
     }
 }
