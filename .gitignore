@@ -16,4 +16,6 @@ test_output/
 tests/data/
 work/
 .github/CODEOWNERS-tmp
+# Symlink created by nft-utils nfcoreLink() during test runs
+modules/nf-core
 .venv*
