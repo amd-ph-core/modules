@@ -19,7 +19,8 @@ concurrency:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NFT_VER: "0.9.5"
-  NFT_WORKDIR: "~"
+  NF_CORE_VER: "3.5.1"
+  NFT_WORKDIR: "/home/runner"
   NXF_ANSI_LOG: false
 
 jobs:
