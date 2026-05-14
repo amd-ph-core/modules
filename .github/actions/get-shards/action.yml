@@ -20,10 +20,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
-      with:
-        distribution: "temurin"
-        java-version: "17"
     - name: Install nf-test
       uses: nf-core/setup-nf-test@4069fbbaabe94c08faba4ad261bfa88225ba133f # v2
       with:
@@ -38,7 +34,8 @@ runs:
         # Run nf-test with dynamic parameter
         nftest_output=$(nf-test test \
           --dry-run \
-          --profile docker \
+          --ci \
+          --profile +docker \
           --filter process,workflow \
           ${TAGS} \
           --changed-since HEAD^) || {
