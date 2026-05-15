@@ -39,7 +39,7 @@ workflow VARPIPE_CORE {
 
     // Varpipe-specific pipeline version for stats file output and report generation
     // Maintained at subworkflow level for consistency across different workflow contexts
-    def pipeline_version = '1.2.0'
+    def pipeline_version = '1.2.1'
 
     // QC TRIMMOMATIC
     TRIMMOMATIC(
