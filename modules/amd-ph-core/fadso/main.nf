@@ -4,7 +4,6 @@ process FADSO {
 
     // Upstream (hkuwahara/sleaping) publishes no releases or tags, so the
     // container is built from a pinned commit and there is no conda package.
-    // Upstream also publishes no licence - see meta.yml.
     container 'cdc-amd/fadso:20230810_1fedb59_v0'
 
     input:
