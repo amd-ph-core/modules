@@ -22,8 +22,10 @@ tools:
       homepage: "https://github.com/hkuwahara/sleaping"
       documentation: "https://github.com/hkuwahara/sleaping"
       tool_dev_url: "https://github.com/hkuwahara/sleaping"
+      # Upstream publishes no LICENSE file and states no licence in its README;
+      # GitHub detects none. Redistribution terms are therefore unclear.
       licence:
-        - "MIT"
+        - "unlicensed"
       identifier: ""
       args_id: "$args"
 input:
