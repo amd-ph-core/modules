@@ -15,9 +15,9 @@ tools:
         QuickSNP is a tool for rapidly generating phylogenetic trees from SNP distance matrices.
         It creates neighbor-joining trees from pairwise distance data to visualize
         evolutionary relationships between samples.
-      homepage: https://github.com/staphb/quicksnp
-      documentation: https://github.com/staphb/quicksnp
-      licence: ["MIT"]
+      homepage: https://github.com/k-florek/QuickSNP
+      documentation: https://github.com/k-florek/QuickSNP
+      licence: ["GNU General Public License v3.0"]
       identifier: "biotools:quicksnp"
 input:
   - - meta:

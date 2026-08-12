@@ -3,7 +3,7 @@ process QUICKSNP {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container "us-cdcgov/cdc-amd/quicksnp:1.0.1_1709e03_v2"
+    container "cdc-amd/quicksnp:1.0.1_1709e03_v2"
 
     input:
     tuple val(meta), path(tsv)
