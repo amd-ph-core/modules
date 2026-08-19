@@ -35,14 +35,18 @@ process HOSTESS {
     // no ordering promise, and passing them the wrong way round would swap the
     // output mates silently.
     def sorted_reads = meta.single_end ? [reads].flatten() : reads.sort { read -> read.simpleName }
-    def reads_cmd    = meta.single_end ? "--fastq1 ${sorted_reads[0]}" : "--fastq1 ${sorted_reads[0]} --fastq2 ${sorted_reads[1]}"
+    // Quoted: these are staged filenames, so a space or a shell metacharacter in
+    // an input name would otherwise split into separate arguments.
+    def reads_cmd    = meta.single_end
+        ? "--fastq1 \"${sorted_reads[0]}\""
+        : "--fastq1 \"${sorted_reads[0]}\" --fastq2 \"${sorted_reads[1]}\""
     """
     hostess clean \\
         ${args} \\
         --threads ${task.cpus} \\
         ${reads_cmd} \\
-        --index ${reference_dir}/${reference_name} \\
-        --prefix ${prefix} \\
+        --index "${reference_dir}/${reference_name}" \\
+        --prefix "${prefix}" \\
         --output . \\
         --force
     """
@@ -50,16 +54,18 @@ process HOSTESS {
     stub:
     def prefix   = task.ext.prefix ?: "${meta.id}"
     def want_bam = (task.ext.args ?: '').contains('--bam')
-    def fastqs   = meta.single_end ? "${prefix}.clean.fastq.gz" : "${prefix}.clean_1.fastq.gz ${prefix}.clean_2.fastq.gz"
+    def fastqs   = (meta.single_end
+        ? ["${prefix}.clean.fastq.gz"]
+        : ["${prefix}.clean_1.fastq.gz", "${prefix}.clean_2.fastq.gz"]).collect { name -> "\"${name}\"" }.join(' ')
     // The BAM outputs are optional, so the stub creates them only when the
     // arguments ask for them. Otherwise a stub run would not exercise the same
     // channel shape as a real one.
     def bam_stub = want_bam
-        ? "touch ${prefix}.host.bam ${prefix}.host.bam.bai ${prefix}.host.flagstat.txt ${prefix}.host.stats.txt"
+        ? "touch \"${prefix}.host.bam\" \"${prefix}.host.bam.bai\" \"${prefix}.host.flagstat.txt\" \"${prefix}.host.stats.txt\""
         : "true"
     """
     for f in ${fastqs}; do
-        echo "" | gzip > \$f
+        echo "" | gzip > "\$f"
     done
     ${bam_stub}
 
@@ -76,6 +82,6 @@ process HOSTESS {
         '        "reads_removed": 0,' \\
         '        "reads_removed_proportion": 0.0' \\
         '    }' \\
-        ']' > ${prefix}.hostess.json
+        ']' > "${prefix}.hostess.json"
     """
 }
