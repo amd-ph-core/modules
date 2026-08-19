@@ -1,5 +1,5 @@
 process DEACON_INDEX {
-    tag "${fasta}"
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
