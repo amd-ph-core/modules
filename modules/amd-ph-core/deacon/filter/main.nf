@@ -5,7 +5,7 @@ process DEACON_FILTER {
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
         ? 'https://depot.galaxyproject.org/singularity/deacon:0.17.0--h3edb6b3_0'
-        : 'quay.io/biocontainers/deacon:0.17.0--h3edb6b3_0'}"
+        : 'biocontainers/deacon:0.17.0--h3edb6b3_0'}"
 
     input:
     tuple val(meta), path(reads, stageAs: "input_reads/")
