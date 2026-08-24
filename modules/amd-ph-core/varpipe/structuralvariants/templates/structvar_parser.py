@@ -60,6 +60,14 @@ def parse_coverage_file(coverage_file, regions):
     return coverage_data, (positions, total_count, total_coverage)
 
 
+def calculate_amino_acid_position(cds_position):
+    """Round a CDS coordinate up to its enclosing amino acid position"""
+    fractional = f"{cds_position / 3:.1f}"
+    if fractional[-1] == "0" and not fractional.startswith("0"):
+        return int(fractional[:-2])
+    return int(fractional[:-2]) + 1
+
+
 def calculate_coordinates(strand, gene_start, gene_stop, del_start, del_stop):
     """Calculate CDS and amino acid coordinates based on strand orientation"""
     cds_start = 0
@@ -69,45 +77,48 @@ def calculate_coordinates(strand, gene_start, gene_stop, del_start, del_stop):
     if strand == "forward":
         cds_start = (del_start + 1) - gene_start
         cds_stop = (del_stop + 1) - gene_start
-        aa_start = int(cds_start / 3)
-        aa_stop = int(cds_stop / 3)
+        aa_start = calculate_amino_acid_position(cds_start)
+        aa_stop = calculate_amino_acid_position(cds_stop)
     elif strand == "reverse":
         cds_start = (gene_stop + 1) - del_stop
         cds_stop = (gene_stop + 1) - del_start
-        aa_start = int(cds_start / 3)
-        aa_stop = int(cds_stop / 3)
-    elif strand == "forward_promoter":
-        cds_start = del_stop - gene_start
-        cds_stop = del_start - gene_start
-    elif strand == "reverse_promoter":
-        cds_start = gene_stop - del_start
-        cds_stop = gene_stop - del_stop
+        aa_start = calculate_amino_acid_position(cds_start)
+        aa_stop = calculate_amino_acid_position(cds_stop)
+    elif strand in ("forward_promoter", "reverse_promoter"):
+        # Both promoter orientations are reported relative to this region's
+        # own stop coordinate (the region here is the promoter/intragenic
+        # BED entry itself, not the neighboring gene)
+        cds_start = del_start - (gene_stop + 1)
+        cds_stop = del_stop - (gene_stop + 1)
 
     return cds_start, cds_stop, aa_start, aa_stop
 
 
 def analyze_deletions(coverage_data, gene_name, coordinates):
     """Identify potential deletions within a given region"""
-    result = {}
     gene_start, gene_stop, gene_strand = coordinates
     deletions = [pos for pos in range(gene_start, gene_stop + 1) if pos not in coverage_data or coverage_data[pos] < 1]
-    if deletions:
-        deletion_start = deletions[0]
-        deletion_stop = deletions[-1]
-        cds_start, cds_stop, aa_start, aa_stop = calculate_coordinates(
-            gene_strand, gene_start, gene_stop, deletion_start, deletion_stop
-        )
-        result = {
-            "Gene": gene_name,
-            "SV Length": deletion_stop - deletion_start,
-            "Ref Start": deletion_start,
-            "Ref Stop": deletion_stop,
-            "CDS Start": cds_start,
-            "CDS Stop": cds_stop,
-            "Amino Acid Start": aa_start,
-            "Amino Acid Stop": aa_stop,
-        }
-    return result
+
+    # Require a minimum run of low-coverage positions before calling a deletion
+    if len(deletions) < 10:
+        status = "No large deletion"
+        return {"Gene": gene_name, "Ref Start": status, "Ref Stop": status}
+
+    deletion_start = deletions[0]
+    deletion_stop = deletions[-1]
+    cds_start, cds_stop, aa_start, aa_stop = calculate_coordinates(
+        gene_strand, gene_start, gene_stop, deletion_start, deletion_stop
+    )
+    return {
+        "Gene": gene_name,
+        "SV Length": deletion_stop - deletion_start,
+        "Ref Start": deletion_start,
+        "Ref Stop": deletion_stop,
+        "CDS Start": cds_start,
+        "CDS Stop": cds_stop,
+        "Amino Acid Start": aa_start,
+        "Amino Acid Stop": aa_stop,
+    }
 
 
 def output_results(sample_id, data):
@@ -151,7 +162,7 @@ def analyze_coverage_data(sample_id, coverage_file, regions_file, genome_stats_f
         ref, gene_name = ref_gene
         avg_depth = float(coverage_stats[ref_gene]["Average Depth"])
         pct_coverage = float(coverage_stats[ref_gene]["Percentage Coverage"])
-        if avg_depth > 2 and pct_coverage > 99:
+        if avg_depth > 2 and pct_coverage > 97:
             status = "No large deletion"
             results.append({"Gene": gene_name, "Ref Start": status, "Ref Stop": status})
         elif avg_depth < 2 or pct_coverage < 1:

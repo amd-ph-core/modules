@@ -44,14 +44,44 @@ def should_print_variant(lined):
     codon_pos = lined[14]
     nucleotide_change = lined[9]
 
+    # Nucleotide changes in rrl that are known to confer resistance
+    rrl_reportable_changes = (
+        "2814G>T",
+        "2270G>T",
+        "2269-2270insT",
+        "2299G>T",
+        "2700G>C",
+        "2689A>T",
+        "2746G>A",
+    )
+
     # Define gene filtering rules as a dictionary with functions
     gene_rules = {
-        "rrl": lambda g, a, p, c, n: True,
+        "rrl": lambda g, a, p, c, n: any(change in n for change in rrl_reportable_changes),
         "ahpC": lambda g, a, p, c, n: True,
         "ahpC upstream": lambda g, a, p, c, n: True,
-        "atpE": lambda g, a, p, c, n: a == "Non-synonymous",
-        "pepQ": lambda g, a, p, c, n: a == "Non-synonymous",
-        "mmpR": lambda g, a, p, c, n: a == "Non-synonymous",
+        "atpE": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "atpE upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "pepQ": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "pepQ upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "mmpR": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "mmpR upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "mmpL5": lambda g, a, p, c, n: a == "Non-synonymous",
+        "mmpS5": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "mmpS5 upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "rplC": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "rplC upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "fbiA": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "fbiA upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "fbiB": lambda g, a, p, c, n: a == "Non-synonymous",
+        "fbiC": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding") and p != 1305494,
+        "fbiC upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding") and p != 1305494,
+        "ddn": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "ddn upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "fgd1": lambda g, a, p, c, n: a == "Non-synonymous",
+        "fgd1 upstream": lambda g, a, p, c, n: a == "Non-synonymous",
+        "Rv2983": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
+        "Rv2983 upstream": lambda g, a, p, c, n: a in ("Non-synonymous", "Non-Coding"),
         "inhA": lambda g, a, p, c, n: a == "Non-synonymous",
         "tlyA": lambda g, a, p, c, n: a == "Non-synonymous",
         "embB": lambda g, a, p, c, n: (
@@ -99,11 +129,7 @@ def should_print_variant(lined):
         ),
     }
 
-    # Check for gene names containing "rplC"
-    if "rplC" in gene_name and annotation == "Non-synonymous":
-        return True
-
-    # For all other genes, check against the rules dictionary
+    # Check against the rules dictionary
     return gene_name in gene_rules and gene_rules[gene_name](
         gene_name, annotation, position, codon_pos, nucleotide_change
     )

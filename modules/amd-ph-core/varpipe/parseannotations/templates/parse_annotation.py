@@ -43,6 +43,12 @@ class SnpEffVcfParser:
             "ins": "Insertion",
             "dup": "Insertion",
         }
+        # Phase-group identifiers (POS_REF_ALT) for known problematic calls
+        # that should be excluded from the annotation report
+        self.skipped_variant_tokens = ("3339144_T_TG", "2860184_CCGCGCG_C")
+        # Genes whose nearby upstream modifier annotation should take priority
+        # over the normal nearest-distance selection when within range
+        self.special_upstream_genes = ("pepQ", "fgd1", "mmpR")
         self.ann_fields = [
             "Allele",
             "Annotation",
@@ -84,12 +90,17 @@ class SnpEffVcfParser:
         # FIXME should this be hard coded??
         self.loci = self._get_loci(loci_path)
 
+    def _is_known_artifact(self, record):
+        """Check if a record belongs to a known problematic phase group"""
+        phase_fields = (record.get("PID", ""), record.get("PGT", ""))
+        return any(token in field for field in phase_fields for token in self.skipped_variant_tokens)
+
     def _filter_vcf(self, sample_id, vcf_path):
         """Parse and filter VCF file"""
         records = []
         with open(vcf_path) as handle:
             reader = csv.DictReader(handle, dialect="excel-tab")
-            records = [row for row in reader if row["FILTER"] == "PASS"]
+            records = [row for row in reader if row["FILTER"] == "PASS" and not self._is_known_artifact(row)]
 
         for record in records:
             record["Sample ID"] = sample_id
@@ -101,7 +112,7 @@ class SnpEffVcfParser:
                 dict(zip(self.ann_fields, a.split("|"))) for a in record["ANN"].split("=", 1)[1].split(",")
             ]
 
-        return [record for record in records if record["support"] >= 5.0]
+        return [record for record in records if float(record["support"]) >= 10.0]
 
     def _get_variant_type(self, record, annotation):
         variant = "SNP"
@@ -140,7 +151,7 @@ class SnpEffVcfParser:
 
             if record["Variant Type"] not in ("Insertion", "Deletion"):
                 if any([len(aa) > 3 for aa in (wt, mut)]) and "-" not in record["Codon Position"]:
-                    record["Codon Position"] = f"{record["Codon Position"]}-{int(record["Codon Position"])+1}"
+                    record["Codon Position"] = f"{record['Codon Position']}-{int(record['Codon Position'])+1}"
                 for non_aa in ("del", "*", "?", "fs"):
                     if non_aa in annotation["HGVS_p"]:
                         break
@@ -176,26 +187,38 @@ class SnpEffVcfParser:
             variant_type = "Deletion" if len(ref) > len(alt) else "Insertion"
         return variant_type
 
-    @staticmethod
-    def _filter_modifier_annotations(record):
-        filtered_annotations = {
-            int(a["Distance"]): a
+    def _filter_modifier_annotations(self, record):
+        priority_matches = [
+            a
             for a in record["annotations"]
-            if "downstream" not in a["Annotation"] and a["Distance"]
-        }
+            if a["Gene_Name"] in self.special_upstream_genes
+            and "downstream" not in a["Annotation"]
+            and a["Distance"]
+            and int(a["Distance"]) < 501
+        ]
 
-        if filtered_annotations:
-            annotation = filtered_annotations[sorted(filtered_annotations.keys())[0]]
+        if len(priority_matches) == 1:
+            annotation = priority_matches[0]
             modifier = "upstream"
         else:
-            annotation = record["annotations"][0]
-            modifier = "downstream"
+            filtered_annotations = {
+                int(a["Distance"]): a
+                for a in record["annotations"]
+                if "downstream" not in a["Annotation"] and a["Distance"]
+            }
+
+            if filtered_annotations:
+                annotation = filtered_annotations[sorted(filtered_annotations.keys())[0]]
+                modifier = "upstream"
+            else:
+                annotation = record["annotations"][0]
+                modifier = "downstream"
 
         record.update(
             {
                 "Annotation": "Non-Coding",
-                "Gene Name": f"{annotation["Gene_Name"]} {modifier}",
-                "Gene ID": f"{annotation["Gene_ID"]} {modifier}",
+                "Gene Name": f"{annotation['Gene_Name']} {modifier}",
+                "Gene ID": f"{annotation['Gene_ID']} {modifier}",
                 "Nucleotide Change": annotation["HGVS_c"],
                 "Position within CDS": "NA",
                 "Amino acid Change": "NA",
@@ -210,20 +233,20 @@ class SnpEffVcfParser:
         mutation_position = int(record["POS"]) - locus["start"] + 1
         cds_position = "NA"
         if "SNP" == record["Variant Type"]:
-            hgvs_c = f"c.{mutation_position}{record["REF"]}>{record["ALT"]}"
+            hgvs_c = f"c.{mutation_position}{record['REF']}>{record['ALT']}"
             cds_position = mutation_position
         elif "MNP" == record["Variant Type"]:
-            hgvs_c = f"c.{mutation_position}_{mutation_position+1}del{record["REF"]}ins{record["ALT"]}"
+            hgvs_c = f"c.{mutation_position}_{mutation_position+1}del{record['REF']}ins{record['ALT']}"
         elif "Insertion" == record["Variant Type"]:
-            hgvs_c = f"c.{mutation_position}_{mutation_position+1}ins{record["ALT"][len(record["REF"]):]}"
+            hgvs_c = f"c.{mutation_position}_{mutation_position+1}ins{record['ALT'][len(record['REF']):]}"
             cds_position = f"{mutation_position}-{mutation_position+1}"
-        elif "Deletion" == record["Variant Type"]:
+        else:
             if len(record["REF"]) - len(record["ALT"]) == 1:
-                hgvs_c = f"c.{mutation_position+len(record["ALT"])}del{record['REF'][len(record["ALT"]):]}"
+                hgvs_c = f"c.{mutation_position+len(record['ALT'])}del{record['REF'][len(record['ALT']):]}"
                 cds_position = str(mutation_position + len(record["ALT"]))
             else:
-                hgvs_c = f"c.{mutation_position+len(record["ALT"])}_{mutation_position+len(record["REF"])-1}del{record["REF"][len(record["ALT"]):]}"
-                cds_position = f"{mutation_position+len(record["ALT"])}-{mutation_position+len(record["REF"])-1}"
+                hgvs_c = f"c.{mutation_position+len(record['ALT'])}_{mutation_position+len(record['REF'])-1}del{record['REF'][len(record['ALT']):]}"
+                cds_position = f"{mutation_position+len(record['ALT'])}-{mutation_position+len(record['REF'])-1}"
 
         record.update(
             {
@@ -242,7 +265,7 @@ class SnpEffVcfParser:
     def _get_modifier_report_annotation(self, record):
         record["Variant Type"] = self._get_modifier_variant_type(record)
         for locus in self.loci.values():
-            if locus["start"] <= int(record["POS"]) <= locus["stop"]:
+            if int(locus["start"]) <= int(record["POS"]) <= int(locus["stop"]):
                 self._annotate_known_loci(locus, record)
                 break
         else:
@@ -267,7 +290,10 @@ class SnpEffVcfParser:
         vcf_records = self._filter_vcf(sample_id, vcf_path)
 
         for record in vcf_records:
-            if not record["annotations"][0]["Annotation_Impact"] == "MODIFIER":
+            annotations = record["annotations"]
+            if not isinstance(annotations, list):
+                raise TypeError("record['annotations'] must be a list")
+            if not annotations[0]["Annotation_Impact"] == "MODIFIER":
                 self._get_report_annotation(record)
             else:
                 self._get_modifier_report_annotation(record)
