@@ -31,7 +31,7 @@
             "nextflow": "25.10.4"
         }
     },
-    "sarscov2 - unclassifiable record - cov": {
+    "sarscov2 - unsupported ctype record - cov": {
         "content": [
             [
                 [

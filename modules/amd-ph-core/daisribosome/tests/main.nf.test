@@ -119,16 +119,16 @@ nextflow_process {
         }
     }
 
-    test("sarscov2 - full bundled reference - cov - default ctype") {
+    test("cov - unannotated bundled reference - default ctype") {
 
         config "./default_ctype.config"
 
         setup {
-            run("EXTRACT_REFERENCE") {
+            run("EXTRACT_UNANNOTATED_REFERENCE") {
                 script "./extract_reference.nf"
                 process {
                     """
-                    input[0] = Channel.of([ [ id:'sarscov2_default_ctype' ], "cov" ])
+                    input[0] = Channel.of([ [ id:'cov_default_ctype' ], "cov" ])
                     """
                 }
             }
@@ -137,35 +137,40 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = EXTRACT_REFERENCE.out.fasta
+                input[0] = EXTRACT_UNANNOTATED_REFERENCE.out.fasta
                 input[1] = "cov"
                 """
             }
         }
 
         then {
-            // Only confirms ext.args reaches ribosome and the module still
-            // succeeds; whether the flag changes ribosome's output is not
-            // this wrapper's concern.
+            def sortedMd5 = { f -> f.readLines().sort().join("\n").bytes.md5() }
+            def productSeq = path(process.out.product_seq[0][1])
+            def genomeSeq  = path(process.out.genome_seq[0][1])
+
+            // Header annotations were removed with cut, so this normalized
+            // output hash changes if --assume-default-ctype is not forwarded.
             assertAll(
                 { assert process.success },
-                { assert path(process.out.product_seq[0][1]).getFileName().toString() == "sarscov2_default_ctype.seq.txt" },
-                { assert path(process.out.genome_seq[0][1]).toFile().isFile() },
+                { assert productSeq.getFileName().toString() == "cov_default_ctype.seq.txt" },
+                { assert sortedMd5(productSeq) == "dbdcd9204d6d169eac77e76d821ade79" },
+                { assert genomeSeq.getFileName().toString() == "cov_default_ctype.gen_seq.txt" },
+                { assert genomeSeq.toFile().isFile() },
                 { assert process.out.versions_daisribosome == [["DAISRIBOSOME", "dais-ribosome", "2.1.0"]] }
             )
         }
     }
 
-    test("sarscov2 - unclassifiable record - cov") {
+    test("sarscov2 - unsupported ctype record - cov") {
 
         when {
             process {
                 """
-                def unclassifiable = new File("${outputDir}/sarscov2_unclassifiable.tsv")
-                unclassifiable.text = "bogus_record\\tNOT_A_CTYPE\\tACGTACGTACGT\\n"
+                def unsupportedCtype = new File("${outputDir}/sarscov2_unsupported_ctype.tsv")
+                unsupportedCtype.text = "bogus_record\\tNOT_A_CTYPE\\tACGTACGTACGT\\n"
                 input[0] = Channel.of([
-                    [ id:'sarscov2_unclassifiable' ],
-                    file(unclassifiable.path)
+                    [ id:'sarscov2_unsupported_ctype' ],
+                    file(unsupportedCtype.path)
                 ])
                 input[1] = "cov"
                 """
@@ -174,16 +179,16 @@ nextflow_process {
 
         then {
             def outputs = [
-                [path(process.out.product_seq[0][1]), "sarscov2_unclassifiable.seq.txt"],
-                [path(process.out.product_ins[0][1]), "sarscov2_unclassifiable.ins.txt"],
-                [path(process.out.product_del[0][1]), "sarscov2_unclassifiable.del.txt"],
-                [path(process.out.genome_seq[0][1]),  "sarscov2_unclassifiable.gen_seq.txt"],
-                [path(process.out.genome_ins[0][1]),  "sarscov2_unclassifiable.gen_ins.txt"],
-                [path(process.out.genome_del[0][1]),  "sarscov2_unclassifiable.gen_del.txt"]
+                [path(process.out.product_seq[0][1]), "sarscov2_unsupported_ctype.seq.txt"],
+                [path(process.out.product_ins[0][1]), "sarscov2_unsupported_ctype.ins.txt"],
+                [path(process.out.product_del[0][1]), "sarscov2_unsupported_ctype.del.txt"],
+                [path(process.out.genome_seq[0][1]),  "sarscov2_unsupported_ctype.gen_seq.txt"],
+                [path(process.out.genome_ins[0][1]),  "sarscov2_unsupported_ctype.gen_ins.txt"],
+                [path(process.out.genome_del[0][1]),  "sarscov2_unsupported_ctype.gen_del.txt"]
             ]
 
-            // An unrecognized ctype is not an error: ribosome exits 0 and writes
-            // every output empty, reporting the record only on stderr.
+            // An explicitly unsupported ctype is not fatal: ribosome exits 0,
+            // reports the unsupported ctype on stdout, and writes empty outputs.
             assertAll(
                 { assert process.success },
                 {
@@ -298,4 +303,3 @@ nextflow_process {
         }
     }
 }
-
