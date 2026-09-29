@@ -22,12 +22,14 @@ tools:
       documentation: https://github.com/CDCgov/irma-core
       licence:
         - Apache-2.0
+      identifier: ""
   - samtools:
       description: SAM to sorted, indexed BAM conversion.
       homepage: https://www.htslib.org/
       documentation: https://www.htslib.org/doc/samtools.html
       licence:
         - MIT
+      identifier: biotools:samtools
   - call.py:
       description: Variant caller over the pileup, supporting the binomial and empirical-Bayes callers with
         depth-adaptive thresholds. Ships in this module's resources/usr/bin.
@@ -35,12 +37,14 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - var_call_stats.py:
       description: Builds the per-position pileup consumed by the caller. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - amend_consensus.py:
       description: Applies called variants to the consensus, emitting ambiguity codes above the ambiguity
         frequency. Ships in this module's resources/usr/bin.
@@ -48,6 +52,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - generate_vcf.py:
       description: Writes a spec-compliant VCFv4.2 from the caller's tables via pysam. Ships in this module's
         resources/usr/bin.
@@ -55,6 +60,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - phase.py:
       description: Variant phasing, emitting the EXPENRD/JACCARD/MUTUALD/NJOINTP square matrices. Ships
         in this module's resources/usr/bin.
@@ -62,12 +68,14 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - complete_matrix.py:
       description: Completes a phasing square matrix. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - get_pairing_stats.py:
       description: Summarises mate-pair merge statistics into the paired-error table used by the caller.
         Ships in this module's resources/usr/bin.
@@ -75,6 +83,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
 input:
   - - meta:
         type: map
@@ -88,10 +97,12 @@ input:
         type: file
         description: Converged reference for this gene
         pattern: "*.{fa,fasta,ref}"
+        ontologies: []
     - sam:
         type: file
         description: Winnowed alignments against that reference
         pattern: "*.sam"
+        ontologies: []
   - min_variant_count:
       type: integer
       description: Minimum supporting reads for a variant to be reported (Mandatory)
@@ -154,7 +165,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.bam":
+      - ${gene}.bam:
           type: file
           description: Coordinate-sorted alignments
           pattern: "*.bam"
@@ -165,7 +176,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.bam.bai":
+      - ${gene}.bam.bai:
           type: file
           description: BAM index
           pattern: "*.bam.bai"
@@ -176,7 +187,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.fasta":
+      - ${gene}.fasta:
           type: file
           description: Plurality consensus for the gene
           pattern: "*.fasta"
@@ -187,7 +198,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-variants.txt":
+      - ${gene}-variants.txt:
           type: file
           description: Called variants
           pattern: "*-variants.txt"
@@ -198,7 +209,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-allAlleles.txt":
+      - ${gene}-allAlleles.txt:
           type: file
           description: Per-position allele counts for every site
           pattern: "*-allAlleles.txt"
@@ -209,7 +220,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-coverage.txt":
+      - ${gene}-coverage.txt:
           type: file
           description: Per-position depth at true per-read depth, in the consensus frame
           pattern: "*-coverage.txt"
@@ -224,6 +235,7 @@ output:
           type: file
           description: Consensus with called variants applied (Optional)
           pattern: amended_consensus/*.fa
+          ontologies: []
   amended_len:
     - - meta:
           type: map
@@ -242,7 +254,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-insertions.txt":
+      - ${gene}-insertions.txt:
           type: file
           description: Called insertions (Optional)
           pattern: "*-insertions.txt"
@@ -253,7 +265,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-deletions.txt":
+      - ${gene}-deletions.txt:
           type: file
           description: Called deletions (Optional)
           pattern: "*-deletions.txt"
@@ -264,7 +276,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.vcf":
+      - ${gene}.vcf:
           type: file
           description: VCFv4.2 in the assembled consensus frame (Optional)
           pattern: "*.vcf"
@@ -275,7 +287,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-pairingStats.txt":
+      - ${gene}-pairingStats.txt:
           type: file
           description: Mate-pair merge statistics, paired-end only (Optional)
           pattern: "*-pairingStats.txt"
@@ -286,15 +298,17 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.sqm":
+      - ${gene}*.sqm:
           type: file
           description: Phasing square matrices, emitted only with more than two variants (Optional)
-          pattern: "*.sqm"
+          pattern: "**.sqm"
   versions:
     - versions.yml:
         type: file
         description: File containing software versions
         pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
 authors:
   - "@smagala"
 maintainers:

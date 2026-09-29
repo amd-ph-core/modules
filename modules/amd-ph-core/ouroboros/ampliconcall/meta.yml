@@ -23,6 +23,7 @@ tools:
       documentation: https://github.com/CDCgov/irma-core
       licence:
         - Apache-2.0
+      identifier: ""
   - rammap:
       description: Pure-Rust minimap2-compatible read mapper; maps the inflated reads onto the full panel
         record.
@@ -30,6 +31,7 @@ tools:
       documentation: https://github.com/jwanglab/rammap
       licence:
         - MIT
+      identifier: ""
   - samtools:
       description: Sorting and indexing, the depth-masked consensus, and the per-position depth that becomes
         the islands BED.
@@ -37,6 +39,7 @@ tools:
       documentation: https://www.htslib.org/doc/samtools.html
       licence:
         - MIT
+      identifier: biotools:samtools
 input:
   - - meta:
         type: map
@@ -50,14 +53,17 @@ input:
         type: file
         description: Deflated read patterns recruited to this gene
         pattern: "*.{fa,fasta}"
+        ontologies: []
     - deflation_index:
         type: file
         description: Deflation index, used to inflate the patterns to true per-read depth
         pattern: "*.xfl"
+        ontologies: []
     - refs:
         type: file
         description: Full panel reference set; the record whose ID matches the gene label is extracted
         pattern: "*.{fa,fasta}"
+        ontologies: []
   - min_depth:
       type: integer
       description: Depth at or above which a reference position is called rather than masked to N
@@ -69,11 +75,11 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.amplicon.bam":
+      - ${gene}.amplicon.bam:
           type: file
           description: Reads mapped to the full panel record, coordinate-sorted
           pattern: "*.amplicon.bam"
-      - "*.amplicon.bam.bai":
+      - ${gene}.amplicon.bam.bai:
           type: file
           description: BAM index
           pattern: "*.amplicon.bam.bai"
@@ -84,7 +90,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.amplicon.consensus.fa":
+      - ${gene}.amplicon.consensus.fa:
           type: file
           description: Full-length reference-anchored consensus, N where depth is below min_depth
           pattern: "*.amplicon.consensus.fa"
@@ -95,7 +101,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.amplicon.islands.bed":
+      - ${gene}.amplicon.islands.bed:
           type: file
           description: Intervals with depth at or above min_depth
           pattern: "*.amplicon.islands.bed"
@@ -106,7 +112,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.ref":
+      - ${gene}.ref:
           type: file
           description: The extracted full-length panel record for this gene
           pattern: "*.ref"
@@ -115,6 +121,8 @@ output:
         type: file
         description: File containing software versions
         pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
 authors:
   - "@smagala"
 maintainers:

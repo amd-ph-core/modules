@@ -28,18 +28,21 @@ tools:
       documentation: https://github.com/jwanglab/rammap
       licence:
         - MIT
+      identifier: ""
   - blast:
       description: NCBI BLAST+; the alternative MATCH and ALIGN path, selected by match_aligner or gather_aligner.
       homepage: https://blast.ncbi.nlm.nih.gov/
       documentation: https://www.ncbi.nlm.nih.gov/books/NBK279690/
       licence:
         - Public Domain
+      identifier: ""
   - samtools:
       description: Filters unmapped records out of the rammap ALIGN stream before the stats step.
       homepage: https://www.htslib.org/
       documentation: https://www.htslib.org/doc/samtools.html
       licence:
         - MIT
+      identifier: biotools:samtools
   - parse_sort_results.py:
       description: Bins matched reads per target and applies the recruitment floors, including the secondary-population
         keep. Ships in this module's resources/usr/bin.
@@ -47,6 +50,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - combine_align_stats.py:
       description: "Builds the next per-gene reference from the CUMULATIVE alignment JSONs across all rounds.
         Cumulative is required, not an optimisation: a reference built from one round's JSON collapses
@@ -55,6 +59,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - sam_align_stats.py:
       description: Converts the rammap ALIGN SAM into per-position alignment statistics. Ships in this module's
         resources/usr/bin.
@@ -62,6 +67,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - blast_align_stats.py:
       description: Converts BLAST tabular alignment output into per-position alignment statistics. Ships
         in this module's resources/usr/bin.
@@ -69,6 +75,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - blast_match.py:
       description: Partitions reads into match/class/nomatch/chimeric sets from BLAST hits. Ships in this
         module's resources/usr/bin.
@@ -76,6 +83,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - rammap_partition.py:
       description: Partitions reads into match/class/nomatch/chimeric sets from a rammap PAF, using the
         native ch:i:1 chimera tag. Ships in this module's resources/usr/bin.
@@ -83,6 +91,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
 input:
   - - meta:
         type: map
@@ -93,10 +102,12 @@ input:
         type: file
         description: Deflated read patterns for the sample; the round-1 query set
         pattern: "*.{fa,fasta}"
+        ontologies: []
     - refs:
         type: file
         description: Panel reference set. Its record IDs are the bin labels and the reporting frame.
         pattern: "*.{fa,fasta}"
+        ontologies: []
   - recruit_opts:
       type: map
       description: |
@@ -118,6 +129,7 @@ output:
           description: Per-gene refined references from every round; the highest round per gene is the one
             assembly consumes (Optional)
           pattern: R*-*.ref
+          ontologies: []
   sorted:
     - - meta:
           type: map
@@ -126,6 +138,7 @@ output:
           type: file
           description: Reads binned per gene, from every round (Optional)
           pattern: R*-*.fa
+          ontologies: []
   nomatch:
     - - meta:
           type: map
@@ -135,6 +148,7 @@ output:
           description: Reads never recruited. Every depth this pipeline reports is RECRUITED depth, so this
             is what distinguishes "not recruited" from "not sequenced".
           pattern: nomatch.fa
+          ontologies: []
   chimeric:
     - - meta:
           type: map
@@ -143,6 +157,7 @@ output:
           type: file
           description: Round-1 reads dropped as chimeric
           pattern: chimeric.fa
+          ontologies: []
   sort_stats:
     - - meta:
           type: map
@@ -151,6 +166,7 @@ output:
           type: file
           description: Per-gene read-pattern and read counts, every round, concatenated in round order
           pattern: sorted_read_stats.txt
+          ontologies: []
   timings:
     - - meta:
           type: map
@@ -159,11 +175,31 @@ output:
           type: file
           description: Per-round seconds, convergence flag, and the reason the loop stopped
           pattern: round_timings.tsv
+          ontologies:
+            - edam: http://edamontology.org/format_3475
+  deferred:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - R*.defer.tsv:
+          type: file
+          description: R*.defer.tsv
+          pattern: R*.defer.tsv
+  collapse:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - R*.collapse.tsv:
+          type: file
+          description: R*.collapse.tsv
+          pattern: R*.collapse.tsv
   versions:
     - versions.yml:
         type: file
         description: File containing software versions
         pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
 authors:
   - "@smagala"
 maintainers:

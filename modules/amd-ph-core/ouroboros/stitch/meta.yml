@@ -23,6 +23,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
 input:
   - - meta:
         type: map
@@ -36,18 +37,22 @@ input:
         type: file
         description: Amended consensus from assembly, trimmed to covered columns
         pattern: "*.fa"
+        ontologies: []
     - bam:
         type: file
         description: Reads mapped to the full panel record, used to tell dropout from true deletion
         pattern: "*.bam"
+        ontologies: []
     - bai:
         type: file
         description: BAM index
         pattern: "*.bam.bai"
+        ontologies: []
     - ref:
         type: file
         description: The full-length panel record for this gene
         pattern: "*.ref"
+        ontologies: []
   - min_depth:
       type: integer
       description: Depth at or above which an assembly gap is treated as a real deletion rather than a dropout
@@ -59,7 +64,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*.stitched.fa":
+      - ${gene}.stitched.fa:
           type: file
           description: Consensus in the full reference coordinate frame
           pattern: "*.stitched.fa"
@@ -68,6 +73,8 @@ output:
         type: file
         description: File containing software versions
         pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
 authors:
   - "@smagala"
 maintainers:

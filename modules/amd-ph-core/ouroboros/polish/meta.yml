@@ -31,12 +31,14 @@ tools:
       documentation: https://github.com/jwanglab/rammap
       licence:
         - MIT
+      identifier: ""
   - rammap:
       description: Pure-Rust minimap2-compatible read mapper; the seeded RAMMAP path.
       homepage: https://github.com/jwanglab/rammap
       documentation: https://github.com/jwanglab/rammap
       licence:
         - MIT
+      identifier: ""
   - irma-core:
       description: Rust reimplementation of IRMA's core routines; xflate inflates the read patterns to true
         per-read depth once, before the loop.
@@ -44,6 +46,7 @@ tools:
       documentation: https://github.com/CDCgov/irma-core
       licence:
         - Apache-2.0
+      identifier: ""
   - winnow_pileup.py:
       description: Streams a SAM in one pass to winnow best-per-read alignments, sum the alignment score
         used as the convergence objective, and build the per-position pileup JSON. Ships in this module's
@@ -52,6 +55,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - combine_sam_stats.py:
       description: Amends a reference from a pileup JSON, folding indels above the given frequency thresholds
         and flagging whether any indel was folded. Ships in this module's resources/usr/bin.
@@ -59,6 +63,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
 input:
   - - meta:
         type: map
@@ -72,14 +77,17 @@ input:
         type: file
         description: Deflated read patterns recruited to this bin, across all gather rounds
         pattern: "*.{fa,fasta}"
+        ontologies: []
     - ref:
         type: file
         description: The bin's refined reference from gather; the starting point for polishing
         pattern: "*.{fa,fasta,ref}"
+        ontologies: []
     - deflation:
         type: file
         description: Deflation index, used once to inflate the patterns to true per-read depth
         pattern: "*.xfl"
+        ontologies: []
   - align_opts:
       type: map
       description: |
@@ -102,10 +110,16 @@ output:
           type: file
           description: Reference from the highest-scoring iteration; what variant calling is done against
           pattern: polished.ref
+          ontologies: []
       - polished.sam:
           type: file
           description: Winnowed alignments from that same iteration
           pattern: polished.sam
+          ontologies: []
+      - CONVERGE_REASON:
+          type: file
+          description: CONVERGE_REASON
+          pattern: CONVERGE_REASON
   indels_folded:
     - - meta:
           type: map
@@ -127,11 +141,15 @@ output:
           type: file
           description: Per-iteration seconds, alignment score, convergence flag, and why the loop stopped
           pattern: iter_timings.tsv
+          ontologies:
+            - edam: http://edamontology.org/format_3475
   versions:
     - versions.yml:
         type: file
         description: File containing software versions
         pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
 authors:
   - "@smagala"
 maintainers:

@@ -19,6 +19,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
   - heuristic_diagram.py:
       description: Plots the caller's decision heuristics against the per-position allele table. Ships in
         this module's resources/usr/bin.
@@ -26,6 +27,7 @@ tools:
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
+      identifier: ""
 input:
   - - meta:
         type: map
@@ -39,18 +41,22 @@ input:
         type: file
         description: Per-position depth table
         pattern: "*-coverage.txt"
+        ontologies: []
     - variants:
         type: file
         description: Called variants, used for the minority-variant overlay
         pattern: "*-variants.txt"
+        ontologies: []
     - alleles:
         type: file
         description: Per-position allele counts for the heuristics plot
         pattern: "*-allAlleles.txt"
+        ontologies: []
     - pairing:
         type: file
         description: Mate-pair statistics; pass an empty list for single-end data (Optional)
         pattern: "*-pairingStats.txt"
+        ontologies: []
   - min_variant_qual:
       type: integer
       description: Minimum mean alt-allele base quality, drawn as a threshold on the heuristics plot
@@ -71,7 +77,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-coverageDiagram.pdf":
+      - ${gene}-coverageDiagram.pdf:
           type: file
           description: Depth plot for the gene (Optional)
           pattern: "*-coverageDiagram.pdf"
@@ -82,7 +88,7 @@ output:
       - gene:
           type: string
           description: Target/bin label
-      - "*-heuristics.pdf":
+      - ${gene}-heuristics.pdf:
           type: file
           description: Caller-heuristics plot for the gene (Optional)
           pattern: "*-heuristics.pdf"
@@ -91,6 +97,8 @@ output:
         type: file
         description: File containing software versions
         pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750
 authors:
   - "@smagala"
 maintainers:
