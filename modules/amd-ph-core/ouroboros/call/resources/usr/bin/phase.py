@@ -12,6 +12,7 @@ split into an array job; the default (one shot) emits the whole triangle.
 
 Doubles are formatted to 15 significant digits.
 """
+
 import argparse
 import math
 
@@ -57,8 +58,8 @@ with open(a.pat_file, "rb") as fh:
     read_pats = msgpack.unpackb(fh.read(), raw=False, strict_map_key=False)
 
 # vectorize: one entry per called allele, ordered by site index then allele
-alleles = []      # [site_index, base, freq]
-names = []        # "<pos+1><base>"
+alleles = []  # [site_index, base, freq]
+names = []  # "<pos+1><base>"
 sites = sorted(variants)
 for site_index, v in enumerate(sites):
     for b in sorted(variants[v]):
@@ -66,15 +67,15 @@ for site_index, v in enumerate(sites):
         names.append(str(v + 1) + b)
 N = len(alleles)
 
-O = (N ** 2 - N) // 2
+O = (N**2 - N) // 2
 if array_size > O:
     import sys
+
     sys.stderr.write("WARNING: array size (%d) greater than operations (%d)!\n" % (array_size, O))
     sys.stderr.write("Setting array size to %d\n" % O)
     array_size = O
     if index > array_size:
-        raise SystemExit("WARNING: index (%d) greater than adjusted array size(%d). Aborting.\n"
-                         % (index, array_size))
+        raise SystemExit("WARNING: index (%d) greater than adjusted array size(%d). Aborting.\n" % (index, array_size))
 
 exp = open(prefix + "-EXPENRD.sqm", "w")
 jac = open(prefix + "-JACCARD.sqm", "w")
@@ -124,7 +125,7 @@ def dist(i, j):
         mnA = min(mn2, mn1)
         mx1 = max(Eb1, Fb1)
         mx2 = max(Eb2, Fb2)
-        mutd = 1 - Fb1b2 ** 2 / (mx1 * mx2)
+        mutd = 1 - Fb1b2**2 / (mx1 * mx2)
         jacc = 1 - Fb1b2 / (mx1 + mx2 - Fb1b2)
         if total <= 20 or mutd == 0 or jacc == 0:
             expd = 1 - ((Fb1b2 * mnA) / (mx1 * mx2))
@@ -143,10 +144,10 @@ def dist(i, j):
 # chunking with Qb. pirma always runs a single shard (-S 1), so once parity ends this reduces to a
 # plain nested `for row in range(N): for col in range(row+1)` over dist(). The '' blank-cell sentinel
 # in print_to_matrix is part of the same row-by-row streaming and goes away with it.
-Qb = O // array_size            # base quantity to do
-s = 1 + Qb * (index - 1)        # starting operation
+Qb = O // array_size  # base quantity to do
+s = 1 + Qb * (index - 1)  # starting operation
 if index == array_size:
-    Qb += O % array_size        # last job cleans up the remainder
+    Qb += O % array_size  # last job cleans up the remainder
 
 if index == 1:
     print_to_matrix(*FULLY_PHASED_VEC, names[0] + "\t", "\n")

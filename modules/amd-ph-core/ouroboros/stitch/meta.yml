@@ -1,6 +1,4 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "ouroboros_stitch"
+name: ouroboros_stitch
 description: |
   Place the deep assembled consensus into the full reference coordinate frame.
   Iterative assembly produces high-quality calls but trims uncovered columns, so its consensus is
@@ -18,12 +16,13 @@ keywords:
   - projection
   - deletion
 tools:
-  - "stitch_consensus.py":
-      description: "Projects an assembled consensus onto a full reference, reading depth from the reads-on-reference BAM via pysam to separate dropout from true deletion. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-
+  - stitch_consensus.py:
+      description: Projects an assembled consensus onto a full reference, reading depth from the reads-on-reference
+        BAM via pysam to separate dropout from true deletion. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
 input:
   - - meta:
         type: map
@@ -52,10 +51,9 @@ input:
   - min_depth:
       type: integer
       description: Depth at or above which an assembly gap is treated as a real deletion rather than a dropout
-
 output:
-  - stitched:
-      - meta:
+  stitched:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -65,12 +63,11 @@ output:
           type: file
           description: Consensus in the full reference coordinate frame
           pattern: "*.stitched.fa"
-  - versions:
-      - "versions.yml":
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
-
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: versions.yml
 authors:
   - "@smagala"
 maintainers:

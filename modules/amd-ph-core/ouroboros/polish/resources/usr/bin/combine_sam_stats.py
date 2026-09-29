@@ -14,22 +14,35 @@ re-reference step of the final-assembly polish loop.
 Tie-breaking: a deterministic (-count, allele) order. Exact ties are vanishingly rare at assembly
 depth, so this choice is not consensus-affecting on real data.
 """
-import sys, re, json
 
-LONG_MAX = 2 ** 63 - 1
+import json
+import re
+import sys
+
+LONG_MAX = 2**63 - 1
 
 # (flag aliases) -> (dest, takes_value, caster)
 _OPTS = {
-    "-N": ("name", True, str), "--name": ("name", True, str),
-    "-I": ("insT", True, float), "--insertion-threshold": ("insT", True, float),
-    "-D": ("delT", True, float), "--deletion-threshold": ("delT", True, float),
-    "-i": ("insD", True, int), "--insertion-depth-threshold": ("insD", True, int),
-    "-d": ("delD", True, int), "--deletion-depth-threshold": ("delD", True, int),
-    "-A": ("altT", True, float), "--alternative-threshold": ("altT", True, float),
-    "-C": ("altC", True, int), "--alternative-count": ("altC", True, int),
-    "-M": ("mark_del", False, None), "--mark-deletions": ("mark_del", False, None),
-    "-E": ("minEdge", True, int), "--min-dropout-edge-support": ("minEdge", True, int),
-    "-m": ("minDepth", True, int), "--min-depth": ("minDepth", True, int),
+    "-N": ("name", True, str),
+    "--name": ("name", True, str),
+    "-I": ("insT", True, float),
+    "--insertion-threshold": ("insT", True, float),
+    "-D": ("delT", True, float),
+    "--deletion-threshold": ("delT", True, float),
+    "-i": ("insD", True, int),
+    "--insertion-depth-threshold": ("insD", True, int),
+    "-d": ("delD", True, int),
+    "--deletion-depth-threshold": ("delD", True, int),
+    "-A": ("altT", True, float),
+    "--alternative-threshold": ("altT", True, float),
+    "-C": ("altC", True, int),
+    "--alternative-count": ("altC", True, int),
+    "-M": ("mark_del", False, None),
+    "--mark-deletions": ("mark_del", False, None),
+    "-E": ("minEdge", True, int),
+    "--min-dropout-edge-support": ("minEdge", True, int),
+    "-m": ("minDepth", True, int),
+    "--min-depth": ("minDepth", True, int),
     # Mutation guard: hold a reference-CHANGING base to the variant-calling bar (mutating the
     # reference is tantamount to calling the variant). Reject a mutation whose allele has too little
     # data (< --mut-min-depth) or is essentially single-stranded (minor-strand fraction <
@@ -65,11 +78,25 @@ _OPTS = {
     "--indel-flag-file": ("indelFlagFile", True, str),
 }
 
+
 def parse_args(argv):
-    o = {"name": None, "insT": 0.15, "delT": 0.75, "insD": 1, "delD": 1,
-         "altT": 2.0, "altC": LONG_MAX, "mark_del": False, "minEdge": 0, "minDepth": 0,
-         "maskUncovered": False, "carryUncovered": False,
-         "mutMinDepth": 0, "mutMinStrandFrac": 0.0, "indelFlagFile": None}
+    o = {
+        "name": None,
+        "insT": 0.15,
+        "delT": 0.75,
+        "insD": 1,
+        "delD": 1,
+        "altT": 2.0,
+        "altC": LONG_MAX,
+        "mark_del": False,
+        "minEdge": 0,
+        "minDepth": 0,
+        "maskUncovered": False,
+        "carryUncovered": False,
+        "mutMinDepth": 0,
+        "mutMinStrandFrac": 0.0,
+        "indelFlagFile": None,
+    }
     pos = []
     i = 0
     while i < len(argv):
@@ -90,9 +117,11 @@ def parse_args(argv):
         i += 1
     return o, pos
 
+
 def first_ref_len(path):
     seq = first_ref_seq(path)
     return len(seq) if seq is not None else None
+
 
 def first_ref_seq(path):
     with open(path) as fh:
@@ -107,9 +136,11 @@ def first_ref_seq(path):
         return rseq.upper()
     return None
 
+
 def sorted_alleles(counts):
     # descending by count, deterministic tie-break by allele
     return sorted(counts.keys(), key=lambda a: (-counts[a], a))
+
 
 def main():
     o, pos = parse_args(sys.argv[1:])
@@ -139,9 +170,9 @@ def main():
     ref_seq = first_ref_seq(ref_path) if (guard_on or o.get("carryUncovered")) else None
 
     # aggregate
-    big = [dict() for _ in range(N)]   # per pos: {base: count}
+    big = [dict() for _ in range(N)]  # per pos: {base: count}
     strand = [dict() for _ in range(N)]  # per pos: {base: [fwd, rev]} (for the mutation guard)
-    ins = {}                            # pos -> {insert: count}
+    ins = {}  # pos -> {insert: count}
     for path in stat_files:
         with open(path) as fh:
             d = json.load(fh)
@@ -160,7 +191,8 @@ def main():
                 tgt = strand[p]
                 for base, fr in sc.items():
                     cur = tgt.setdefault(base, [0, 0])
-                    cur[0] += fr[0]; cur[1] += fr[1]
+                    cur[0] += fr[0]
+                    cur[1] += fr[1]
         for ps, ic in d.get("ins_counts", {}).items():
             p = int(ps)
             tgt = ins.setdefault(p, {})
@@ -193,7 +225,7 @@ def main():
                 too_thin = mut_min_depth > 0 and total < mut_min_depth
                 one_strand = mut_min_sf > 0 and minor_frac < mut_min_sf
                 if too_thin or one_strand:
-                    con = rb.upper()   # decline the mutation; keep the reference base
+                    con = rb.upper()  # decline the mutation; keep the reference base
 
         cons[p] = con
         totals[p] = total
@@ -229,8 +261,7 @@ def main():
     # has evidence and was judged, an uncovered one was never seen.
     if o.get("carryUncovered") and ref_seq is not None:
         for p in range(N):
-            if (cons[p] in ("", "N") and p < len(ref_seq)
-                    and ref_seq[p] in "ACGT" and totals[p] == 0):
+            if cons[p] in ("", "N") and p < len(ref_seq) and ref_seq[p] in "ACGT" and totals[p] == 0:
                 cons[p] = ref_seq[p]
 
     if name:
@@ -304,6 +335,7 @@ def main():
     sys.stdout.write(header + consensus + "\n")
     if alternative != "" and alternative != consensus:
         sys.stdout.write(header2 + alternative + "\n")
+
 
 if __name__ == "__main__":
     main()

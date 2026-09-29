@@ -1,6 +1,4 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "ouroboros_ampliconcall"
+name: ouroboros_ampliconcall
 description: |
   Reference-anchored, coverage-masked output for amplicon and patchy-coverage samples.
   The iterative assembler force-extends a contiguous consensus across thin coverage and splices out
@@ -18,22 +16,27 @@ keywords:
   - bed
   - reference-anchored
 tools:
-  - "irma-core":
-      description: "Rust reimplementation of IRMA's core routines; xflate inflates read patterns to true per-read depth."
-      homepage: "https://github.com/CDCgov/irma-core"
-      documentation: "https://github.com/CDCgov/irma-core"
-      licence: ["Apache-2.0"]
-  - "rammap":
-      description: "Pure-Rust minimap2-compatible read mapper; maps the inflated reads onto the full panel record."
-      homepage: "https://github.com/jwanglab/rammap"
-      documentation: "https://github.com/jwanglab/rammap"
-      licence: ["MIT"]
-  - "samtools":
-      description: "Sorting and indexing, the depth-masked consensus, and the per-position depth that becomes the islands BED."
-      homepage: "https://www.htslib.org/"
-      documentation: "https://www.htslib.org/doc/samtools.html"
-      licence: ["MIT"]
-
+  - irma-core:
+      description: Rust reimplementation of IRMA's core routines; xflate inflates read patterns to true
+        per-read depth.
+      homepage: https://github.com/CDCgov/irma-core
+      documentation: https://github.com/CDCgov/irma-core
+      licence:
+        - Apache-2.0
+  - rammap:
+      description: Pure-Rust minimap2-compatible read mapper; maps the inflated reads onto the full panel
+        record.
+      homepage: https://github.com/jwanglab/rammap
+      documentation: https://github.com/jwanglab/rammap
+      licence:
+        - MIT
+  - samtools:
+      description: Sorting and indexing, the depth-masked consensus, and the per-position depth that becomes
+        the islands BED.
+      homepage: https://www.htslib.org/
+      documentation: https://www.htslib.org/doc/samtools.html
+      licence:
+        - MIT
 input:
   - - meta:
         type: map
@@ -58,10 +61,9 @@ input:
   - min_depth:
       type: integer
       description: Depth at or above which a reference position is called rather than masked to N
-
 output:
-  - bam:
-      - meta:
+  bam:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -75,8 +77,8 @@ output:
           type: file
           description: BAM index
           pattern: "*.amplicon.bam.bai"
-  - consensus:
-      - meta:
+  consensus:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -86,8 +88,8 @@ output:
           type: file
           description: Full-length reference-anchored consensus, N where depth is below min_depth
           pattern: "*.amplicon.consensus.fa"
-  - bed:
-      - meta:
+  bed:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -97,8 +99,8 @@ output:
           type: file
           description: Intervals with depth at or above min_depth
           pattern: "*.amplicon.islands.bed"
-  - ref:
-      - meta:
+  ref:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -108,12 +110,11 @@ output:
           type: file
           description: The extracted full-length panel record for this gene
           pattern: "*.ref"
-  - versions:
-      - "versions.yml":
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
-
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: versions.yml
 authors:
   - "@smagala"
 maintainers:

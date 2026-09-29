@@ -15,7 +15,6 @@ Requires: pysam
 
 import argparse
 import json
-import sys
 
 import pysam
 
@@ -91,9 +90,7 @@ def process_sam(sam_path, ref_len, elongate, term_window=0):
                         elif 0 < gap <= MAX_GAP_REPAIR and len(clip_bases) >= gap:
                             # Gap repair: fill leading gap from clip end
                             for g in range(gap):
-                                fill_base = clip_bases[
-                                    len(clip_bases) - gap + g
-                                ].upper()
+                                fill_base = clip_bases[len(clip_bases) - gap + g].upper()
                                 d = position_counts.setdefault(g, {})
                                 d[fill_base] = d.get(fill_base, 0) + 1
                             # Remaining clip → leader
@@ -117,10 +114,7 @@ def process_sam(sam_path, ref_len, elongate, term_window=0):
                                 key = str(x)
                                 d = trailer_counts.setdefault(key, {})
                                 d[base] = d.get(base, 0) + 1
-                        elif (
-                            0 < gap_from_end <= MAX_GAP_REPAIR
-                            and len(clip_bases) >= gap_from_end
-                        ):
+                        elif 0 < gap_from_end <= MAX_GAP_REPAIR and len(clip_bases) >= gap_from_end:
                             # Gap repair at trailing end
                             for g in range(gap_from_end):
                                 fill_base = clip_bases[g].upper()
@@ -193,15 +187,9 @@ def stats_to_json(position_counts, leader_counts, trailer_counts, ref_len, posit
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Parse a SAM stream into alignment stats JSON"
-    )
-    parser.add_argument(
-        "--ref", required=True, help="Reference FASTA (for length and gap repair)"
-    )
-    parser.add_argument(
-        "-o", "--output", required=True, help="Output JSON stats file"
-    )
+    parser = argparse.ArgumentParser(description="Parse a SAM stream into alignment stats JSON")
+    parser.add_argument("--ref", required=True, help="Reference FASTA (for length and gap repair)")
+    parser.add_argument("-o", "--output", required=True, help="Output JSON stats file")
     parser.add_argument(
         "-S",
         "--skip-elongation",
@@ -233,9 +221,7 @@ def main():
         sam_path, ref_len, elongate, args.term_window
     )
 
-    data = stats_to_json(
-        position_counts, leader_counts, trailer_counts, ref_len, position_terminal
-    )
+    data = stats_to_json(position_counts, leader_counts, trailer_counts, ref_len, position_terminal)
 
     with open(args.output, "w") as fh:
         json.dump(data, fh, separators=(",", ":"))

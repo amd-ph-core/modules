@@ -17,15 +17,21 @@ NOTE: leader/trailer EXTENSION (elongation) needs the query overhang sequence, w
 outfmt does not provide; this script supports --skip-elongation (the SKIP_E default) and
 emits empty leader/trailer otherwise.
 """
-import sys, argparse, json
+
+import argparse
+import json
+import sys
 
 COMP = str.maketrans("ACGTNacgtn-", "TGCANtgcan-")
+
 
 def revcomp(s):
     return s.translate(COMP)[::-1]
 
+
 def ref_len_of(path):
-    n = 0; started = False
+    n = 0
+    started = False
     with open(path) as fh:
         for line in fh:
             if line.startswith(">"):
@@ -36,6 +42,7 @@ def ref_len_of(path):
                 n += len(line.strip())
     return n
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("blast", nargs="?", default="-", help="blastn outfmt-6 (sstart send sstrand qseq sseq), or '-'")
@@ -45,10 +52,12 @@ def main():
     ap.add_argument("-G", "--ignore-annotation", action="store_true")
     a = ap.parse_args()
     if not a.skip_elongation:
-        sys.stderr.write("blast_align_stats.py: elongation not supported (needs query overhang); emitting position_counts only\n")
+        sys.stderr.write(
+            "blast_align_stats.py: elongation not supported (needs query overhang); emitting position_counts only\n"
+        )
 
     ref_len = ref_len_of(a.ref)
-    pos_counts = {}   # int ref pos (0-based) -> {base: count}
+    pos_counts = {}  # int ref pos (0-based) -> {base: count}
 
     fh = sys.stdin if a.blast == "-" else open(a.blast)
     for line in fh:
@@ -64,7 +73,7 @@ def main():
             start = sstart
         rpos = start - 1  # 0-based
         for q, s in zip(qseq, sseq):
-            if s != "-":                       # reference has a base here
+            if s != "-":  # reference has a base here
                 base = q if q != "-" else "-"  # query gap = deletion
                 d = pos_counts.setdefault(rpos, {})
                 d[base] = d.get(base, 0) + 1
@@ -81,6 +90,7 @@ def main():
     }
     with open(a.output, "w") as out:
         json.dump(data, out, separators=(",", ":"))
+
 
 if __name__ == "__main__":
     main()

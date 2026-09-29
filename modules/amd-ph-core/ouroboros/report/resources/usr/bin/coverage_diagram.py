@@ -8,22 +8,29 @@ Usage:
   full:   coverage_diagram.py <run> <gene> <COVG.txt> <VARS.txt> <STATS.txt> <out.pdf>
   simple: coverage_diagram.py <run> <gene> <COVG.txt> <out.pdf>
 """
-import sys, csv
+
+import csv
+import sys
+
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ALLELE_COLORS = {"A": "#1F77B4", "C": "#FF7F0E", "G": "#2CA02C", "T": "#D62728"}
 
+
 def read_tsv(path):
     with open(path) as fh:
         return list(csv.DictReader(fh, delimiter="\t"))
+
 
 def col(row, *names):
     for n in names:
         if n in row:
             return row[n]
     raise KeyError(names)
+
 
 def main():
     a = sys.argv[1:]
@@ -56,35 +63,45 @@ def main():
         depth_at = {p: d for p, d in zip(pos, depth)}
         vpos, vfreq, vcols, vlabels = [], [], [], []
         for r in V:
-            p = int(r["Position"]); a_min = r["Minority_Allele"][:1]
-            c = depth_at.get(p, 0); color = ALLELE_COLORS.get(a_min, "#FFFFFF")
+            p = int(r["Position"])
+            a_min = r["Minority_Allele"][:1]
+            c = depth_at.get(p, 0)
+            color = ALLELE_COLORS.get(a_min, "#FFFFFF")
             if c < Cmax / 2:
                 ax1.vlines(p, c, Cmax, color=color, linewidth=0.8)
             else:
                 ax1.vlines(p, 0, c, color=color, linewidth=0.8)
-            vpos.append(p); vfreq.append(float(r["Minority_Frequency"]))
-            vcols.append(color); vlabels.append(f"{cons.get(p,'?')}2{a_min}")
+            vpos.append(p)
+            vfreq.append(float(r["Minority_Frequency"]))
+            vcols.append(color)
+            vlabels.append(f"{cons.get(p,'?')}2{a_min}")
 
         # bottom: minority-frequency barplot vs expected error rate (if STATS present)
         ee = None
         try:
             for s in csv.reader(open(stat_f), delimiter="\t"):
                 if len(s) >= 3 and s[1] == "ExpectedErrorRate":
-                    ee = float(s[2]); break
+                    ee = float(s[2])
+                    break
         except OSError:
             pass
         if ee is not None:
-            vals = [ee] + vfreq; cols = ["black"] + vcols; labels = ["exp. err"] + vlabels
+            vals = [ee] + vfreq
+            cols = ["black"] + vcols
+            labels = ["exp. err"] + vlabels
             ax2.bar(range(len(vals)), vals, color=cols)
             ax2.axhline(ee, color="#282828", ls="--", lw=0.75)
         else:
-            ax2.bar(range(len(vfreq)), vfreq, color=vcols); labels = vlabels
+            ax2.bar(range(len(vfreq)), vfreq, color=vcols)
+            labels = vlabels
         ax2.set_xticks(range(len(labels)))
         ax2.set_xticklabels(labels, rotation=90, fontsize=7)
-        ax2.set_ylabel("Observed frequency"); ax2.set_xlabel("minor variants")
+        ax2.set_ylabel("Observed frequency")
+        ax2.set_xlabel("minor variants")
 
     fig.tight_layout()
     fig.savefig(out)
+
 
 if __name__ == "__main__":
     main()

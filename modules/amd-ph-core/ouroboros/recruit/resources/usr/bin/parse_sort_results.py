@@ -16,9 +16,10 @@ Every recruited bin matching it is pooled into one, and the losing bins' reads a
 into the winner rather than going to .fa.2. The winner is whichever candidate covers most of
 itself in the MATCH hit file (breadth), with mean coverage breaking ties inside --breadth-tol.
 """
-import sys
-import re
+
 import argparse
+import re
+import sys
 
 
 # ── record id -> bin ──────────────────────────────────────────────────────────────
@@ -57,7 +58,9 @@ def bin_of(target, binmap):
     except KeyError:
         raise KeyError(
             "target %r is not in the reference FASTA's bin map; the hit file and the reference "
-            "are out of step (%d records known)" % (target, len(binmap)))
+            "are out of step (%d records known)" % (target, len(binmap))
+        )
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument("sort_results")
@@ -68,59 +71,108 @@ ap.add_argument("-G", "--ignore-annotations", action="store_true")
 ap.add_argument("-C", "--min-read-count", type=int, default=1)
 ap.add_argument("-D", "--min-read-patterns", type=int, default=1)
 ap.add_argument("-B", "--ban-list", default=None)
-ap.add_argument("--secondary-frac", type=float, default=0.0,
-                help="In an __ALL__ group, also keep a secondary target whose read count is >= this "
-                     "fraction of the primary target's (and >= --secondary-floor), so a co-infecting / "
-                     "contaminating target gets its own assembly. 0 = single-best only (default, IRMA parity). "
-                     "Superseded by --secondary-min-depth when that is set.")
-ap.add_argument("--secondary-floor", type=int, default=0,
-                help="Absolute read-count floor a retained secondary must also clear (paired with --secondary-frac).")
-ap.add_argument("--secondary-min-depth", type=float, default=0.0,
-                help="Coverage-based secondary keep (preferred over --secondary-frac): in an __ALL__ group, keep a "
-                     "secondary target when its recruited reads give at least this average depth over ITS OWN "
-                     "reference — reads * read_len / ref_len >= this. Answers 'can we assemble this genome?' "
-                     "independent of how deep the primary is (a fraction-of-primary gate wrongly drops a real "
-                     "secondary as the primary gets deeper). Set to the variant-calling floor (min_column_coverage) "
-                     "to only split out targets we could actually call a consensus for. Needs --ref-fasta + --read-len.")
-ap.add_argument("--ref-fasta", default=None,
-                help="Panel reference FASTA; per-target length (first record per id) for the depth estimate.")
-ap.add_argument("--read-len", type=float, default=0.0,
-                help="Mean read length (bases), for the --secondary-min-depth estimate.")
-ap.add_argument("--collapse-group", action="append", default=None, metavar="REGEX",
-                help="Pool every recruited target matching REGEX into one bin, keeping the winner "
-                     "and re-routing the losers' reads into it. Repeatable. Needs --hits and "
-                     "--ref-fasta. Off by default.")
-ap.add_argument("--hits", default=None,
-                help="MATCH hit file (rammap PAF or blastn outfmt 6) used to measure candidate "
-                     "breadth/depth for --collapse-group.")
-ap.add_argument("--hits-format", choices=("paf", "blast6"), default="paf",
-                help="Format of --hits. Default paf.")
-ap.add_argument("--hits-min-len", type=int, default=0,
-                help="Significance floor on alignment block length for breadth/depth. Set to the "
-                     "same value MATCH used so the measurement matches recruitment.")
-ap.add_argument("--hits-min-pid", type=float, default=0.0,
-                help="Significance floor on percent identity for breadth/depth.")
-ap.add_argument("--breadth-min-depth", type=int, default=1,
-                help="A reference position counts as covered at this depth or above. Default 1.")
-ap.add_argument("--breadth-tol", type=float, default=0.02,
-                # DEPRECATED and inert: the winner is chosen on identity, not on a breadth tie-break.
-                # Still accepted so existing callers do not break.
-                help="Candidates within this much breadth of the leader are treated as tied and "
-                     "decided on depth instead. Default 0.02.")
-ap.add_argument("--collapse-min-breadth-frac", type=float, default=0.5,
-                help="A candidate must cover at least this fraction of the BEST candidate's "
-                     "breadth to be eligible to win. Breadth gates; identity decides. Default 0.5.")
-ap.add_argument("--collapse-warn-breadth", type=float, default=0.50,
-                help="Treat a losing candidate as a suspected co-infection when it covers at least "
-                     "this much of itself. A broadly covered sibling is the signature of a second "
-                     "organism; reads split off ONE population leave the sibling partially covered. "
-                     "Default 0.50.")
-ap.add_argument("--collapse-on-suspect", choices=("skip", "warn"), default="skip",
-                help="What to do when a group trips --collapse-warn-breadth. 'skip' (default) "
-                     "leaves that group uncollapsed, so both organisms keep their own bin; 'warn' "
-                     "collapses anyway and only reports it. Default skip.")
-ap.add_argument("--collapse-report", default=None,
-                help="Write a TSV of every candidate's breadth/depth and the collapse decision.")
+ap.add_argument(
+    "--secondary-frac",
+    type=float,
+    default=0.0,
+    help="In an __ALL__ group, also keep a secondary target whose read count is >= this "
+    "fraction of the primary target's (and >= --secondary-floor), so a co-infecting / "
+    "contaminating target gets its own assembly. 0 = single-best only (default, IRMA parity). "
+    "Superseded by --secondary-min-depth when that is set.",
+)
+ap.add_argument(
+    "--secondary-floor",
+    type=int,
+    default=0,
+    help="Absolute read-count floor a retained secondary must also clear (paired with --secondary-frac).",
+)
+ap.add_argument(
+    "--secondary-min-depth",
+    type=float,
+    default=0.0,
+    help="Coverage-based secondary keep (preferred over --secondary-frac): in an __ALL__ group, keep a "
+    "secondary target when its recruited reads give at least this average depth over ITS OWN "
+    "reference — reads * read_len / ref_len >= this. Answers 'can we assemble this genome?' "
+    "independent of how deep the primary is (a fraction-of-primary gate wrongly drops a real "
+    "secondary as the primary gets deeper). Set to the variant-calling floor (min_column_coverage) "
+    "to only split out targets we could actually call a consensus for. Needs --ref-fasta + --read-len.",
+)
+ap.add_argument(
+    "--ref-fasta",
+    default=None,
+    help="Panel reference FASTA; per-target length (first record per id) for the depth estimate.",
+)
+ap.add_argument(
+    "--read-len", type=float, default=0.0, help="Mean read length (bases), for the --secondary-min-depth estimate."
+)
+ap.add_argument(
+    "--collapse-group",
+    action="append",
+    default=None,
+    metavar="REGEX",
+    help="Pool every recruited target matching REGEX into one bin, keeping the winner "
+    "and re-routing the losers' reads into it. Repeatable. Needs --hits and "
+    "--ref-fasta. Off by default.",
+)
+ap.add_argument(
+    "--hits",
+    default=None,
+    help="MATCH hit file (rammap PAF or blastn outfmt 6) used to measure candidate "
+    "breadth/depth for --collapse-group.",
+)
+ap.add_argument("--hits-format", choices=("paf", "blast6"), default="paf", help="Format of --hits. Default paf.")
+ap.add_argument(
+    "--hits-min-len",
+    type=int,
+    default=0,
+    help="Significance floor on alignment block length for breadth/depth. Set to the "
+    "same value MATCH used so the measurement matches recruitment.",
+)
+ap.add_argument(
+    "--hits-min-pid", type=float, default=0.0, help="Significance floor on percent identity for breadth/depth."
+)
+ap.add_argument(
+    "--breadth-min-depth",
+    type=int,
+    default=1,
+    help="A reference position counts as covered at this depth or above. Default 1.",
+)
+ap.add_argument(
+    "--breadth-tol",
+    type=float,
+    default=0.02,
+    # DEPRECATED and inert: the winner is chosen on identity, not on a breadth tie-break.
+    # Still accepted so existing callers do not break.
+    help="Candidates within this much breadth of the leader are treated as tied and "
+    "decided on depth instead. Default 0.02.",
+)
+ap.add_argument(
+    "--collapse-min-breadth-frac",
+    type=float,
+    default=0.5,
+    help="A candidate must cover at least this fraction of the BEST candidate's "
+    "breadth to be eligible to win. Breadth gates; identity decides. Default 0.5.",
+)
+ap.add_argument(
+    "--collapse-warn-breadth",
+    type=float,
+    default=0.50,
+    help="Treat a losing candidate as a suspected co-infection when it covers at least "
+    "this much of itself. A broadly covered sibling is the signature of a second "
+    "organism; reads split off ONE population leave the sibling partially covered. "
+    "Default 0.50.",
+)
+ap.add_argument(
+    "--collapse-on-suspect",
+    choices=("skip", "warn"),
+    default="skip",
+    help="What to do when a group trips --collapse-warn-breadth. 'skip' (default) "
+    "leaves that group uncollapsed, so both organisms keep their own bin; 'warn' "
+    "collapses anyway and only reports it. Default skip.",
+)
+ap.add_argument(
+    "--collapse-report", default=None, help="Write a TSV of every candidate's breadth/depth and the collapse decision."
+)
 a = ap.parse_args()
 
 # per-target reference length (first record per gene id), for the coverage-based secondary keep
@@ -129,16 +181,18 @@ a = ap.parse_args()
 BINMAP = load_bin_map(a.ref_fasta) if a.ref_fasta else {}
 reflen = {}
 if a.ref_fasta:
-    seen_ref = set(); cur = None
+    seen_ref = set()
+    cur = None
     with open(a.ref_fasta) as fh:
         for line in fh:
             if line.startswith(">"):
                 rid = line[1:].split()[0]
                 cur = BINMAP.get(rid, rid)
                 if cur in seen_ref:
-                    cur = None            # keep only the first record per bin
+                    cur = None  # keep only the first record per bin
                 else:
-                    seen_ref.add(cur); reflen[cur] = 0
+                    seen_ref.add(cur)
+                    reflen[cur] = 0
             elif cur is not None:
                 reflen[cur] += len(line.strip())
 
@@ -160,8 +214,8 @@ def num(x):
         return 0.0
 
 
-counts = {}   # target -> pattern count (insertion order = first-seen, like perl hash build)
-ids = {}      # ID -> {target: score}
+counts = {}  # target -> pattern count (insertion order = first-seen, like perl hash build)
+ids = {}  # ID -> {target: score}
 rcounts = {}  # target -> read count
 
 with open(a.sort_results) as fh:
@@ -251,7 +305,7 @@ def measure_targets(path, fmt, min_len, min_pid, lengths):
     like. Summed over hits as total matches / total aligned block, so it is read-weighted.
     """
     cov = {}
-    idc = {}          # target -> [sum matched bases, sum aligned block], for read-weighted identity
+    idc = {}  # target -> [sum matched bases, sum aligned block], for read-weighted identity
     for line in open(path):
         f = line.rstrip("\n").split("\t")
         if fmt == "paf":
@@ -302,7 +356,7 @@ def measure_targets(path, fmt, min_len, min_pid, lengths):
     return out
 
 
-collapse_to = {}          # losing target -> winning target
+collapse_to = {}  # losing target -> winning target
 collapse_rows = []
 if a.collapse_group:
     if not a.hits or not reflen:
@@ -324,14 +378,20 @@ if a.collapse_group:
         floor = max(breadth.values()) * a.collapse_min_breadth_frac
         eligible = [g for g in cands if breadth[g] >= floor] or list(cands)
         winner = max(eligible, key=lambda g: (ident[g], breadth[g], depth[g], g))
-        suspects = [g for g in cands
-                    if g != winner and breadth[g] >= a.collapse_warn_breadth]
+        suspects = [g for g in cands if g != winner and breadth[g] >= a.collapse_warn_breadth]
         for g in suspects:
             sys.stderr.write(
                 "%s WARNING: %s covers %.3f of itself against the winner %s at %.3f — a broadly "
                 "covered sibling is a suspected co-infection, not a split.%s\n"
-                % (sys.argv[0], g, breadth[g], winner, breadth[winner],
-                   " Group left uncollapsed." if a.collapse_on_suspect == "skip" else ""))
+                % (
+                    sys.argv[0],
+                    g,
+                    breadth[g],
+                    winner,
+                    breadth[winner],
+                    " Group left uncollapsed." if a.collapse_on_suspect == "skip" else "",
+                )
+            )
         # One suspect disqualifies the whole group: merging the rest would still fold a second
         # organism's reads into whichever bin survives.
         hold = bool(suspects) and a.collapse_on_suspect == "skip"
@@ -351,7 +411,8 @@ if a.collapse_group:
                     sys.stderr.write(
                         "%s NOTE: collapsed group led by %s pools %d reads for ~%.1fx over %d bp, "
                         "below --secondary-min-depth %.1f; not reported.\n"
-                        % (sys.argv[0], winner, pooled, est, rl, a.secondary_min_depth))
+                        % (sys.argv[0], winner, pooled, est, rl, a.secondary_min_depth)
+                    )
             else:
                 valid[winner] = 1
         for g in cands:
@@ -364,8 +425,9 @@ if a.collapse_group:
                 valid[g] = 0
                 collapse_to[g] = winner
                 role = "collapsed_suspect" if suspect else "collapsed"
-            collapse_rows.append((group, g, reflen.get(g, 0), counts.get(g, 0), rcounts.get(g, 0),
-                                  breadth[g], depth[g], ident[g], role))
+            collapse_rows.append(
+                (group, g, reflen.get(g, 0), counts.get(g, 0), rcounts.get(g, 0), breadth[g], depth[g], ident[g], role)
+            )
 
 # Only rounds that actually collapsed something get a report; later rounds have one candidate
 # left and would otherwise emit a header-only file per round.

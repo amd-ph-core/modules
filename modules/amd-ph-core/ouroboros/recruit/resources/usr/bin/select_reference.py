@@ -19,6 +19,7 @@ Matching mirrors rammap_partition.py: resolve each record ID to its BIN via the 
 `bin=` deflines, because the bin is the form the class labels — and therefore the gene names —
 carry. The bin is looked up, never parsed out of the ID.
 """
+
 import argparse
 import sys
 
@@ -59,27 +60,39 @@ def bin_of(target, binmap):
     except KeyError:
         raise KeyError(
             "target %r is not in the reference FASTA's bin map; the hit file and the reference "
-            "are out of step (%d records known)" % (target, len(binmap)))
+            "are out of step (%d records known)" % (target, len(binmap))
+        )
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--fasta", required=True, help="Panel FASTA to select from")
 ap.add_argument("--name", required=True, help="Gene / bin label to select (a record ID)")
 ap.add_argument("-o", "--out", required=True, help="Output FASTA")
-ap.add_argument("--min-length-frac", type=float, default=0.95,
-                help="A candidate must be at least this fraction of the bin's MEDIAN record "
-                     "length to be eligible. Completeness is a hard requirement (refine cannot "
-                     "create bases the reference lacks) where divergence is not (refine "
-                     "converges), so length gates and identity only ranks within the gate.")
-ap.add_argument("--max-length-frac", type=float, default=1.05,
-                help="Upper bound on the same median. Refine cannot delete spurious bases any more "
-                     "than it can create missing ones: an over-long deposit (a duplicated 3' end, "
-                     "say) contributes reference nothing can cover, which deflates breadth and "
-                     "offers mismapping targets.")
-ap.add_argument("--subtype-counts",
-                help="TSV from rammap_partition.py (<out>.subtypes.tsv): bin, record, reads. "
-                     "When given, the bin's reference is the record its own reads matched most "
-                     "often instead of the first record in the file. Without it, behaviour is "
-                     "unchanged.")
+ap.add_argument(
+    "--min-length-frac",
+    type=float,
+    default=0.95,
+    help="A candidate must be at least this fraction of the bin's MEDIAN record "
+    "length to be eligible. Completeness is a hard requirement (refine cannot "
+    "create bases the reference lacks) where divergence is not (refine "
+    "converges), so length gates and identity only ranks within the gate.",
+)
+ap.add_argument(
+    "--max-length-frac",
+    type=float,
+    default=1.05,
+    help="Upper bound on the same median. Refine cannot delete spurious bases any more "
+    "than it can create missing ones: an over-long deposit (a duplicated 3' end, "
+    "say) contributes reference nothing can cover, which deflates breadth and "
+    "offers mismapping targets.",
+)
+ap.add_argument(
+    "--subtype-counts",
+    help="TSV from rammap_partition.py (<out>.subtypes.tsv): bin, record, reads. "
+    "When given, the bin's reference is the record its own reads matched most "
+    "often instead of the first record in the file. Without it, behaviour is "
+    "unchanged.",
+)
 a = ap.parse_args()
 
 
@@ -140,14 +153,16 @@ if a.subtype_counts:
         lens = sorted(len("".join(s)) for _h, s in hits)
         n = len(lens)
         median = lens[n // 2] if n % 2 else (lens[n // 2 - 1] + lens[n // 2]) / 2
-        eligible = {r for r in by_id
-                    if a.min_length_frac * median <= len("".join(by_id[r][1]))
-                    <= a.max_length_frac * median}
+        eligible = {
+            r for r in by_id if a.min_length_frac * median <= len("".join(by_id[r][1])) <= a.max_length_frac * median
+        }
         pool = {r: v for r, v in votes.items() if r in eligible} or votes
         if not eligible:
-            sys.stderr.write(f"{sys.argv[0]}: WARNING no record in {a.name} falls within "
-                             f"{a.min_length_frac:.0%}-{a.max_length_frac:.0%} of the bin median "
-                             f"({median:.0f} bp); choosing on identity alone\n")
+            sys.stderr.write(
+                f"{sys.argv[0]}: WARNING no record in {a.name} falls within "
+                f"{a.min_length_frac:.0%}-{a.max_length_frac:.0%} of the bin median "
+                f"({median:.0f} bp); choosing on identity alone\n"
+            )
         # ties break on record ID so the result does not depend on dict or file order
         winner = max(sorted(pool), key=lambda r: pool[r])
         if winner in by_id:
@@ -157,10 +172,12 @@ if a.subtype_counts:
             if winner != hits[0][0].split()[0]:
                 sys.stderr.write(
                     f"{sys.argv[0]}: {a.name} -> {winner} on {votes[winner]} reads "
-                    f"(first record was {hits[0][0].split()[0]})\n")
+                    f"(first record was {hits[0][0].split()[0]})\n"
+                )
         else:
-            sys.stderr.write(f"{sys.argv[0]}: WARNING {winner} not in {a.fasta}; "
-                             f"falling back to the first record\n")
+            sys.stderr.write(
+                f"{sys.argv[0]}: WARNING {winner} not in {a.fasta}; " f"falling back to the first record\n"
+            )
 
 with open(a.out, "w") as out:
     h, s = chosen

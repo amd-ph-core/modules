@@ -25,6 +25,7 @@ to the VCF and leaves the amended consensus length-locked to the reference):
   insertions — the most-frequent called insertion per site (count>=min_count, freq>=min_ins_freq,
                total>=min_total) is spliced in after its upstream column (faithful to -i).
 """
+
 import argparse
 import os
 import sys
@@ -33,9 +34,22 @@ from scipy import stats
 
 # major+minor allele set -> IUPAC code (sorted, de-duplicated keys)
 IUPAC = {
-    "A": "A", "C": "C", "G": "G", "T": "T", "N": "N",
-    "AT": "W", "CG": "S", "AC": "M", "GT": "K", "AG": "R", "CT": "Y",
-    "CGT": "B", "AGT": "D", "ACT": "H", "ACG": "V", "ACGT": "N",
+    "A": "A",
+    "C": "C",
+    "G": "G",
+    "T": "T",
+    "N": "N",
+    "AT": "W",
+    "CG": "S",
+    "AC": "M",
+    "GT": "K",
+    "AG": "R",
+    "CT": "Y",
+    "CGT": "B",
+    "AGT": "D",
+    "ACT": "H",
+    "ACG": "V",
+    "ACGT": "N",
 }
 
 
@@ -75,35 +89,69 @@ def read_first_fasta(path):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("reference", help="plurality consensus FASTA")
     ap.add_argument("variants", help="IRMA-style variants.txt from call.py")
     ap.add_argument("-C", "--count", type=int, default=2, dest="min_count")
-    ap.add_argument("-F", "--freq", type=float, default=0.25, dest="min_freq",
-                    help="minimum minority frequency to amend (MIN_AMBIG, default 0.25)")
+    ap.add_argument(
+        "-F",
+        "--freq",
+        type=float,
+        default=0.25,
+        dest="min_freq",
+        help="minimum minority frequency to amend (MIN_AMBIG, default 0.25)",
+    )
     ap.add_argument("-T", "--min-total-depth", type=int, default=100, dest="min_total")
     ap.add_argument("-N", "--name", default=None, help="output header/file name")
-    ap.add_argument("-S", "--seg", default=None,
-                    help="convert a protein name in the header to a segment number (prot:num,...)")
-    ap.add_argument("-H", "--fa-header-suffix", action="store_true",
-                    help="append the fasta header as a suffix to --name")
+    ap.add_argument(
+        "-S", "--seg", default=None, help="convert a protein name in the header to a segment number (prot:num,...)"
+    )
+    ap.add_argument(
+        "-H", "--fa-header-suffix", action="store_true", help="append the fasta header as a suffix to --name"
+    )
     ap.add_argument("-P", "--prefix", default=".", help="output directory prefix")
-    ap.add_argument("--refchg", choices=("fixed", "binom"), default="fixed",
-                    help="reference-changing rule: fixed = freq>=MIN_AMBIG point estimate; "
-                         "binom = Clopper-Pearson lower bound > MIN_AMBIG (depth-aware)")
-    ap.add_argument("--refchg-conf", type=float, default=0.95,
-                    help="confidence for the binom lower bound (default 0.95)")
-    ap.add_argument("-d", "--deletion-file", default=None, dest="del_file",
-                    help="IRMA-style deletions.txt; called deletions are folded in as '-' (shortens consensus)")
-    ap.add_argument("-i", "--insertion-file", default=None, dest="ins_file",
-                    help="IRMA-style insertions.txt; the most-frequent called insertion per site is "
-                         "spliced in (lengthens consensus)")
-    ap.add_argument("-D", "--min-del-freq", type=float, default=0.5, dest="min_freq_del",
-                    help="minimum deletion frequency to fold into the consensus (default 0.5: a "
-                         "deletion shortens the consensus only when it is the majority allele)")
-    ap.add_argument("-I", "--min-ins-freq", type=float, default=0.5, dest="min_freq_ins",
-                    help="minimum insertion frequency to fold into the consensus (default 0.5)")
+    ap.add_argument(
+        "--refchg",
+        choices=("fixed", "binom"),
+        default="fixed",
+        help="reference-changing rule: fixed = freq>=MIN_AMBIG point estimate; "
+        "binom = Clopper-Pearson lower bound > MIN_AMBIG (depth-aware)",
+    )
+    ap.add_argument(
+        "--refchg-conf", type=float, default=0.95, help="confidence for the binom lower bound (default 0.95)"
+    )
+    ap.add_argument(
+        "-d",
+        "--deletion-file",
+        default=None,
+        dest="del_file",
+        help="IRMA-style deletions.txt; called deletions are folded in as '-' (shortens consensus)",
+    )
+    ap.add_argument(
+        "-i",
+        "--insertion-file",
+        default=None,
+        dest="ins_file",
+        help="IRMA-style insertions.txt; the most-frequent called insertion per site is "
+        "spliced in (lengthens consensus)",
+    )
+    ap.add_argument(
+        "-D",
+        "--min-del-freq",
+        type=float,
+        default=0.5,
+        dest="min_freq_del",
+        help="minimum deletion frequency to fold into the consensus (default 0.5: a "
+        "deletion shortens the consensus only when it is the majority allele)",
+    )
+    ap.add_argument(
+        "-I",
+        "--min-ins-freq",
+        type=float,
+        default=0.5,
+        dest="min_freq_ins",
+        help="minimum insertion frequency to fold into the consensus (default 0.5)",
+    )
     a = ap.parse_args()
 
     min_total = a.min_total if a.min_total >= 0 else 100
@@ -135,8 +183,11 @@ def main():
             f = line.split("\t")
             # Reference_Name, Position, Total, Consensus_Allele, Minority_Allele,
             # Consensus_Count, Minority_Count, Consensus_Frequency, Minority_Frequency, ...
-            pos = int(f[1]); total = int(f[2]); allele = f[4].upper()
-            count = int(f[6]); freq = float(f[8])
+            pos = int(f[1])
+            total = int(f[2])
+            allele = f[4].upper()
+            count = int(f[6])
+            freq = float(f[8])
             if count < a.min_count or total < min_total:
                 continue
             if a.refchg == "fixed":
@@ -164,8 +215,11 @@ def main():
                     continue
                 f = line.split("\t")
                 # Reference_Name, Upstream_Position, Length, Context, Called, Count, Total, Frequency, PairedUB
-                upstream = int(f[1]); length = int(f[2])
-                count = int(f[5]); total = int(f[6]); freq = float(f[7])
+                upstream = int(f[1])
+                length = int(f[2])
+                count = int(f[5])
+                total = int(f[6])
+                freq = float(f[7])
                 if count >= a.min_count and freq >= a.min_freq_del and total >= min_total:
                     for p in range(upstream, upstream + length):
                         if 0 <= p < len(seq):
@@ -173,7 +227,7 @@ def main():
 
     # collect called insertions: most-frequent insert per upstream 0-based column, spliced after it on
     # output (lengthens consensus). The -i insertion rule (key = Upstream_Position - 1).
-    insertions = {}   # 0-based upstream column -> (freq, insert)
+    insertions = {}  # 0-based upstream column -> (freq, insert)
     if a.ins_file:
         with open(a.ins_file) as fh:
             next(fh, None)  # header
@@ -183,8 +237,11 @@ def main():
                     continue
                 f = line.split("\t")
                 # Reference_Name, Upstream_Position, Insert, Context, Called, Count, Total, Frequency, ...
-                upstream = int(f[1]); insert = f[2].upper()
-                count = int(f[5]); total = int(f[6]); freq = float(f[7])
+                upstream = int(f[1])
+                insert = f[2].upper()
+                count = int(f[5])
+                total = int(f[6])
+                freq = float(f[7])
                 if count >= a.min_count and freq >= a.min_freq_ins and total >= min_total:
                     p = upstream - 1
                     if p not in insertions or freq > insertions[p][0]:

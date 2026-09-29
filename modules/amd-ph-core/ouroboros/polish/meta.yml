@@ -1,6 +1,4 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "ouroboros_polish"
+name: ouroboros_polish
 description: |
   Run the entire iterative polish loop for one bin in a single task.
   Each iteration aligns the bin's reads to the current reference, winnows to best-per-read, scores the
@@ -25,32 +23,42 @@ keywords:
   - consensus
   - reference-refinement
 tools:
-  - "local_sw":
-      description: "Exhaustive local Smith-Waterman aligner with CIGAR output, built from the ouroboros patch series on rammap-core. The LOCALSW path, where an exact alignment is wanted rather than a seeded one."
-      homepage: "https://github.com/jwanglab/rammap"
-      documentation: "https://github.com/jwanglab/rammap"
-      licence: ["MIT"]
-  - "rammap":
-      description: "Pure-Rust minimap2-compatible read mapper; the seeded RAMMAP path."
-      homepage: "https://github.com/jwanglab/rammap"
-      documentation: "https://github.com/jwanglab/rammap"
-      licence: ["MIT"]
-  - "irma-core":
-      description: "Rust reimplementation of IRMA's core routines; xflate inflates the read patterns to true per-read depth once, before the loop."
-      homepage: "https://github.com/CDCgov/irma-core"
-      documentation: "https://github.com/CDCgov/irma-core"
-      licence: ["Apache-2.0"]
-  - "winnow_pileup.py":
-      description: "Streams a SAM in one pass to winnow best-per-read alignments, sum the alignment score used as the convergence objective, and build the per-position pileup JSON. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "combine_sam_stats.py":
-      description: "Amends a reference from a pileup JSON, folding indels above the given frequency thresholds and flagging whether any indel was folded. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-
+  - local_sw:
+      description: Exhaustive local Smith-Waterman aligner with CIGAR output, built from the ouroboros patch
+        series on rammap-core. The LOCALSW path, where an exact alignment is wanted rather than a seeded
+        one.
+      homepage: https://github.com/jwanglab/rammap
+      documentation: https://github.com/jwanglab/rammap
+      licence:
+        - MIT
+  - rammap:
+      description: Pure-Rust minimap2-compatible read mapper; the seeded RAMMAP path.
+      homepage: https://github.com/jwanglab/rammap
+      documentation: https://github.com/jwanglab/rammap
+      licence:
+        - MIT
+  - irma-core:
+      description: Rust reimplementation of IRMA's core routines; xflate inflates the read patterns to true
+        per-read depth once, before the loop.
+      homepage: https://github.com/CDCgov/irma-core
+      documentation: https://github.com/CDCgov/irma-core
+      licence:
+        - Apache-2.0
+  - winnow_pileup.py:
+      description: Streams a SAM in one pass to winnow best-per-read alignments, sum the alignment score
+        used as the convergence objective, and build the per-position pileup JSON. Ships in this module's
+        resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - combine_sam_stats.py:
+      description: Amends a reference from a pileup JSON, folding indels above the given frequency thresholds
+        and flagging whether any indel was folded. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
 input:
   - - meta:
         type: map
@@ -82,25 +90,24 @@ input:
   - max_iter:
       type: integer
       description: Safety cap on iterations; convergence normally stops the loop first (Mandatory)
-
 output:
-  - aligned:
-      - meta:
+  aligned:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
           type: string
           description: Target/bin label
-      - "polished.ref":
+      - polished.ref:
           type: file
           description: Reference from the highest-scoring iteration; what variant calling is done against
-          pattern: "polished.ref"
-      - "polished.sam":
+          pattern: polished.ref
+      - polished.sam:
           type: file
           description: Winnowed alignments from that same iteration
-          pattern: "polished.sam"
-  - indels_folded:
-      - meta:
+          pattern: polished.sam
+  indels_folded:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -109,23 +116,22 @@ output:
       - INDELS_FOLDED:
           type: integer
           description: 1 if any iteration folded an indel into the reference, OR-accumulated across iterations
-  - timings:
-      - meta:
+  timings:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
           type: string
           description: Target/bin label
-      - "iter_timings.tsv":
+      - iter_timings.tsv:
           type: file
           description: Per-iteration seconds, alignment score, convergence flag, and why the loop stopped
-          pattern: "iter_timings.tsv"
-  - versions:
-      - "versions.yml":
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
-
+          pattern: iter_timings.tsv
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: versions.yml
 authors:
   - "@smagala"
 maintainers:

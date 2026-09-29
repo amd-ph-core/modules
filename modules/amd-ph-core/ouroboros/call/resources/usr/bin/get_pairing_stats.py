@@ -7,7 +7,9 @@ files and emits the derived per-reference rates.
 Note: reference names are sorted for deterministic output (the downstream consumer treats this
 as an unordered table).
 """
+
 import sys
+
 
 def fmt(x):
     """Match perl's default numeric stringification (%.15g)."""
@@ -15,6 +17,7 @@ def fmt(x):
         return str(x)
     s = "%.15g" % x
     return s
+
 
 def main():
     if len(sys.argv) < 2:
@@ -64,6 +67,7 @@ def main():
             out.write("%s\tMinimumInsertionErrorRate\t%s\n" % (rn, fmt(insErr)))
         else:
             out.write("%s\tMinimumInsertionErrorRate\t0\n" % rn)
+
 
 if __name__ == "__main__":
     main()

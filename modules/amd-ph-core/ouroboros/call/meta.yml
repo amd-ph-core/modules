@@ -1,6 +1,4 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "ouroboros_call"
+name: ouroboros_call
 description: |
   Terminal variant calling and consensus from a converged reference and its SAM.
   Produces the sorted BAM, the pileup and variant tables, phasing matrices when there are more than two
@@ -17,52 +15,66 @@ keywords:
   - phasing
   - pileup
 tools:
-  - "irma-core":
-      description: "Rust reimplementation of IRMA's core routines; merge-sam merges mate pairs before the pileup on the paired path."
-      homepage: "https://github.com/CDCgov/irma-core"
-      documentation: "https://github.com/CDCgov/irma-core"
-      licence: ["Apache-2.0"]
-  - "samtools":
-      description: "SAM to sorted, indexed BAM conversion."
-      homepage: "https://www.htslib.org/"
-      documentation: "https://www.htslib.org/doc/samtools.html"
-      licence: ["MIT"]
-  - "call.py":
-      description: "Variant caller over the pileup, supporting the binomial and empirical-Bayes callers with depth-adaptive thresholds. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "var_call_stats.py":
-      description: "Builds the per-position pileup consumed by the caller. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "amend_consensus.py":
-      description: "Applies called variants to the consensus, emitting ambiguity codes above the ambiguity frequency. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "generate_vcf.py":
-      description: "Writes a spec-compliant VCFv4.2 from the caller's tables via pysam. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "phase.py":
-      description: "Variant phasing, emitting the EXPENRD/JACCARD/MUTUALD/NJOINTP square matrices. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "complete_matrix.py":
-      description: "Completes a phasing square matrix. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-  - "get_pairing_stats.py":
-      description: "Summarises mate-pair merge statistics into the paired-error table used by the caller. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["MIT"]
-
+  - irma-core:
+      description: Rust reimplementation of IRMA's core routines; merge-sam merges mate pairs before the
+        pileup on the paired path.
+      homepage: https://github.com/CDCgov/irma-core
+      documentation: https://github.com/CDCgov/irma-core
+      licence:
+        - Apache-2.0
+  - samtools:
+      description: SAM to sorted, indexed BAM conversion.
+      homepage: https://www.htslib.org/
+      documentation: https://www.htslib.org/doc/samtools.html
+      licence:
+        - MIT
+  - call.py:
+      description: Variant caller over the pileup, supporting the binomial and empirical-Bayes callers with
+        depth-adaptive thresholds. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - var_call_stats.py:
+      description: Builds the per-position pileup consumed by the caller. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - amend_consensus.py:
+      description: Applies called variants to the consensus, emitting ambiguity codes above the ambiguity
+        frequency. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - generate_vcf.py:
+      description: Writes a spec-compliant VCFv4.2 from the caller's tables via pysam. Ships in this module's
+        resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - phase.py:
+      description: Variant phasing, emitting the EXPENRD/JACCARD/MUTUALD/NJOINTP square matrices. Ships
+        in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - complete_matrix.py:
+      description: Completes a phasing square matrix. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
+  - get_pairing_stats.py:
+      description: Summarises mate-pair merge statistics into the paired-error table used by the caller.
+        Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - MIT
 input:
   - - meta:
         type: map
@@ -115,7 +127,8 @@ input:
       description: Segment-numbering map for amended consensus headers; empty disables it (Optional)
   - sort_groups:
       type: string
-      description: Sort-group map. When empty the panel is treated as non-segmented and header numbering is applied (Optional)
+      description: Sort-group map. When empty the panel is treated as non-segmented and header numbering
+        is applied (Optional)
   - caller:
       type: string
       description: Caller selector, e.g. binomial or empirical Bayes (Mandatory)
@@ -133,10 +146,9 @@ input:
   - refchg_min_strand_frac:
       type: float
       description: Minimum strand fraction for a reference-changing base; 0 disables the guard (Mandatory)
-
 output:
-  - bam:
-      - meta:
+  bam:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -146,8 +158,8 @@ output:
           type: file
           description: Coordinate-sorted alignments
           pattern: "*.bam"
-  - bai:
-      - meta:
+  bai:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -157,8 +169,8 @@ output:
           type: file
           description: BAM index
           pattern: "*.bam.bai"
-  - consensus:
-      - meta:
+  consensus:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -168,8 +180,8 @@ output:
           type: file
           description: Plurality consensus for the gene
           pattern: "*.fasta"
-  - variants:
-      - meta:
+  variants:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -179,8 +191,8 @@ output:
           type: file
           description: Called variants
           pattern: "*-variants.txt"
-  - alleles:
-      - meta:
+  alleles:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -190,8 +202,8 @@ output:
           type: file
           description: Per-position allele counts for every site
           pattern: "*-allAlleles.txt"
-  - coverage:
-      - meta:
+  coverage:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -201,19 +213,19 @@ output:
           type: file
           description: Per-position depth at true per-read depth, in the consensus frame
           pattern: "*-coverage.txt"
-  - amended:
-      - meta:
+  amended:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
           type: string
           description: Target/bin label
-      - "amended_consensus/*.fa":
+      - amended_consensus/*.fa:
           type: file
           description: Consensus with called variants applied (Optional)
-          pattern: "amended_consensus/*.fa"
-  - amended_len:
-      - meta:
+          pattern: amended_consensus/*.fa
+  amended_len:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -221,9 +233,10 @@ output:
           description: Target/bin label
       - AMENDED_LEN:
           type: integer
-          description: Length of the amended consensus, 0 when absent. The downstream stitch gate needs this as a value.
-  - insertions:
-      - meta:
+          description: Length of the amended consensus, 0 when absent. The downstream stitch gate needs
+            this as a value.
+  insertions:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -233,8 +246,8 @@ output:
           type: file
           description: Called insertions (Optional)
           pattern: "*-insertions.txt"
-  - deletions:
-      - meta:
+  deletions:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -244,8 +257,8 @@ output:
           type: file
           description: Called deletions (Optional)
           pattern: "*-deletions.txt"
-  - vcf:
-      - meta:
+  vcf:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -255,8 +268,8 @@ output:
           type: file
           description: VCFv4.2 in the assembled consensus frame (Optional)
           pattern: "*.vcf"
-  - pairing:
-      - meta:
+  pairing:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -266,8 +279,8 @@ output:
           type: file
           description: Mate-pair merge statistics, paired-end only (Optional)
           pattern: "*-pairingStats.txt"
-  - sqm:
-      - meta:
+  sqm:
+    - - meta:
           type: map
           description: Groovy Map containing sample information
       - gene:
@@ -277,12 +290,11 @@ output:
           type: file
           description: Phasing square matrices, emitted only with more than two variants (Optional)
           pattern: "*.sqm"
-  - versions:
-      - "versions.yml":
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
-
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: versions.yml
 authors:
   - "@smagala"
 maintainers:

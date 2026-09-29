@@ -16,31 +16,51 @@ by (-count, base), so the consensus and variant calls are unchanged.
 Precondition (from winnow_sam.py): a query's records must be CONTIGUOUS — true for concatenated chunk
 SAMs (each read lands in exactly one chunk). Do not feed a coordinate-sorted / query-interleaved SAM.
 """
-import sys, argparse, re, os, tempfile, json
+
+import argparse
+import json
+import os
+import re
+import sys
+import tempfile
+
 import numpy as np
 
 ap = argparse.ArgumentParser()
 ap.add_argument("ref")
 ap.add_argument("sam", help="winnowed SAM OUTPUT; also the input (rewritten in place) when --in-sams absent")
 ap.add_argument("out_json")
-ap.add_argument("--in-sams", nargs="+", default=None,
-                help="read these chunk SAMs IN ORDER as one stream (no concatenation) and write the winnowed "
-                     "SAM to `sam`. Skips the giant intermediate concatenated SAM the MERGE used to build "
-                     "(one full write + read of the biggest file in the pipeline). Omit to read+rewrite `sam` "
-                     "in place (single-chunk / legacy). Each read is wholly within one chunk, so per-query "
-                     "records stay contiguous across the chunk boundary — the winnow precondition holds.")
-ap.add_argument("-F", "--score-field", type=int, default=None,
-                help="1-based SAM column holding the winnow score tag (default 12 / AS)")
+ap.add_argument(
+    "--in-sams",
+    nargs="+",
+    default=None,
+    help="read these chunk SAMs IN ORDER as one stream (no concatenation) and write the winnowed "
+    "SAM to `sam`. Skips the giant intermediate concatenated SAM the MERGE used to build "
+    "(one full write + read of the biggest file in the pipeline). Omit to read+rewrite `sam` "
+    "in place (single-chunk / legacy). Each read is wholly within one chunk, so per-query "
+    "records stay contiguous across the chunk boundary — the winnow precondition holds.",
+)
+ap.add_argument(
+    "-F",
+    "--score-field",
+    type=int,
+    default=None,
+    help="1-based SAM column holding the winnow score tag (default 12 / AS)",
+)
 ap.add_argument("-G", "--ignore-annotation", action="store_true")
 ap.add_argument("-S", "--silence-complex-indel", action="store_true")
 ap.add_argument("-q", "--min-bq", type=int, default=0)
 a = ap.parse_args()
 
 # winnow score column (mirror winnow_sam.py: default 0 -> col 12; >=12 -> index past col 11)
-SF = 0 if (a.score_field is None or a.score_field < 0) else (a.score_field - 12 if a.score_field >= 12 else a.score_field)
+SF = (
+    0
+    if (a.score_field is None or a.score_field < 0)
+    else (a.score_field - 12 if a.score_field >= 12 else a.score_field)
+)
 # SAM record columns (0-based); TAGS = first optional field (col 12, where the winnow AS score lives)
 QNAME, FLAG, RNAME, POS, CIGAR, SEQ, QUAL, TAGS = 0, 1, 2, 3, 5, 9, 10, 11
-REVERSE_FLAG = 16   # BAM FLAG bit 0x10 = read reverse-strand
+REVERSE_FLAG = 16  # BAM FLAG bit 0x10 = read reverse-strand
 
 # NOTE: the minus is required. bowtie2 --end-to-end emits NEGATIVE alignment scores (AS:i:-10,
 # 0 = perfect); without it the match fails and win_score() silently falls back to the CIGAR M-count,
@@ -52,12 +72,15 @@ ANNOT_RE = re.compile(r"^([^{]+)\{[^}]*\}")
 COMPLEX_INDEL = re.compile(r"\d\d+[DI]\d+M+")
 COMPLEX_RUN = re.compile(r"^\d+M(\d+[DI]\d+M){4,}$")
 
+
 def count_match(cig):
     return sum(int(n) for n, op in CIG_RE.findall(cig) if op == "M")
+
 
 def win_score(cigar, AS):
     m = AS_RE.match(AS) if AS else None
     return int(m.group(1)) if m else count_match(cigar)
+
 
 def first_ref(path):
     with open(path) as fh:
@@ -69,6 +92,7 @@ def first_ref(path):
             if seq:
                 return lines[0], seq
     return None, None
+
 
 ref_name, ref_seq = first_ref(a.ref)
 if ref_name is None:
@@ -82,10 +106,11 @@ if a.ignore_annotation:
 # strand-resolved dense counts [fwd, rev], each a flat [pos*256 + base_byte] vector filled via bincount.
 # base_counts = fwd + rev. Insertions are sparse (rare) so stay a dict.
 strand = [np.zeros(N * 256, dtype=np.int64), np.zeros(N * 256, dtype=np.int64)]
-pend = [[], []]        # pending flat-index arrays per strand, flushed into `strand` periodically
+pend = [[], []]  # pending flat-index arrays per strand, flushed into `strand` periodically
 pend_n = [0, 0]
 ins_counts = {}
 FLUSH = 4_000_000
+
 
 def flush_strand(r):
     if pend[r]:
@@ -93,11 +118,13 @@ def flush_strand(r):
         pend[r] = []
         pend_n[r] = 0
 
+
 def add_flat(r, flat):
     pend[r].append(flat)
     pend_n[r] += flat.size
     if pend_n[r] >= FLUSH:
         flush_strand(r)
+
 
 def pileup(f, rev):
     rname = f[RNAME]
@@ -118,21 +145,24 @@ def pileup(f, rev):
     rpos = int(f[POS]) - 1
     qpos = 0
     for m in CIG_RE.finditer(cigar):
-        inc = int(m.group(1)); op = m.group(2)
+        inc = int(m.group(1))
+        op = m.group(2)
         if op == "M":
             rp = np.arange(rpos, rpos + inc, dtype=np.int64)
-            od = seq_b[qpos:qpos + inc].astype(np.int64)
+            od = seq_b[qpos : qpos + inc].astype(np.int64)
             if a.min_bq > 0 and qual_b is not None and qpos + inc <= qual_b.size:
-                keep = (qual_b[qpos:qpos + inc].astype(np.int16) - 33) >= a.min_bq
-                rp = rp[keep]; od = od[keep]
+                keep = (qual_b[qpos : qpos + inc].astype(np.int16) - 33) >= a.min_bq
+                rp = rp[keep]
+                od = od[keep]
             add_flat(rev, rp * 256 + od)
-            qpos += inc; rpos += inc
+            qpos += inc
+            rpos += inc
         elif op == "D":
             rp = np.arange(rpos, rpos + inc, dtype=np.int64)
-            add_flat(rev, rp * 256 + 45)   # 45 == ord('-')
+            add_flat(rev, rp * 256 + 45)  # 45 == ord('-')
             rpos += inc
         elif op == "I":
-            insert = seq[qpos:qpos + inc].lower()
+            insert = seq[qpos : qpos + inc].lower()
             d = ins_counts.setdefault(rpos - 1, {})
             d[insert] = d.get(insert, 0) + 1
             qpos += inc
@@ -145,14 +175,17 @@ def pileup(f, rev):
         else:
             sys.exit(f"Extended CIGAR ({op}) not supported.")
 
+
 # streaming winnow: keep the best record per contiguous query; on query change flush it to the SAM,
 # add its score, and pile it up. In-place: write a temp beside the input and rename over it at the end.
-tmp = tempfile.NamedTemporaryFile("w", delete=False,
-    dir=os.path.dirname(os.path.abspath(a.sam)) or ".", prefix=".wp.", suffix=".sam")
+tmp = tempfile.NamedTemporaryFile(
+    "w", delete=False, dir=os.path.dirname(os.path.abspath(a.sam)) or ".", prefix=".wp.", suffix=".sam"
+)
 prev_header = ""
 cur_q = cur_score = cur_rec = cur_f = None
 cur_rev = 0
 total_as = 0
+
 
 def flush_query():
     global total_as
@@ -168,6 +201,7 @@ def flush_query():
     total_as += cur_score
     pileup(cur_f, cur_rev)
 
+
 # stream the input SAM(s) in order. With --in-sams we read the raw chunk SAMs directly (each carries its
 # own header); headers are valid only at the very top, so we emit them from the first chunk and skip every
 # later chunk's header once records have started — byte-identical to concatenating (header-once + bodies).
@@ -177,14 +211,14 @@ for _path in inputs:
     with open(_path) as fh:
         for line in fh:
             if line[:1] == "@":
-                if not seen_record and line != prev_header:   # header block, first chunk only, de-duped
+                if not seen_record and line != prev_header:  # header block, first chunk only, de-duped
                     tmp.write(line)
                 prev_header = line
                 continue
             seen_record = True
             rec = line.rstrip("\n")
             f = rec.split("\t")
-            if f[CIGAR] == "*":                    # unmapped: winnow_sam drops these
+            if f[CIGAR] == "*":  # unmapped: winnow_sam drops these
                 continue
             extra = f[TAGS:]
             score = win_score(f[CIGAR], extra[SF] if SF < len(extra) else None)
@@ -192,7 +226,7 @@ for _path in inputs:
                 flush_query()
                 cur_q, cur_score, cur_rec, cur_f = f[QNAME], score, rec, f
                 cur_rev = 1 if (int(f[FLAG]) & REVERSE_FLAG) else 0
-            elif cur_score < score:                # strict: first occurrence wins ties (matches original)
+            elif cur_score < score:  # strict: first occurrence wins ties (matches original)
                 cur_score, cur_rec, cur_f = score, rec, f
                 cur_rev = 1 if (int(f[FLAG]) & REVERSE_FLAG) else 0
 flush_query()
@@ -200,11 +234,14 @@ flush_query()
 tmp.close()
 os.replace(tmp.name, a.sam)
 
-flush_strand(0); flush_strand(1)
+flush_strand(0)
+flush_strand(1)
 base = strand[0] + strand[1]
 base_counts, strand_counts = {}, {}
 for flat in np.nonzero(base)[0]:
-    flat = int(flat); p, o = divmod(flat, 256); ch = chr(o)
+    flat = int(flat)
+    p, o = divmod(flat, 256)
+    ch = chr(o)
     base_counts.setdefault(str(p), {})[ch] = int(base[flat])
     strand_counts.setdefault(str(p), {})[ch] = [int(strand[0][flat]), int(strand[1][flat])]
 data = {

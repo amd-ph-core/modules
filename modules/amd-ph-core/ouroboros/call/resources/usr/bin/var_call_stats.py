@@ -14,8 +14,10 @@ Pileup schema (msgpack dict):
   ins_c[pos]  = {insert: count}            ins_q[pos] = {insert: mean_phred_sum}
   del_c[pos]  = {del_len: count}           aln        = {"start:body": count}  (compact coord string)
 """
+
 import argparse
 import re
+
 import msgpack
 
 ap = argparse.ArgumentParser()
@@ -42,13 +44,13 @@ ref_len = len("".join(ref_seq_parts))
 if ref_name is None or ref_len < 1:
     raise SystemExit("No reference found.")
 
-counts = [dict() for _ in range(ref_len)]   # per position: {allele: count}
-quals = [dict() for _ in range(ref_len)]    # per position: {allele: sum(Phred+33)}
-strand = [dict() for _ in range(ref_len)]   # per position: {allele: [fwd, rev]} for SOR strand bias
-ins_c = {}                                  # {pos: {insert: count}}
-ins_q = {}                                  # {pos: {insert: summed mean Phred}}
-del_c = {}                                  # {pos: {del_len: count}}
-aln_counts = {}                             # {alignment coordinate string: count}
+counts = [dict() for _ in range(ref_len)]  # per position: {allele: count}
+quals = [dict() for _ in range(ref_len)]  # per position: {allele: sum(Phred+33)}
+strand = [dict() for _ in range(ref_len)]  # per position: {allele: [fwd, rev]} for SOR strand bias
+ins_c = {}  # {pos: {insert: count}}
+ins_q = {}  # {pos: {insert: summed mean Phred}}
+del_c = {}  # {pos: {del_len: count}}
+aln_counts = {}  # {alignment coordinate string: count}
 
 CIGAR = re.compile(r"(\d+)([MIDNSHP])")
 
@@ -68,8 +70,8 @@ with open(a.sam) as fh:
         rn, pos, cigar, seq, qual = f[2], f[3], f[5], f[9].upper(), f[10]
         if rn != ref_name:
             continue
-        is_rev = (int(f[1]) & 16) != 0       # SAM FLAG 0x10 — read maps to the reverse strand
-        qint = [ord(c) for c in qual]       # raw Phred+33 ASCII value of each quality byte
+        is_rev = (int(f[1]) & 16) != 0  # SAM FLAG 0x10 — read maps to the reverse strand
+        qint = [ord(c) for c in qual]  # raw Phred+33 ASCII value of each quality byte
         rpos = int(pos) - 1
         qpos = 0
         # Each read's reference-coordinate alignment is the covered body ('.' for spliced/N, base/'-'
@@ -102,11 +104,11 @@ with open(a.sam) as fh:
                     bump(counts[rpos], "-")
                     rpos += 1
             elif op == "I":
-                insert = seq[qpos:qpos + inc].lower()
+                insert = seq[qpos : qpos + inc].lower()
                 ic = ins_c.setdefault(rpos - 1, {})
                 ic[insert] = ic.get(insert, 0) + 1
                 iq = ins_q.setdefault(rpos - 1, {})
-                iq[insert] = iq.get(insert, 0.0) + (sum(qint[qpos:qpos + inc]) / len(insert)) - 33
+                iq[insert] = iq.get(insert, 0.0) + (sum(qint[qpos : qpos + inc]) / len(insert)) - 33
                 qpos += inc
             elif op == "S":
                 qpos += inc
@@ -121,7 +123,7 @@ with open(a.sam) as fh:
         body = "".join(body)
         lead = len(body) - len(body.lstrip("."))
         stripped = body.strip(".")
-        key = f"{start + lead}:{stripped}" if stripped else "0:"   # all-dot read -> canonical
+        key = f"{start + lead}:{stripped}" if stripped else "0:"  # all-dot read -> canonical
         aln_counts[key] = aln_counts.get(key, 0) + 1
 
 table = {

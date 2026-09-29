@@ -20,10 +20,11 @@ Inputs: per-target consensus FASTAs, the panel reference FASTA (for reference ba
 and a directory of per-target consensus-vs-own-ref SAMs (<target>.sam). Optionally the gather
 sorted_read_stats.txt for recruited read counts. Writes a TSV to stdout.
 """
+
 import argparse
 import os
-import pysam
 
+import pysam
 
 
 # ── record id -> bin ──────────────────────────────────────────────────────────────
@@ -62,9 +63,11 @@ def bin_of(target, binmap):
     except KeyError:
         raise KeyError(
             "target %r is not in the reference FASTA's bin map; the hit file and the reference "
-            "are out of step (%d records known)" % (target, len(binmap)))
+            "are out of step (%d records known)" % (target, len(binmap))
+        )
 
-BINMAP = {}          # set from --ref-fasta in main(); record id -> bin
+
+BINMAP = {}  # set from --ref-fasta in main(); record id -> bin
 
 
 def gene_of(record_id):
@@ -171,7 +174,7 @@ def identity_to_ref(sam_path, by_record, bin_name):
                     continue  # insertion / deletion column, or past ref — not a comparable base
                 st["covered"].add(rpos)
                 qb = q[qpos]
-                if qb in "ACGT":               # skip N (no-coverage) — identity over CALLED bases
+                if qb in "ACGT":  # skip N (no-coverage) — identity over CALLED bases
                     st["called"] += 1
                     st["cpos"].add(rpos)
                     if qb == refseq[rpos]:
@@ -218,7 +221,8 @@ def main():
         clen, called = consensus_stats(cons)
         bin_name = gene_of(target)
         idpct, aln_frac, called_ref_pos, matched, matched_len = identity_to_ref(
-            os.path.join(args.sam_dir, target + ".sam"), by_record, bin_name)
+            os.path.join(args.sam_dir, target + ".sam"), by_record, bin_name
+        )
         # length of the variant the assembly actually matched; the bin's first record only as a
         # fallback when nothing aligned, so pct_called still has a denominator
         reflen = matched_len or len(refs.get(bin_name, ""))
@@ -235,12 +239,20 @@ def main():
         else:
             denom = reflen or clen
             pct_called = (100.0 * called / denom) if denom else 0.0
-        rows.append({
-            "target": target, "reads": reads.get(target, 0), "cons_len": clen, "ref_len": reflen,
-            "called": called, "ref_covered": len(called_ref_pos), "pct_called": pct_called,
-            "identity_to_ref": idpct, "aligned_frac": aln_frac,
-            "matched_record": matched or "NA",
-        })
+        rows.append(
+            {
+                "target": target,
+                "reads": reads.get(target, 0),
+                "cons_len": clen,
+                "ref_len": reflen,
+                "called": called,
+                "ref_covered": len(called_ref_pos),
+                "pct_called": pct_called,
+                "identity_to_ref": idpct,
+                "aligned_frac": aln_frac,
+                "matched_record": matched or "NA",
+            }
+        )
 
     if args.primary and any(r["target"] == args.primary for r in rows):
         prim = args.primary
@@ -250,14 +262,18 @@ def main():
         prim = max(rows, key=lambda r: r["cons_len"])["target"]
 
     rows.sort(key=lambda r: (r["target"] != prim, -r["reads"], r["target"]))
-    print("sample\tgenome\trole\treads\tcons_len\tcalled\tref_len\tref_covered\tpct_called\t"
-          "identity_to_ref\taligned_frac\tmatched_record")
+    print(
+        "sample\tgenome\trole\treads\tcons_len\tcalled\tref_len\tref_covered\tpct_called\t"
+        "identity_to_ref\taligned_frac\tmatched_record"
+    )
     for r in rows:
         role = "primary" if r["target"] == prim else "secondary"
         idc = f"{r['identity_to_ref']:.1f}" if r["identity_to_ref"] is not None else "NA"
-        print(f"{args.sample}\t{r['target']}\t{role}\t{r['reads']}\t{r['cons_len']}\t{r['called']}\t"
-              f"{r['ref_len']}\t{r['ref_covered']}\t{r['pct_called']:.1f}\t{idc}\t"
-              f"{r['aligned_frac']:.2f}\t{r['matched_record']}")
+        print(
+            f"{args.sample}\t{r['target']}\t{role}\t{r['reads']}\t{r['cons_len']}\t{r['called']}\t"
+            f"{r['ref_len']}\t{r['ref_covered']}\t{r['pct_called']:.1f}\t{idc}\t"
+            f"{r['aligned_frac']:.2f}\t{r['matched_record']}"
+        )
 
 
 if __name__ == "__main__":

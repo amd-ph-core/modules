@@ -5,12 +5,17 @@ Six diagnostic panels of assembled-allele quality stats, with threshold referenc
 
 Usage: heuristic_diagram.py <MIN_AQ> <MIN_F> <MIN_TCC> <MIN_CONF> <ALL_ALLELES.txt> <out.pdf>
 """
-import sys, csv
-import numpy as np
+
+import csv
+import sys
+
 import matplotlib
+import numpy as np
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
+
 
 def kde_plot(ax, data, lo, hi, title, vline=None):
     data = np.asarray([d for d in data if d is not None and np.isfinite(d)])
@@ -22,6 +27,7 @@ def kde_plot(ax, data, lo, hi, title, vline=None):
     if vline is not None:
         ax.axvline(vline, color="red")
 
+
 def main():
     if len(sys.argv) != 7:
         sys.exit("Usage: heuristic_diagram.py <MIN_AQ> <MIN_F> <MIN_TCC> <MIN_CONF> <ALL_ALLELES> <out.pdf>")
@@ -31,9 +37,12 @@ def main():
     def f(name):
         out = []
         for r in rows:
-            try: out.append(float(r[name]))
-            except (ValueError, KeyError): out.append(np.nan)
+            try:
+                out.append(float(r[name]))
+            except (ValueError, KeyError):
+                out.append(np.nan)
         return np.array(out)
+
     aq, freq, total, conf = f("Average_Quality"), f("Frequency"), f("Total"), f("ConfidenceNotMacErr")
 
     fig, axes = plt.subplots(3, 2, figsize=(10.5, 8))
@@ -57,6 +66,7 @@ def main():
 
     fig.tight_layout()
     fig.savefig(sys.argv[6])
+
 
 if __name__ == "__main__":
     main()

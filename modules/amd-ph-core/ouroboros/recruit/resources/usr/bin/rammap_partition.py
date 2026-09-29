@@ -35,6 +35,7 @@ significant — and never absolute. That distinction is the whole safety propert
 
 So deferral is strictly conservative: it can withhold a read from a bin, never add one.
 """
+
 import argparse
 
 
@@ -74,7 +75,9 @@ def bin_of(target, binmap):
     except KeyError:
         raise KeyError(
             "target %r is not in the reference FASTA's bin map; the hit file and the reference "
-            "are out of step (%d records known)" % (target, len(binmap)))
+            "are out of step (%d records known)" % (target, len(binmap))
+        )
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--paf", required=True)
@@ -83,31 +86,47 @@ ap.add_argument("--out", required=True)
 ap.add_argument("--min-len", type=int, default=33)
 ap.add_argument("--min-pid", type=float, default=88.0)
 ap.add_argument("--incl-chim", action="store_true")
-ap.add_argument("--defer-ambiguous", action="store_true",
-                help="Defer reads whose best and runner-up TARGETS are within the margin to "
-                     ".nomatch, so a later round re-decides them against a refined reference. "
-                     "Off by default: assignment behaviour is unchanged unless asked for.")
-ap.add_argument("--margin-matches", type=int, default=2,
-                help="Ambiguity margin in matching bases: defer when the winner explains this "
-                     "many or fewer extra bases than the best hit on a DIFFERENT target. "
-                     "Absolute floor so a short alignment cannot look decisive on a fraction.")
-ap.add_argument("--margin-frac", type=float, default=0.02,
-                help="Ambiguity margin as a fraction of the winner's matches. A read defers only "
-                     "when it is within BOTH this and --margin-matches, so the two agree before "
-                     "anything is withheld.")
-ap.add_argument("--defer-report",
-                help="Optional TSV of every deferred read and the two targets that tied for it. "
-                     "Deferral silently moves depth, so it should be auditable per round.")
-ap.add_argument("--bin-map", required=True,
-                help="Reference FASTA whose deflines carry `bin=<label>`; maps hit targets "
-                     "(record ids) to bins. Required: a bin can no longer be parsed out of an id.")
+ap.add_argument(
+    "--defer-ambiguous",
+    action="store_true",
+    help="Defer reads whose best and runner-up TARGETS are within the margin to "
+    ".nomatch, so a later round re-decides them against a refined reference. "
+    "Off by default: assignment behaviour is unchanged unless asked for.",
+)
+ap.add_argument(
+    "--margin-matches",
+    type=int,
+    default=2,
+    help="Ambiguity margin in matching bases: defer when the winner explains this "
+    "many or fewer extra bases than the best hit on a DIFFERENT target. "
+    "Absolute floor so a short alignment cannot look decisive on a fraction.",
+)
+ap.add_argument(
+    "--margin-frac",
+    type=float,
+    default=0.02,
+    help="Ambiguity margin as a fraction of the winner's matches. A read defers only "
+    "when it is within BOTH this and --margin-matches, so the two agree before "
+    "anything is withheld.",
+)
+ap.add_argument(
+    "--defer-report",
+    help="Optional TSV of every deferred read and the two targets that tied for it. "
+    "Deferral silently moves depth, so it should be auditable per round.",
+)
+ap.add_argument(
+    "--bin-map",
+    required=True,
+    help="Reference FASTA whose deflines carry `bin=<label>`; maps hit targets "
+    "(record ids) to bins. Required: a bin can no longer be parsed out of an id.",
+)
 a = ap.parse_args()
 BINMAP = load_bin_map(a.bin_map)
 
 # rid -> {target: best matches on that target}. Keyed per TARGET, not per hit: several hits to
 # the same reference at different loci are one candidate, not competing evidence.
 hits = {}
-chim = set()   # rids rammap tagged ch:i:1
+chim = set()  # rids rammap tagged ch:i:1
 
 with open(a.paf) as fh:
     for line in fh:
@@ -147,8 +166,8 @@ def rank(per_tgt):
     return flat[0], (flat[1] if len(flat) > 1 else None)
 
 
-best = {}       # rid -> target it is assigned to
-deferred = {}   # rid -> (win_tgt, win_m, run_tgt, run_m) held back as ambiguous
+best = {}  # rid -> target it is assigned to
+deferred = {}  # rid -> (win_tgt, win_m, run_tgt, run_m) held back as ambiguous
 # bin -> record -> reads. Which representative the bin's reads actually matched, so the
 # alignment reference can be chosen on evidence instead of on file order.
 subtypes = {}
@@ -199,8 +218,9 @@ def records(path):
         yield name, "".join(seq)
 
 
-with open(a.out + ".match", "w") as mfh, open(a.out + ".class", "w") as cfh, \
-     open(a.out + ".nomatch", "w") as nfh, open(a.out + ".chim", "w") as chfh:
+with open(a.out + ".match", "w") as mfh, open(a.out + ".class", "w") as cfh, open(a.out + ".nomatch", "w") as nfh, open(
+    a.out + ".chim", "w"
+) as chfh:
     for hdr, seq in records(a.query):
         rid = hdr.split()[0]
         if rid in chim and not a.incl_chim:

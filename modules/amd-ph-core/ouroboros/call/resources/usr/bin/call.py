@@ -19,6 +19,7 @@ Minority-variant floor:
                     observed allele with full stats regardless, so the sub-threshold tail stays
                     visible — calling is a flag, not a filter.
 """
+
 import argparse
 import math
 import re
@@ -35,32 +36,60 @@ ap.add_argument("-D", "--min-deletion-freq", type=float, dest="min_freq_del")
 ap.add_argument("-C", "--min-count", type=int, dest="min_count")
 ap.add_argument("-Q", "--min-quality", type=int, dest="min_quality")
 ap.add_argument("-T", "--min-total-col-coverage", type=int, dest="min_total")
-ap.add_argument("--min-consensus-depth", type=int, dest="min_cons_depth", default=None,
-                help="Emit 'N' rather than a plurality base at columns below this depth. 0/unset "
-                     "keeps the legacy behaviour of calling from any depth >= 1.")
+ap.add_argument(
+    "--min-consensus-depth",
+    type=int,
+    dest="min_cons_depth",
+    default=None,
+    help="Emit 'N' rather than a plurality base at columns below this depth. 0/unset "
+    "keeps the legacy behaviour of calling from any depth >= 1.",
+)
 ap.add_argument("-P", "--print-all-sites", action="store_true", dest="print_all")
 ap.add_argument("-M", "--conf-not-mac-err", type=float, dest="min_conf")
 ap.add_argument("-S", "--sig-level", type=float, dest="sig_level")
 ap.add_argument("-E", "--paired-error", dest="paired_stats")
 ap.add_argument("-B", "--call-table", dest="call_table")
 ap.add_argument("-A", "--auto-min-freq", action="store_true", dest="auto_freq")
-ap.add_argument("--caller", choices=("fixed", "binomial", "eb"), default="fixed",
-                help="minority-variant significance rule: fixed = legacy Wilson UB + min-freq floor; "
-                     "binomial = exact binomial vs an error-floor null (depth-adaptive); "
-                     "eb = capped empirical-Bayes posterior (depth-adaptive, self-calibrating)")
-ap.add_argument("--systematic-error", type=float, default=0.005, dest="systematic",
-                help="per-position systematic error floor for the binomial/eb caller (default 0.005)")
-ap.add_argument("--cap-prior-mean", type=float, default=0.02, dest="cap_prior_mean",
-                help="ceiling on the empirical-Bayes prior mean (eb caller only)")
-ap.add_argument("--sor", type=float, default=0.0,
-                help="SOR strand-bias gate: drop a called variant if GATK StrandOddsRatio > this "
-                     "(0 = off; GATK SNP hard-filter = 3.0)")
-ap.add_argument("--refchg-min-strand-frac", type=float, default=0.0, dest="refchg_min_sf",
-                help="consensus reference-change guard: when the plurality consensus base DIFFERS "
-                     "from the reference base, keep the reference base if the consensus allele is "
-                     "essentially single-stranded (minor-strand fraction < this) — a one-strand "
-                     "amplicon/primer artifact you wouldn't CALL, so don't consensus-mutate to it. "
-                     "The artifact then reports as a minority variant instead. (0 = off/parity)")
+ap.add_argument(
+    "--caller",
+    choices=("fixed", "binomial", "eb"),
+    default="fixed",
+    help="minority-variant significance rule: fixed = legacy Wilson UB + min-freq floor; "
+    "binomial = exact binomial vs an error-floor null (depth-adaptive); "
+    "eb = capped empirical-Bayes posterior (depth-adaptive, self-calibrating)",
+)
+ap.add_argument(
+    "--systematic-error",
+    type=float,
+    default=0.005,
+    dest="systematic",
+    help="per-position systematic error floor for the binomial/eb caller (default 0.005)",
+)
+ap.add_argument(
+    "--cap-prior-mean",
+    type=float,
+    default=0.02,
+    dest="cap_prior_mean",
+    help="ceiling on the empirical-Bayes prior mean (eb caller only)",
+)
+ap.add_argument(
+    "--sor",
+    type=float,
+    default=0.0,
+    help="SOR strand-bias gate: drop a called variant if GATK StrandOddsRatio > this "
+    "(0 = off; GATK SNP hard-filter = 3.0)",
+)
+ap.add_argument(
+    "--refchg-min-strand-frac",
+    type=float,
+    default=0.0,
+    dest="refchg_min_sf",
+    help="consensus reference-change guard: when the plurality consensus base DIFFERS "
+    "from the reference base, keep the reference base if the consensus allele is "
+    "essentially single-stranded (minor-strand fraction < this) — a one-strand "
+    "amplicon/primer artifact you wouldn't CALL, so don't consensus-mutate to it. "
+    "The artifact then reports as a minority variant instead. (0 = off/parity)",
+)
 ap.add_argument("ref")
 ap.add_argument("prefix")
 ap.add_argument("pileups", nargs="+")
@@ -163,17 +192,17 @@ if take_sig:
     sig = a.sig_level
     if sig >= 1:
         sig /= 100
-    if sig >= .999:
+    if sig >= 0.999:
         kappa = 3.090232
-    elif sig >= .99:
+    elif sig >= 0.99:
         kappa = 2.326348
-    elif sig >= .95:
+    elif sig >= 0.95:
         kappa = 1.644854
-    elif sig >= .90:
+    elif sig >= 0.90:
         kappa = 1.281552
     else:
         kappa = 3.090232
-    kappa2 = kappa ** 2
+    kappa2 = kappa**2
     eta = kappa2 / 3 + 1 / 6
     gamma1 = kappa2 * (13 / 18) + 17 / 18
     gamma2 = kappa2 * (1 / 18) + 7 / 36
@@ -192,7 +221,7 @@ def UB(p, N):
         return 0
     if p == 1:
         return 1
-    V = p - p ** 2
+    V = p - p**2
     u2 = (p * N + eta) / (N + 2 * eta)
     in_root = V + (gamma2 - gamma1 * V) / N
     if in_root < 0:
@@ -221,10 +250,10 @@ ref_name, ref_seq = read_first_fasta(a.ref)
 if ref_seq is None or len(ref_seq) < 1:
     raise SystemExit("No reference found.")
 ref_len = len(ref_seq)
-ref_seq_u = ref_seq.upper()   # for the consensus reference-change guard (case-insensitive compare)
+ref_seq_u = ref_seq.upper()  # for the consensus reference-change guard (case-insensitive compare)
 
 # --- call table (-B), seeds variants to force-report ---
-variants = {}        # {pos: {base: freq}}
+variants = {}  # {pos: {base: freq}}
 do_call_table = False
 if a.call_table:
     with open(a.call_table) as fh:
@@ -252,7 +281,7 @@ if a.paired_stats:
 # --- combine pileups ---
 cTable = [dict() for _ in range(ref_len)]
 qTable = [dict() for _ in range(ref_len)]
-sTable = [dict() for _ in range(ref_len)]   # {allele: [fwd, rev]} for the SOR strand-bias gate
+sTable = [dict() for _ in range(ref_len)]  # {allele: [fwd, rev]} for the SOR strand-bias gate
 icTable = {}
 iqTable = {}
 dcTable = {}
@@ -299,15 +328,21 @@ cons = open(prefix + ".fasta", "w")
 alla = None
 if print_all or do_call_table:
     alla = open(prefix + "-allAlleles.txt", "w")
-    alla.write("Reference_Name\tPosition\tAllele\tCount\tTotal\tFrequency\t"
-               "Average_Quality\tConfidenceNotMacErr\tPairedUB\tQualityUB\tAllele_Type\n")
+    alla.write(
+        "Reference_Name\tPosition\tAllele\tCount\tTotal\tFrequency\t"
+        "Average_Quality\tConfidenceNotMacErr\tPairedUB\tQualityUB\tAllele_Type\n"
+    )
 vars_fh = open(prefix + "-variants.txt", "w")
-vars_fh.write("Reference_Name\tPosition\tTotal\tConsensus_Allele\tMinority_Allele\t"
-              "Consensus_Count\tMinority_Count\tConsensus_Frequency\tMinority_Frequency\t"
-              "Consensus_Average_Quality\tMinority_Average_Quality\t"
-              "ConfidenceNotMacErr\tPairedUB\tQualityUB\n")
-covg.write("Reference_Name\tPosition\tCoverage Depth\tConsensus\tDeletions\tAmbiguous\t"
-           "Consensus_Count\tConsensus_Average_Quality\n")
+vars_fh.write(
+    "Reference_Name\tPosition\tTotal\tConsensus_Allele\tMinority_Allele\t"
+    "Consensus_Count\tMinority_Count\tConsensus_Frequency\tMinority_Frequency\t"
+    "Consensus_Average_Quality\tMinority_Average_Quality\t"
+    "ConfidenceNotMacErr\tPairedUB\tQualityUB\n"
+)
+covg.write(
+    "Reference_Name\tPosition\tCoverage Depth\tConsensus\tDeletions\tAmbiguous\t"
+    "Consensus_Count\tConsensus_Average_Quality\n"
+)
 cons.write(">" + ref_name + "\n")
 
 hFreq = 0.0
@@ -318,8 +353,24 @@ consensus_seq_parts = []
 
 
 def alla_row(p, base, count, total, freq, quality, confidence, paired_ub, quality_ub, btype):
-    alla.write("\t".join([ref_name, str(p + 1), base, g(count), g(total), g(freq), g(quality),
-                          g(confidence), g(paired_ub), g(quality_ub), btype]) + "\n")
+    alla.write(
+        "\t".join(
+            [
+                ref_name,
+                str(p + 1),
+                base,
+                g(count),
+                g(total),
+                g(freq),
+                g(quality),
+                g(confidence),
+                g(paired_ub),
+                g(quality_ub),
+                btype,
+            ]
+        )
+        + "\n"
+    )
 
 
 # empirical-Bayes prior, fit once from this sample's whole minority-allele frequency spectrum (the
@@ -378,14 +429,14 @@ for p in range(ref_len):
     # one-strand amplicon/primer artifact you wouldn't CALL), keep the reference base — the artifact
     # then falls through to the minority-variant table below. No-op where plurality == ref, no strand
     # data, or the gate is off. Real both-strand WGS variants pass (minor-strand frac ~0.5) -> parity.
-    if (refchg_min_sf > 0 and con_count > 0 and p < len(ref_seq_u)):
+    if refchg_min_sf > 0 and con_count > 0 and p < len(ref_seq_u):
         rb = ref_seq_u[p]
         if consensus != rb and rb in "ACGT":
             fwd, rev = sTable[p].get(consensus, (0, 0))
             sc_tot = fwd + rev
             if sc_tot > 0 and (min(fwd, rev) / sc_tot) < refchg_min_sf:
-                consensus = rb   # decline the consensus mutation; keep the reference base
-                con_count = cTable[p].get(rb, 0)   # re-anchor freq/quality/classification on the ref base
+                consensus = rb  # decline the consensus mutation; keep the reference base
+                con_count = cTable[p].get(rb, 0)  # re-anchor freq/quality/classification on the ref base
 
     # Depth floor on the CONSENSUS. min_total has always gated variant and indel calls, but never
     # the plurality base, so a column with a single aligned read produced a called base. Exhaustive
@@ -406,8 +457,21 @@ for p in range(ref_len):
     gaps = cTable[p].get("-")
     depth = (total - gaps) if gaps is not None else total
     ambig = cTable[p].get("N", 0)
-    covg.write("\t".join([ref_name, str(p + 1), g(depth), consensus, g(gaps if gaps is not None else 0),
-                          g(ambig), g(con_count), g(con_quality)]) + "\n")
+    covg.write(
+        "\t".join(
+            [
+                ref_name,
+                str(p + 1),
+                g(depth),
+                consensus,
+                g(gaps if gaps is not None else 0),
+                g(ambig),
+                g(con_count),
+                g(con_quality),
+            ]
+        )
+        + "\n"
+    )
 
     if do_call_table:
         # FIXME legacy perl logic: the -B call-table branch is a rarely-used IRMA mode kept only for
@@ -440,10 +504,27 @@ for p in range(ref_len):
             alla_row(p, base, count, total, freq, quality, confidence, paired_ub, quality_ub, btype)
             if base in variants.get(p, {}):
                 variants[p][base] = freq
-                var_line.setdefault(p, {})[base] = "\t".join(
-                    [ref_name, str(p + 1), g(total), consensus, base, g(con_count), g(count),
-                     g(con_freq), g(freq), g(con_quality), g(quality),
-                     g(confidence), g(paired_ub), g(quality_ub)]) + "\n"
+                var_line.setdefault(p, {})[base] = (
+                    "\t".join(
+                        [
+                            ref_name,
+                            str(p + 1),
+                            g(total),
+                            consensus,
+                            base,
+                            g(con_count),
+                            g(count),
+                            g(con_freq),
+                            g(freq),
+                            g(con_quality),
+                            g(quality),
+                            g(confidence),
+                            g(paired_ub),
+                            g(quality_ub),
+                        ]
+                    )
+                    + "\n"
+                )
         continue
 
     for base in sorted(bases):
@@ -482,9 +563,13 @@ for p in range(ref_len):
             # valid variant. The fixed VAF floor (min_freq) applies only to --caller fixed; the
             # depth-adaptive callers replace it with the binomial/EB significance test below.
             floor_ok = (freq >= min_freq) if caller == "fixed" else True
-            if (not (no_gap and base == "-")
-                    and floor_ok and count >= min_count
-                    and quality >= min_quality and total >= min_total):
+            if (
+                not (no_gap and base == "-")
+                and floor_ok
+                and count >= min_count
+                and quality >= min_quality
+                and total >= min_total
+            ):
                 if base == "-":
                     confidence = quality = "NA"
                     paired_ub = UB(DE, total)
@@ -512,13 +597,13 @@ for p in range(ref_len):
                 # significance: fixed = legacy Wilson upper bounds; binomial/eb = depth-adaptive test
                 # vs an error-floor null. The paired-error UB guard is kept in all modes.
                 if caller == "fixed":
-                    sig_fail = (freq <= quality_ub)
+                    sig_fail = freq <= quality_ub
                 elif caller == "binomial":
                     eps = error_floor(quality, systematic) if base != "-" else 1.0
-                    sig_fail = (binom_sf(count, total, eps) >= alpha)
+                    sig_fail = binom_sf(count, total, eps) >= alpha
                 else:  # eb
                     eps = error_floor(quality, systematic) if base != "-" else 1.0
-                    sig_fail = (eb_prob_real(eps, eb_a0, eb_b0, count, total) <= sig_thresh)
+                    sig_fail = eb_prob_real(eps, eb_a0, eb_b0, count, total) <= sig_thresh
                 if conf_num < min_conf or freq <= paired_ub or sig_fail:
                     continue
 
@@ -531,10 +616,27 @@ for p in range(ref_len):
                         continue
 
                 variants.setdefault(p, {})[base] = freq
-                var_line.setdefault(p, {})[base] = "\t".join(
-                    [ref_name, str(p + 1), g(total), consensus, base, g(con_count), g(count),
-                     g(con_freq), g(freq), g(con_quality), g(quality),
-                     g(confidence), g(paired_ub), g(quality_ub)]) + "\n"
+                var_line.setdefault(p, {})[base] = (
+                    "\t".join(
+                        [
+                            ref_name,
+                            str(p + 1),
+                            g(total),
+                            consensus,
+                            base,
+                            g(con_count),
+                            g(count),
+                            g(con_freq),
+                            g(freq),
+                            g(con_quality),
+                            g(quality),
+                            g(confidence),
+                            g(paired_ub),
+                            g(quality_ub),
+                        ]
+                    )
+                    + "\n"
+                )
 
             # FIXME legacy perl logic: this "any variant" branch re-derives ee/confidence/UBs already
             # computed above purely to print sub-threshold alleles to allAlleles. Once allAlleles is
@@ -643,8 +745,10 @@ def span_depth(p, pp):
 
 # --- insertions ---
 with open(prefix + "-insertions.txt", "w") as insv:
-    insv.write("Reference_Name\tUpstream_Position\tInsert\tContext\tCalled\tCount\tTotal\t"
-               "Frequency\tAverage_Quality\tConfidenceNotMacErr\tPairedUB\tQualityUB\n")
+    insv.write(
+        "Reference_Name\tUpstream_Position\tInsert\tContext\tCalled\tCount\tTotal\t"
+        "Frequency\tAverage_Quality\tConfidenceNotMacErr\tPairedUB\tQualityUB\n"
+    )
     for p in sorted(icTable):
         pp = p + 1
         total = span_depth(p, pp)
@@ -666,22 +770,37 @@ with open(prefix + "-insertions.txt", "w") as insv:
             if confidence < min_conf or freq <= paired_ub or freq <= quality_ub:
                 called = "FALSE"
             if p < 5:
-                left = consensus_seq[0:p + 1]
+                left = consensus_seq[0 : p + 1]
             else:
-                left = consensus_seq[p - 4:p + 1]
+                left = consensus_seq[p - 4 : p + 1]
             if p > (ref_len - 6):
                 right = consensus_seq[pp:ref_len]
             else:
-                right = consensus_seq[pp:pp + 5]
+                right = consensus_seq[pp : pp + 5]
             context = left.lower() + insert.upper() + right.lower()
-            insv.write("\t".join([ref_name, str(p + 1), insert.upper(), context, called,
-                                  g(count), g(total), g(freq), g(quality), g(confidence),
-                                  g(paired_ub), g(quality_ub)]) + "\n")
+            insv.write(
+                "\t".join(
+                    [
+                        ref_name,
+                        str(p + 1),
+                        insert.upper(),
+                        context,
+                        called,
+                        g(count),
+                        g(total),
+                        g(freq),
+                        g(quality),
+                        g(confidence),
+                        g(paired_ub),
+                        g(quality_ub),
+                    ]
+                )
+                + "\n"
+            )
 
 # --- deletions ---
 with open(prefix + "-deletions.txt", "w") as delv:
-    delv.write("Reference_Name\tUpstream_Position\tLength\tContext\tCalled\tCount\tTotal\t"
-               "Frequency\tPairedUB\n")
+    delv.write("Reference_Name\tUpstream_Position\tLength\tContext\tCalled\tCount\tTotal\t" "Frequency\tPairedUB\n")
     for p in sorted(dcTable):
         for inc in sorted(dcTable[p]):
             count = dcTable[p][inc]
@@ -697,17 +816,19 @@ with open(prefix + "-deletions.txt", "w") as delv:
             if freq <= paired_ub:
                 called = "FALSE"
             if p < 5:
-                left = consensus_seq[0:p + 1]
+                left = consensus_seq[0 : p + 1]
             else:
-                left = consensus_seq[p - 4:p + 1]
+                left = consensus_seq[p - 4 : p + 1]
             if p > (ref_len - 6 - inc):
                 right = consensus_seq[pp:ref_len]
             else:
-                right = consensus_seq[pp:pp + 5]
+                right = consensus_seq[pp : pp + 5]
             mid = "-" * inc
             context = left + mid + right
-            delv.write("\t".join([ref_name, str(p + 1), g(inc), context, called,
-                                  g(count), g(total), g(freq), g(paired_ub)]) + "\n")
+            delv.write(
+                "\t".join([ref_name, str(p + 1), g(inc), context, called, g(count), g(total), g(freq), g(paired_ub)])
+                + "\n"
+            )
 
 # --- phasing inputs (msgpack, read by phase.py) ---
 # FIXME legacy perl logic: phasing patterns are extracted by slicing each read's full-length alignment

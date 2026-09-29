@@ -1,6 +1,4 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "genotype_call"
+name: genotype_call
 description: |
   Turn tabular BLAST hits into one genotype call per query.
 
@@ -24,11 +22,13 @@ keywords:
   - blast
   - call
 tools:
-  - "genotype_call.py":
-      description: "Aggregates BLAST HSPs per subject, ranks by summed bitscore, and reports the best call with its runner-up and margin. Ships in this module's resources/usr/bin."
-      homepage: "https://github.com/cdcent/oamd-bio-ouroboros"
-      documentation: "https://github.com/cdcent/oamd-bio-ouroboros"
-      licence: ["Apache-2.0"]
+  - genotype_call.py:
+      description: Aggregates BLAST HSPs per subject, ranks by summed bitscore, and reports the best call
+        with its runner-up and margin. Ships in this module's resources/usr/bin.
+      homepage: https://github.com/cdcent/oamd-bio-ouroboros
+      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      licence:
+        - Apache-2.0
 input:
   - - meta:
         type: map
@@ -52,8 +52,8 @@ input:
             min_qcov    - drop a subject below this aggregated query coverage, 0-1 (default 0.0)
             tie_margin  - relative bitscore margin below which a call is `ambiguous` (default 0.02)
 output:
-  - calls:
-      - meta:
+  calls:
+    - - meta:
           type: map
           description: |
             Groovy Map containing sample information e.g. `[ id:'sample1' ]`
@@ -65,8 +65,6 @@ output:
             no surviving hit produces a `no_hit` row rather than being dropped, so an empty result
             is distinguishable from a step that did not run.
           pattern: "*.genotype.tsv"
-# No versions.yml. This module reports to the `versions` TOPIC as a (process, tool, version)
-# tuple, matching the nf-core blast modules it runs alongside.
 authors:
   - "@smagala"
 maintainers:

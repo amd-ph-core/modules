@@ -193,9 +193,7 @@ def build_consensus(
     if debug:
         # Leader positions
         for p in sorted(count5.keys(), key=lambda x: int(x)):
-            bases_sorted = sorted(
-                count5[p].items(), key=lambda x: (-x[1], x[0])
-            )
+            bases_sorted = sorted(count5[p].items(), key=lambda x: (-x[1], x[0]))
             parts = "\t".join(f"{b}:{c}" for b, c in bases_sorted)
             print(f"{int(p):5d}::\t{parts}", file=sys.stderr)
 
@@ -203,17 +201,13 @@ def build_consensus(
         for p in range(n_count):
             if not count[p]:
                 continue
-            bases_sorted = sorted(
-                count[p].items(), key=lambda x: (-x[1], x[0])
-            )
+            bases_sorted = sorted(count[p].items(), key=lambda x: (-x[1], x[0]))
             parts = "\t".join(f"{b}:{c}" for b, c in bases_sorted)
             print(f"{p:5d}::\t{parts}", file=sys.stderr)
 
         print("3'", file=sys.stderr)
         for p in sorted(count3.keys(), key=lambda x: int(x)):
-            bases_sorted = sorted(
-                count3[p].items(), key=lambda x: (-x[1], x[0])
-            )
+            bases_sorted = sorted(count3[p].items(), key=lambda x: (-x[1], x[0]))
             parts = "\t".join(f"{b}:{c}" for b, c in bases_sorted)
             print(f"+{int(p):4d}::\t{parts}", file=sys.stderr)
 
@@ -233,9 +227,12 @@ def build_consensus(
         # than a thin plurality. No-op where total >= floor or no ref available (parity on deep WGS).
         if min_ref_depth > 0 and total < min_ref_depth and ref_sites is not None and j < len(ref_sites):
             rb = ref_sites[j]
-            seq.append(rb); seq_alt.append(rb)
-            if j == 0: max5 = max_cnt
-            if j == n_count - 1: max3 = max_cnt
+            seq.append(rb)
+            seq_alt.append(rb)
+            if j == 0:
+                max5 = max_cnt
+            if j == n_count - 1:
+                max3 = max_cnt
             continue
 
         # Position-bias guard: prefer the spanning consensus when the plurality base is a
@@ -263,11 +260,7 @@ def build_consensus(
             seq.append(amended)
             if amended != max_base:
                 seq_alt.append(amended)
-            elif (
-                not alt_base
-                or alt_cnt < alt_count_thresh
-                or (total > 0 and (alt_cnt / total) < alt_freq_thresh)
-            ):
+            elif not alt_base or alt_cnt < alt_count_thresh or (total > 0 and (alt_cnt / total) < alt_freq_thresh):
                 seq_alt.append(max_base)
             else:
                 seq_alt.append(alt_base)
@@ -341,9 +334,7 @@ def build_consensus(
 
         sys.stdout.write(f"{header}{leader_str}{seq_str}{trailer_str}\n")
         if seq_alt_str and seq_alt_str != seq_str:
-            sys.stdout.write(
-                f"{header2}{leader_str}{seq_alt_str}{trailer_str}\n"
-            )
+            sys.stdout.write(f"{header2}{leader_str}{seq_alt_str}{trailer_str}\n")
     else:
         sys.stdout.write(f"{header}{seq_str}\n")
         if seq_alt_str and seq_alt_str != seq_str:
@@ -351,9 +342,7 @@ def build_consensus(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Aggregate alignment stats and build consensus FASTA"
-    )
+    parser = argparse.ArgumentParser(description="Aggregate alignment stats and build consensus FASTA")
     parser.add_argument("stats", nargs="+", help="JSON stats files")
     parser.add_argument("-N", "--name", default="", help="Consensus name")
     parser.add_argument(
@@ -455,8 +444,7 @@ def main():
             keep_deleted = True
         else:
             print(
-                "WARNING (combine_align_stats): no reference found, "
-                "turning off keep-deleted.",
+                "WARNING (combine_align_stats): no reference found, " "turning off keep-deleted.",
                 file=sys.stderr,
             )
 

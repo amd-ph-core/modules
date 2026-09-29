@@ -25,6 +25,7 @@ length. So hits are aggregated per (query, subject): bitscores are summed and al
 summed over the union of query intervals, so overlapping HSPs are not double-counted. Percent
 identity is reported as the aligned-length-weighted mean.
 """
+
 import argparse
 import sys
 from collections import defaultdict
@@ -35,17 +36,26 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--hits", required=True, help="blastn -outfmt 6 output")
 ap.add_argument("--sample", required=True, help="Sample id, emitted as the first column")
 ap.add_argument("-o", "--out", required=True, help="Output TSV")
-ap.add_argument("--columns", default=DEFAULT_COLUMNS,
-                help="Space-separated outfmt 6 field names, in file order. Must include qseqid, "
-                     "sseqid, pident, length, qstart, qend, qlen and bitscore. "
-                     f"Default: {DEFAULT_COLUMNS!r}")
-ap.add_argument("--min-pident", type=float, default=0.0,
-                help="Drop HSPs below this percent identity before aggregating.")
-ap.add_argument("--min-qcov", type=float, default=0.0,
-                help="Drop a subject whose aggregated query coverage (0-1) is below this.")
-ap.add_argument("--tie-margin", type=float, default=0.02,
-                help="Relative bitscore margin below which a call is 'ambiguous'. Computed as "
-                     "(best - runnerup)/best against the best subject from a DIFFERENT reference.")
+ap.add_argument(
+    "--columns",
+    default=DEFAULT_COLUMNS,
+    help="Space-separated outfmt 6 field names, in file order. Must include qseqid, "
+    "sseqid, pident, length, qstart, qend, qlen and bitscore. "
+    f"Default: {DEFAULT_COLUMNS!r}",
+)
+ap.add_argument(
+    "--min-pident", type=float, default=0.0, help="Drop HSPs below this percent identity before aggregating."
+)
+ap.add_argument(
+    "--min-qcov", type=float, default=0.0, help="Drop a subject whose aggregated query coverage (0-1) is below this."
+)
+ap.add_argument(
+    "--tie-margin",
+    type=float,
+    default=0.02,
+    help="Relative bitscore margin below which a call is 'ambiguous'. Computed as "
+    "(best - runnerup)/best against the best subject from a DIFFERENT reference.",
+)
 a = ap.parse_args()
 
 cols = a.columns.split()
@@ -67,8 +77,9 @@ with open(a.hits) as fh:
             continue
         f = line.split("\t")
         if len(f) < len(cols):
-            sys.exit(f"{sys.argv[0]} ERROR: {a.hits}:{line_no} has {len(f)} fields, "
-                     f"--columns declares {len(cols)}\n")
+            sys.exit(
+                f"{sys.argv[0]} ERROR: {a.hits}:{line_no} has {len(f)} fields, " f"--columns declares {len(cols)}\n"
+            )
         try:
             q, s = f[idx["qseqid"]], f[idx["sseqid"]]
             pid = float(f[idx["pident"]])
@@ -113,8 +124,7 @@ for (q, s), rec in agg.items():
     by_query[q].append({"subject": s, "bits": rec["bits"], "qcov": qcov, "pident": pid})
 
 with open(a.out, "w") as out:
-    out.write("sample\tquery\tsubject\tpident\tqcov\tbitscore\t"
-              "runnerup\trunnerup_bitscore\tmargin\tcall\n")
+    out.write("sample\tquery\tsubject\tpident\tqcov\tbitscore\t" "runnerup\trunnerup_bitscore\tmargin\tcall\n")
     for q in queries:
         hits = sorted(by_query.get(q, []), key=lambda h: (-h["bits"], h["subject"]))
         if not hits:
@@ -129,8 +139,10 @@ with open(a.out, "w") as out:
             call = "ambiguous" if margin < a.tie_margin else "confident"
             r_sub, r_bits = runner["subject"], f"{runner['bits']:.1f}"
         m = f"{margin:.4f}" if runner is not None else "NA"
-        out.write(f"{a.sample}\t{q}\t{best['subject']}\t{best['pident']:.2f}\t{best['qcov']:.4f}\t"
-                  f"{best['bits']:.1f}\t{r_sub}\t{r_bits}\t{m}\t{call}\n")
+        out.write(
+            f"{a.sample}\t{q}\t{best['subject']}\t{best['pident']:.2f}\t{best['qcov']:.4f}\t"
+            f"{best['bits']:.1f}\t{r_sub}\t{r_bits}\t{m}\t{call}\n"
+        )
 
 # A query with no surviving hit is a result, not an error — an unrelated or badly assembled consensus
 # should produce a `no_hit` row rather than an empty file that reads as "nothing ran".

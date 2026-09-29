@@ -24,6 +24,7 @@ Length model matches amend_consensus.py: N is kept (length-preserving), '-' is s
 insertions in the assembly relative to the reference are dropped (the reference frame has no column
 for them; they live in the VCF / insertion table).
 """
+
 import argparse
 import subprocess
 import sys
@@ -60,7 +61,9 @@ def align_consensus_sam(consensus_path, ref_path, preset):
     with open(sam.name, "w") as out:
         subprocess.run(
             ["rammap", "-a", "-x", preset, "--secondary", "no", ref_path, consensus_path],
-            stdout=out, stderr=subprocess.DEVNULL, check=True,
+            stdout=out,
+            stderr=subprocess.DEVNULL,
+            check=True,
         )
     return sam.name
 
@@ -118,53 +121,65 @@ def project_cigar(cigartuples, qseq, ref_start, ref_len, frame, max_clip=10):
     ref_pos = ref_start
     q = 0
     for op, length in cigartuples:
-        if op in (0, 7, 8):            # M/=/X: aligned bases
+        if op in (0, 7, 8):  # M/=/X: aligned bases
             for _ in range(length):
                 if 0 <= ref_pos < ref_len and frame[ref_pos] is None:
                     frame[ref_pos] = qseq[q]
                 ref_pos += 1
                 q += 1
-        elif op == 2 or op == 3:       # D / N (ref skip): assembly has no base here
+        elif op == 2 or op == 3:  # D / N (ref skip): assembly has no base here
             for _ in range(length):
                 if 0 <= ref_pos < ref_len and frame[ref_pos] is None:
                     frame[ref_pos] = "-"
                 ref_pos += 1
-        elif op == 4:                  # soft-clip: recover a short terminal-mismatch clip; drop long ones
+        elif op == 4:  # soft-clip: recover a short terminal-mismatch clip; drop long ones
             if length <= max_clip:
-                if q == 0:             # leading clip -> ref[ref_pos-length : ref_pos]
+                if q == 0:  # leading clip -> ref[ref_pos-length : ref_pos]
                     for k in range(length):
                         p = ref_pos - (length - k)
                         if 0 <= p < ref_len and frame[p] is None:
                             frame[p] = qseq[q + k]
-                else:                  # trailing clip -> ref[ref_pos : ref_pos+length]
+                else:  # trailing clip -> ref[ref_pos : ref_pos+length]
                     for k in range(length):
                         p = ref_pos + k
                         if 0 <= p < ref_len and frame[p] is None:
                             frame[p] = qseq[q + k]
             q += length
-        elif op == 1:                  # insertion: query advances, no reference column
+        elif op == 1:  # insertion: query advances, no reference column
             q += length
         # H (5) / P (6): no advance
     return frame
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("reference", help="full reference FASTA (the coordinate frame)")
     ap.add_argument("consensus", help="assembled consensus FASTA (the deep calls)")
     ap.add_argument("--ref-name", default=None, help="reference record to use (default: first)")
-    ap.add_argument("--bam", default=None,
-                    help="reads mapped to the SAME reference; depth splits real deletion from dropout")
-    ap.add_argument("--min-depth", type=int, default=10,
-                    help="minimum spanning depth to adjudicate an assembly-gap column (below = N; default 10)")
-    ap.add_argument("--del-frac", type=float, default=0.5,
-                    help="read deletion fraction at/above which an assembly-gap column is a REAL deletion "
-                         "(below = the gap is an assembly artifact; recover the read-majority base; default 0.5)")
+    ap.add_argument(
+        "--bam", default=None, help="reads mapped to the SAME reference; depth splits real deletion from dropout"
+    )
+    ap.add_argument(
+        "--min-depth",
+        type=int,
+        default=10,
+        help="minimum spanning depth to adjudicate an assembly-gap column (below = N; default 10)",
+    )
+    ap.add_argument(
+        "--del-frac",
+        type=float,
+        default=0.5,
+        help="read deletion fraction at/above which an assembly-gap column is a REAL deletion "
+        "(below = the gap is an assembly artifact; recover the read-majority base; default 0.5)",
+    )
     ap.add_argument("--preset", default="asm20", help="rammap -x preset (default asm20)")
-    ap.add_argument("--max-clip-extend", type=int, default=10,
-                    help="max terminal soft-clip length to recover as an ungapped extension (a clipped "
-                         "terminal mismatch); longer clips are structural and left as N (default 10)")
+    ap.add_argument(
+        "--max-clip-extend",
+        type=int,
+        default=10,
+        help="max terminal soft-clip length to recover as an ungapped extension (a clipped "
+        "terminal mismatch); longer clips are structural and left as N (default 10)",
+    )
     ap.add_argument("-N", "--name", default=None, help="output header/name")
     ap.add_argument("-o", "--out", default=None, help="output FASTA (default stdout)")
     a = ap.parse_args()
@@ -187,32 +202,37 @@ def main():
             qseq = aln.query_sequence
             if qseq is None:
                 continue
-            project_cigar(aln.cigartuples, qseq, aln.reference_start, ref_len, frame,
-                          max_clip=a.max_clip_extend)
+            project_cigar(aln.cigartuples, qseq, aln.reference_start, ref_len, frame, max_clip=a.max_clip_extend)
 
     # resolve each reference column to a single character
     out_chars = []
     n_base = n_del = n_missing = n_recovered = 0
     for p in range(ref_len):
         c = frame[p]
-        if c is None:                          # never spanned by the assembly -> missing
-            out_chars.append("N"); n_missing += 1
-        elif c == "-":                         # assembly gap: trust it only if the READS show a deletion
-            if base_counts is None:            # no BAM -> can't adjudicate; keep length-honest as N
-                out_chars.append("N"); n_missing += 1
+        if c is None:  # never spanned by the assembly -> missing
+            out_chars.append("N")
+            n_missing += 1
+        elif c == "-":  # assembly gap: trust it only if the READS show a deletion
+            if base_counts is None:  # no BAM -> can't adjudicate; keep length-honest as N
+                out_chars.append("N")
+                n_missing += 1
                 continue
-            bdepth = sum(base_counts[p]); ddepth = del_depth[p]
+            bdepth = sum(base_counts[p])
+            ddepth = del_depth[p]
             spanning = bdepth + ddepth
             if spanning >= a.min_depth and ddepth >= a.del_frac * spanning:
-                n_del += 1                     # reads agree it's deleted -> drop the column (shortens)
+                n_del += 1  # reads agree it's deleted -> drop the column (shortens)
             elif bdepth >= a.min_depth:
                 # covered, but the reads carry a BASE not a deletion -> assembly-gap artifact.
                 # recover the read-majority base instead of dropping it.
-                out_chars.append(majority_base(base_counts[p])); n_recovered += 1
+                out_chars.append(majority_base(base_counts[p]))
+                n_recovered += 1
             else:
-                out_chars.append("N"); n_missing += 1   # too shallow to call -> dropout
+                out_chars.append("N")
+                n_missing += 1  # too shallow to call -> dropout
         else:
-            out_chars.append(c); n_base += 1
+            out_chars.append(c)
+            n_base += 1
 
     name = a.name or ref_name
     seq = "".join(out_chars)

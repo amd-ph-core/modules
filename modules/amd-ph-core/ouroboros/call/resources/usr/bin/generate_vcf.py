@@ -18,6 +18,7 @@ A variant needs >= min_count supporting reads to be reported at all. The remaini
 FILTER annotations: by default only PASS records are written; --print-all writes every candidate with its
 FILTER flags so nothing is silently dropped.
 """
+
 import argparse
 import sys
 
@@ -73,8 +74,7 @@ def build_header(chrom, ref_len, ref_path, argv):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("reference", help="consensus FASTA (the coordinate frame / REF bases)")
     ap.add_argument("alleles", help="call.py -allAlleles.txt")
     ap.add_argument("insertions", help="call.py -insertions.txt")
@@ -139,8 +139,9 @@ def main():
         if not is_del and conf is not None and conf < min_conf:
             f.append("LowConf")
         if take_sig:
-            bad = (paired_ub is not None and freq <= paired_ub) or \
-                  (not is_del and quality_ub is not None and freq <= quality_ub)
+            bad = (paired_ub is not None and freq <= paired_ub) or (
+                not is_del and quality_ub is not None and freq <= quality_ub
+            )
             if bad:
                 f.append("MachineError")
         return f
@@ -158,7 +159,8 @@ def main():
         count, total = int(float(f[3])), int(float(f[4]))
         if count < min_count:
             continue
-        pos = int(f[1]); ref = ref_base(pos)
+        pos = int(f[1])
+        ref = ref_base(pos)
         if ref is None:
             continue
         freq, qual, conf = float(f[5]), num(f[6]), num(f[7])
@@ -177,7 +179,8 @@ def main():
         count, total = int(float(f[5])), int(float(f[6]))
         if count < min_count:
             continue
-        up = int(f[1]); ref = ref_base(up)
+        up = int(f[1])
+        ref = ref_base(up)
         if ref is None:
             continue
         ins = f[2].upper()
@@ -199,10 +202,11 @@ def main():
             continue
         up, length = int(f[1]), int(f[2])
         anchor = ref_base(up)
-        deleted = seq[up:up + length]  # 1-based up+1..up+length
+        deleted = seq[up : up + length]  # 1-based up+1..up+length
         if anchor is None or len(deleted) != length or any(b not in "ACGT" for b in deleted):
             continue
-        freq = float(f[7]); paired_ub = num(f[8])
+        freq = float(f[7])
+        paired_ub = num(f[8])
         flt = filters_for(total, freq, None, None, paired_ub, None, min_freq_del, is_del=True)
         info = {"DP": total, "AF": (freq,), "AD": (total - count, count), "TYPE": ("del",)}
         records.append((up - 1, up + length, anchor + deleted, anchor, None, info, flt))
@@ -213,9 +217,15 @@ def main():
     for start, stop, ref, alt, qual, info, flt in sorted(records, key=lambda r: (r[0], r[3])):
         if flt and not a.print_all:
             continue
-        rec = vf.new_record(contig=chrom, start=start, stop=stop, alleles=(ref, alt),
-                            qual=(None if qual is None else round(qual, 2)), info=info)
-        for name in (flt if flt else ["PASS"]):
+        rec = vf.new_record(
+            contig=chrom,
+            start=start,
+            stop=stop,
+            alleles=(ref, alt),
+            qual=(None if qual is None else round(qual, 2)),
+            info=info,
+        )
+        for name in flt if flt else ["PASS"]:
             rec.filter.add(name)
         vf.write(rec)
     vf.close()

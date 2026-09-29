@@ -6,7 +6,9 @@ upper triangle). Pure value-copy (no reformatting).
 
   python complete_matrix.py <lower_diagonal.txt> [-A|--annot-col]
 """
+
 import sys
+
 
 def main():
     args = [a for a in sys.argv[1:]]
@@ -47,6 +49,7 @@ def main():
                 else:
                     out.write("\t" + M[j][i])
             out.write("\n")
+
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,8 @@ Reads blastn outfmt-6 HSPs + the query FASTA; writes, for the gather convention:
 A read is chimeric when its significant HSPs hit the same target on BOTH strands.
 Significance = HSP length >= --min-len and %id >= --min-pid.
 """
-import argparse, sys
+
+import argparse
 from collections import defaultdict
 
 
@@ -50,24 +51,33 @@ def bin_of(target, binmap):
     except KeyError:
         raise KeyError(
             "target %r is not in the reference FASTA's bin map; the hit file and the reference "
-            "are out of step (%d records known)" % (target, len(binmap)))
+            "are out of step (%d records known)" % (target, len(binmap))
+        )
+
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--blast", required=True, help="blastn outfmt 6: qseqid sseqid pident length qstart qend sstart send sstrand bitscore")
+ap.add_argument(
+    "--blast",
+    required=True,
+    help="blastn outfmt 6: qseqid sseqid pident length qstart qend sstart send sstrand bitscore",
+)
 ap.add_argument("--query", required=True, help="query FASTA")
 ap.add_argument("--out", required=True, help="output basename (writes .match/.class/.chim/.nomatch)")
 ap.add_argument("--min-len", type=int, default=33)
 ap.add_argument("--min-pid", type=float, default=88.0)
 ap.add_argument("--incl-chim", action="store_true", help="keep chimeric reads in .match (INCL_CHIM)")
-ap.add_argument("--bin-map", required=True,
-                help="Reference FASTA whose deflines carry `bin=<label>`; maps hit targets "
-                     "(record ids) to bins. Required: a bin can no longer be parsed out of an id.")
+ap.add_argument(
+    "--bin-map",
+    required=True,
+    help="Reference FASTA whose deflines carry `bin=<label>`; maps hit targets "
+    "(record ids) to bins. Required: a bin can no longer be parsed out of an id.",
+)
 a = ap.parse_args()
 BINMAP = load_bin_map(a.bin_map)
 
-strands = defaultdict(lambda: defaultdict(set))   # rid -> target -> {plus,minus}
+strands = defaultdict(lambda: defaultdict(set))  # rid -> target -> {plus,minus}
 nhsp = defaultdict(int)
-best = {}                                         # rid -> (bitscore, target)
+best = {}  # rid -> (bitscore, target)
 
 with open(a.blast) as fh:
     for line in fh:
@@ -87,9 +97,11 @@ with open(a.blast) as fh:
         if rid not in best or bits > best[rid][0]:
             best[rid] = (bits, tgt)
 
+
 def is_chimera(rid):
     tg = strands[rid]
-    return any(len(s) > 1 for s in tg.values())   # same target, both strands
+    return any(len(s) > 1 for s in tg.values())  # same target, both strands
+
 
 # stream query FASTA, route each record
 m = open(a.out + ".match", "w")
@@ -97,17 +109,19 @@ c = open(a.out + ".class", "w")
 ch = open(a.out + ".chim", "w")
 nm = open(a.out + ".nomatch", "w")
 
+
 def flush(hdr, seq):
     if not hdr:
         return
     rid = hdr.split()[0]
-    if rid not in strands:                 # no significant HSP
+    if rid not in strands:  # no significant HSP
         nm.write(f">{hdr}\n{seq}\n")
     elif is_chimera(rid) and not a.incl_chim:
         ch.write(f">{hdr}\n{seq}\n")
     else:
         m.write(f">{hdr}\n{seq}\n")
         c.write(f"{hdr}\t{best[rid][1]}\n")
+
 
 hdr, seq = "", []
 with open(a.query) as fh:
