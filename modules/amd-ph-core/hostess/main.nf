@@ -39,6 +39,12 @@ process HOSTESS {
     // to meta.id and meta.single_end, and leaves the caller -- which already
     // knows whether it is routing long or short reads -- the single source of
     // truth for the choice.
+    //
+    // hostess's own --aligner also accepts `auto`, and this module deliberately
+    // does not: choosing the shape of --index IS choosing the aligner, so `auto`
+    // would mean building a bowtie2-style prefix and then letting hostess pick
+    // minimap2, or the reverse. Every unrecognised value fails here rather than
+    // silently taking the bowtie2 branch below.
     def index_ref = aligner == 'minimap2'
         ? (reference_dir.isDirectory() ? "${reference_dir}/${reference_name}.mmi" : reference_dir.toString())
         : "${reference_dir}/${reference_name}"
@@ -51,6 +57,16 @@ process HOSTESS {
     def reads_cmd    = meta.single_end
         ? "--fastq1 \"${sorted_reads[0]}\""
         : "--fastq1 \"${sorted_reads[0]}\" --fastq2 \"${sorted_reads[1]}\""
+    // Deliberately AFTER the declarations above, not before them. On Nextflow
+    // 24.10.5 -- which this repository's nf-test matrix still covers -- a
+    // statement ahead of them makes the parser read `def index_ref = aligner
+    // == ...` as redeclaring an input and refuse to compile the module with
+    // "Variable `aligner` already defined in the process scope". Nothing here
+    // depends on the order otherwise: the declarations build strings, and this
+    // throws before any of them is used.
+    if (!(aligner in ['bowtie2', 'minimap2'])) {
+        error("HOSTESS requires aligner to be 'bowtie2' or 'minimap2', not '${aligner}' (sample '${meta.id}'). hostess accepts 'auto', but this module has to know which index form to build.")
+    }
     """
     hostess clean \\
         ${args} \\
@@ -75,6 +91,14 @@ process HOSTESS {
     def bam_stub = want_bam
         ? "touch \"${prefix}.host.bam\" \"${prefix}.host.bam.bai\" \"${prefix}.host.flagstat.txt\" \"${prefix}.host.stats.txt\""
         : "true"
+    // Same guard as the script path. The stub never builds an index path, so it
+    // has nothing to get wrong, but a stub that accepts an aligner the real run
+    // rejects is a stub that does not stand in for the real run -- and since no
+    // hostess image is published, these stub tests are also the only place the
+    // rejection is testable. After the declarations, for the parser reason above.
+    if (!(aligner in ['bowtie2', 'minimap2'])) {
+        error("HOSTESS requires aligner to be 'bowtie2' or 'minimap2', not '${aligner}' (sample '${meta.id}'). hostess accepts 'auto', but this module has to know which index form to build.")
+    }
     """
     for f in ${fastqs}; do
         echo "" | gzip > "\$f"
