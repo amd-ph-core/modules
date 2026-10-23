@@ -1,0 +1,90 @@
+name: rasusa_reads
+description: |
+  Downsample FASTQ files to an exact number of reads (or read pairs). Paired-end
+  mates are kept or dropped together, so the output stays synchronised.
+
+  An input holding fewer reads than the cap is written out whole, with exit 0 --
+  so routing every sample through this module is correct, and gating on a read
+  count upstream is an optimisation rather than a requirement.
+keywords:
+  - downsampling
+  - subsampling
+  - fastq
+  - sequencing depth
+tools:
+  - rasusa:
+      description: "Randomly subsample sequencing reads or alignments to a specified
+        coverage, number of bases, number of reads or fraction. `rasusa reads` measures
+        the input first, so a --num target is exact rather than approximate."
+      homepage: "https://github.com/mbhall88/rasusa"
+      documentation: "https://github.com/mbhall88/rasusa"
+      tool_dev_url: "https://github.com/mbhall88/rasusa"
+      doi: "10.21105/joss.03941"
+      licence:
+        - "MIT"
+      args_id: "$args"
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - reads:
+        type: file
+        description: |
+          Mandatory. One FASTQ file for single-end data, or two mate files for
+          paired-end data.
+        pattern: "*.{fastq,fq}{,.gz}"
+        ontologies:
+          - edam: http://edamontology.org/format_1930
+  - max_reads:
+      type: integer
+      description: |
+        Mandatory. Number of reads (single-end) or read pairs (paired-end) to
+        retain. An input with fewer than this many is passed through whole.
+  - seed:
+      type: integer
+      description: |
+        Mandatory. Random seed, so downsampling is deterministic across runs.
+        Which reads a given seed selects is a property of the rasusa version, so
+        reproducing a run needs both.
+output:
+  reads:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.downsampled.fastq.gz":
+          type: file
+          description: |
+            Downsampled, gzip-compressed FASTQ. One file for single-end input,
+            two mate-synchronised files for paired-end input.
+          pattern: "*.downsampled.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989
+  versions_rasusa:
+    - - ${task.process}:
+          type: string
+          description: Process name, emitted to the `versions` topic channel
+      - rasusa:
+          type: string
+          description: Tool name, emitted to the `versions` topic channel
+      - rasusa --version | sed 's/.* //':
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: Process name, emitted to the `versions` topic channel
+      - rasusa:
+          type: string
+          description: Tool name, emitted to the `versions` topic channel
+      - rasusa --version | sed 's/.* //':
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"
