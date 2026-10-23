@@ -58,6 +58,40 @@ nextflow_process {
         }
     }
 
+    test("sarscov2 - fastq - paired_end - mates arriving reversed are not swapped") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test', single_end:false ],
+                    [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true),
+                      file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            // bbduk is handed in= and in2= in the order the module sorted them,
+            // so a sort that leaves a reversed pair reversed writes mate 2 into
+            // the _1 outputs. The filenames come from the prefix either way, so
+            // only the read names show it. The matched stream is checked because
+            // these reads are from this genome, which is where nearly all of
+            // them go; non-empty is asserted so the check cannot be vacuous.
+            def names_1 = path(process.out.matched[0][1][0]).linesGzip.findAll { line -> line.startsWith('@') }
+            def names_2 = path(process.out.matched[0][1][1]).linesGzip.findAll { line -> line.startsWith('@') }
+            assertAll(
+                { assert process.success },
+                { assert names_1.size() > 0 },
+                { assert names_2.size() > 0 },
+                { assert names_1.every { name -> name.endsWith('/1') } },
+                { assert names_2.every { name -> name.endsWith('/2') } }
+            )
+        }
+    }
+
     test("sarscov2 - fastq - paired_end - stub") {
 
         options "-stub"
