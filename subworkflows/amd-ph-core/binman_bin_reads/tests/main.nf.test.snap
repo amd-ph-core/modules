@@ -1,0 +1,264 @@
+{
+    "paired_both_tiers_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "taxid_12058_picornaviridae_enriched_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.residual_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.residual_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.assignment_report.tsv:md5,ec705723472fa60a5a6866bac8625719"
+                    ]
+                ],
+                "assignment": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.assignment_report.tsv:md5,ec705723472fa60a5a6866bac8625719"
+                    ]
+                ],
+                "bin_manifest": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "bins": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "bins_enriched": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "taxid_12058_picornaviridae_enriched_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "residual": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.residual_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.residual_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T20:13:32.84085012",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "paired_no_tiers_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "taxid_12058_picornaviridae_enriched_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.residual_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.residual_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.assignment_report.tsv:md5,ec705723472fa60a5a6866bac8625719"
+                    ]
+                ],
+                "assignment": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.assignment_report.tsv:md5,ec705723472fa60a5a6866bac8625719"
+                    ]
+                ],
+                "bin_manifest": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "bins": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "bins_enriched": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "taxid_12058_picornaviridae_enriched_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "residual": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.residual_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.residual_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T20:13:02.849504899",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

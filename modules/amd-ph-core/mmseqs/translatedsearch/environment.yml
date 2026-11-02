@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # Pinned to match the container. `bioconda_latest` will keep reporting this as an available
+  # update to 17.b804f, which is not one: mmseqs2 release tags are `<number>.<commit>`, and the
+  # check compares them as strings, so 18 sorts below 17. Taking that suggestion would downgrade
+  # the tool and make `-profile conda` run a different mmseqs than `-profile docker`.
+  - bioconda::mmseqs2=18.8cc5c

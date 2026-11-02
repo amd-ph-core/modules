@@ -1,0 +1,127 @@
+name: "binman_assignbins"
+description: Fold translated-search and dense-panel recruitment hits into existing taxonomic read bins
+keywords:
+  - metagenomics
+  - read binning
+  - read recruitment
+  - virus
+tools:
+  - "python":
+      description: |
+        The assignment policy, implemented as a template script using only the standard
+        library. Family labels a read earned from any tier are unioned; the read is placed if
+        exactly one family survives and held in the residual if more than one does. Enrichment
+        never overrides a tier-1 bin, because no tier is a superset of any other.
+      homepage: "https://www.python.org/"
+      documentation: "https://docs.python.org/3/"
+      licence:
+        - "PSF-2.0"
+      args_id: "$args"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information, e.g. `[ id:'sample1', single_end:false ]`
+    - residual:
+        type: file
+        description: |
+          Mandatory. The residual pool from `binman/residual`, one file per mate. The file names
+          must keep the `*.residual_pool_<n>.fastq.gz` shape, because the template resolves the
+          mates by that pattern and asserts their count against `meta.single_end`.
+        pattern: "*.residual_pool_*.fastq.gz"
+        ontologies:
+          - edam: http://edamontology.org/format_1930 # FASTQ
+    - bin_manifest:
+        type: file
+        description: |
+          Mandatory. The `bins.tsv` manifest of the bins already opened at the requested rank,
+          as emitted by `kraken2hunter/classify`.
+        pattern: "*.tsv"
+        ontologies:
+          - edam: http://edamontology.org/format_3475 # TSV
+    - mmseqs_hits:
+        type: file
+        description: |
+          Optional, pass `[]` when the translated-search tier is disabled. BLAST tabular hits,
+          plain or gzipped. Passing `[]` is NOT the same as passing an empty file: an omitted
+          tier must not look like a tier that ran and found nothing.
+        pattern: "*.m8{,.gz}"
+    - rammap_paf:
+        type: file
+        description: |
+          Optional, pass `[]` when the dense-panel tier is disabled. PAF, plain or gzipped.
+          Only columns 1, 6, 10 and 11 are read -- query, target, residue matches and alignment
+          block length -- so a PAF without CIGAR strings is sufficient.
+        pattern: "*.paf{,.gz}"
+  - rammap_blocks:
+      type: file
+      description: |
+        Optional, pass `[]` when the dense-panel tier is disabled. The panel's `blocks.tsv`,
+        mapping each panel record id to a family via a `family` or `bin` column. Required for
+        the PAF to mean anything: without it, PAF hits are ignored.
+      pattern: "*.tsv"
+      ontologies:
+        - edam: http://edamontology.org/format_3475 # TSV
+
+output:
+  bins:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - enriched/*.fastq.gz:
+          type: file
+          description: |
+            Optional. The enriched bins: tier-1 bins plus every read a later tier placed in
+            them. Absent when no tier recruited anything, which is a real outcome on a library
+            with no content for the panel.
+          pattern: "enriched/*.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  residual:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - ${meta.id}.residual_*.fastq.gz:
+          type: file
+          description: |
+            The honest remainder, one file per mate: reads no tier recruited (9.1% of the pool
+            as measured) plus reads held back because they recruited to more than one family
+            (0.6%). Passed along rather than dropped, for downstream tools to mine.
+          pattern: "*.residual_*.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  report:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - ${meta.id}.assignment_report.tsv:
+          type: file
+          description: |
+            Per-sample metric table: mates in, mates enriched into bins, mates held for
+            cross-mapping, control-only hits, mates out, and a per-family enriched count.
+          pattern: "*.assignment_report.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions:
+    - versions.yml:
+        type: file
+        description: |
+          File containing software versions. This module's script is a Python `template`, and
+          Nextflow rejects an `eval` output on a non-Bash interpreter, so the version is written
+          to a file and that file is carried on the `versions` topic.
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+topics:
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

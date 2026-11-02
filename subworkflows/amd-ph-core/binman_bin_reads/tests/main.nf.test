@@ -1,0 +1,96 @@
+nextflow_workflow {
+
+    name "Test Subworkflow BINMAN_BIN_READS"
+    script "../main.nf"
+    workflow "BINMAN_BIN_READS"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/binman_bin_reads"
+    tag "kraken2hunter/classify"
+    tag "binman/residual"
+    tag "binman/assignbins"
+    tag "mmseqs/translatedsearch"
+    tag "subworkflows/../../modules/nf-core/minimap2/align"
+
+    // `modules/nf-core/minimap2/align` is checked in to this repo, as a deliberate exception to
+    // the .gitignore rule that keeps nf-core modules out. Nextflow resolves an `include` at PARSE
+    // time, so a subworkflow that composes an nf-core module cannot be tested at all unless the
+    // module is present, and the nf-test job does not install it. That is why varpipe_core and
+    // varpipe_variantanalysis print "Dependency ... not found" on every run in this repo and have
+    // never actually executed. Vendoring the one module keeps this subworkflow out of that set.
+    // The lint matrix filters on `modules/amd-ph-core/**`, so the vendored copy is never linted
+    // as if it were ours.
+
+    test("stub - paired end, no enrichment tiers") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.value([])
+                input[2] = 'family'
+                input[3] = channel.value([])
+                input[4] = channel.value([])
+                input[5] = channel.value([])
+                input[6] = false
+                input[7] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(workflow.out).match("paired_no_tiers_stub") }
+            )
+        }
+    }
+
+    test("stub - paired end, both enrichment tiers") {
+
+        options "-stub"
+
+        // The reference channels carry the FASTQ fixtures rather than real databases: under
+        // -stub nothing reads them, and what is being tested here is that enabling both tiers
+        // keeps one entry per sample all the way to BINMAN_ASSIGNBINS. That is the bug this
+        // wiring exists to prevent -- joining against a genuinely empty channel dropped
+        // samples, leaving 1 of 3 at the end of the subworkflow.
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.value([])
+                input[2] = 'family'
+                input[3] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true))
+                input[4] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true))
+                input[5] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true))
+                input[6] = true
+                input[7] = true
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.assignment.size() == 1 },
+                { assert snapshot(workflow.out).match("paired_both_tiers_stub") }
+            )
+        }
+    }
+}

@@ -17,5 +17,14 @@ tests/data/
 work/
 .github/CODEOWNERS-tmp
 # Symlink created by nft-utils nfcoreLink() during test runs
-modules/nf-core
+# nf-core modules are installed by the consuming pipeline, not vendored here -- with one
+# exception. A subworkflow's `include` is resolved by Nextflow at PARSE time, so a subworkflow
+# that composes an nf-core module cannot be tested at all unless that module is present, and the
+# nf-test job does not install it. That is why the varpipe_core and varpipe_variantanalysis
+# subworkflow tests print "Dependency ... not found" on every run and have never actually
+# executed. minimap2/align is checked in so binman_bin_reads does not join them. The lint matrix
+# filters on `modules/amd-ph-core/**`, so a vendored nf-core module is never linted as if it
+# were ours.
+modules/nf-core/*
+!modules/nf-core/minimap2/
 .venv*
