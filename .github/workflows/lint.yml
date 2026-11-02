@@ -23,13 +23,14 @@ env:
   NF_CORE_VER: "4.1.0"
   # nf-core 4.x's container_links test accepts only quay.io and
   # community.wave.seqera.io/library by default, which fails nearly every module here: ph-core
-  # Tier 1 puts our images behind the cdc-amd mirror, dais-ribosome comes from ghcr.io, and the
-  # modules that follow the stock nf-core container pattern name biocontainers/. Those prefixes
+  # Tier 1 puts our images in the AMDP ECR and behind the cdc-amd mirror, dais-ribosome comes
+  # from ghcr.io, and the modules following the stock nf-core container pattern name
+  # biocontainers/. Those prefixes
   # are declared with the sanctioned --registry flag rather than waived, because lint waivers in
   # .nf-core.yml are pipeline-only -- nf-core/tools loads that lint config only when
   # repo_type == "pipeline", so a `lint:` block in this repo would be silently ignored.
   # Collected from the modules, not assumed, and kept to the minimum that passes.
-  NF_CORE_REGISTRIES: "cdc-amd,ghcr.io,biocontainers,quay.io,community.wave.seqera.io/library"
+  NF_CORE_REGISTRIES: "025066257930.dkr.ecr.us-east-1.amazonaws.com,cdc-amd,ghcr.io,biocontainers,quay.io,community.wave.seqera.io/library"
 
 jobs:
   pre-commit:
