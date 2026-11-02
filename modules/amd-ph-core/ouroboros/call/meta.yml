@@ -16,8 +16,7 @@ keywords:
   - pileup
 tools:
   - irma-core:
-      description: Rust reimplementation of IRMA's core routines; merge-sam merges mate pairs before the
-        pileup on the paired path.
+      description: Rust reimplementation of IRMA's core routines; merge-sam merges mate pairs before the pileup on the paired path.
       homepage: https://github.com/CDCgov/irma-core
       documentation: https://github.com/CDCgov/irma-core
       licence:
@@ -31,8 +30,7 @@ tools:
         - MIT
       identifier: biotools:samtools
   - call.py:
-      description: Variant caller over the pileup, supporting the binomial and empirical-Bayes callers with
-        depth-adaptive thresholds. Ships in this module's resources/usr/bin.
+      description: Variant caller over the pileup, supporting the binomial and empirical-Bayes callers with depth-adaptive thresholds. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -46,24 +44,21 @@ tools:
         - MIT
       identifier: ""
   - amend_consensus.py:
-      description: Applies called variants to the consensus, emitting ambiguity codes above the ambiguity
-        frequency. Ships in this module's resources/usr/bin.
+      description: Applies called variants to the consensus, emitting ambiguity codes above the ambiguity frequency. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - generate_vcf.py:
-      description: Writes a spec-compliant VCFv4.2 from the caller's tables via pysam. Ships in this module's
-        resources/usr/bin.
+      description: Writes a spec-compliant VCFv4.2 from the caller's tables via pysam. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - phase.py:
-      description: Variant phasing, emitting the EXPENRD/JACCARD/MUTUALD/NJOINTP square matrices. Ships
-        in this module's resources/usr/bin.
+      description: Variant phasing, emitting the EXPENRD/JACCARD/MUTUALD/NJOINTP square matrices. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -77,8 +72,7 @@ tools:
         - MIT
       identifier: ""
   - get_pairing_stats.py:
-      description: Summarises mate-pair merge statistics into the paired-error table used by the caller.
-        Ships in this module's resources/usr/bin.
+      description: Summarises mate-pair merge statistics into the paired-error table used by the caller. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -138,8 +132,7 @@ input:
       description: Segment-numbering map for amended consensus headers; empty disables it (Optional)
   - sort_groups:
       type: string
-      description: Sort-group map. When empty the panel is treated as non-segmented and header numbering
-        is applied (Optional)
+      description: Sort-group map. When empty the panel is treated as non-segmented and header numbering is applied (Optional)
   - caller:
       type: string
       description: Caller selector, e.g. binomial or empirical Bayes (Mandatory)
@@ -169,6 +162,7 @@ output:
           type: file
           description: Coordinate-sorted alignments
           pattern: "*.bam"
+          ontologies: []
   bai:
     - - meta:
           type: map
@@ -180,6 +174,7 @@ output:
           type: file
           description: BAM index
           pattern: "*.bam.bai"
+          ontologies: []
   consensus:
     - - meta:
           type: map
@@ -191,6 +186,7 @@ output:
           type: file
           description: Plurality consensus for the gene
           pattern: "*.fasta"
+          ontologies: []
   variants:
     - - meta:
           type: map
@@ -202,6 +198,7 @@ output:
           type: file
           description: Called variants
           pattern: "*-variants.txt"
+          ontologies: []
   alleles:
     - - meta:
           type: map
@@ -213,6 +210,7 @@ output:
           type: file
           description: Per-position allele counts for every site
           pattern: "*-allAlleles.txt"
+          ontologies: []
   coverage:
     - - meta:
           type: map
@@ -224,6 +222,7 @@ output:
           type: file
           description: Per-position depth at true per-read depth, in the consensus frame
           pattern: "*-coverage.txt"
+          ontologies: []
   amended:
     - - meta:
           type: map
@@ -245,8 +244,7 @@ output:
           description: Target/bin label
       - AMENDED_LEN:
           type: integer
-          description: Length of the amended consensus, 0 when absent. The downstream stitch gate needs
-            this as a value.
+          description: Length of the amended consensus, 0 when absent. The downstream stitch gate needs this as a value.
   insertions:
     - - meta:
           type: map
@@ -258,6 +256,7 @@ output:
           type: file
           description: Called insertions (Optional)
           pattern: "*-insertions.txt"
+          ontologies: []
   deletions:
     - - meta:
           type: map
@@ -269,6 +268,7 @@ output:
           type: file
           description: Called deletions (Optional)
           pattern: "*-deletions.txt"
+          ontologies: []
   vcf:
     - - meta:
           type: map
@@ -280,6 +280,7 @@ output:
           type: file
           description: VCFv4.2 in the assembled consensus frame (Optional)
           pattern: "*.vcf"
+          ontologies: []
   pairing:
     - - meta:
           type: map
@@ -291,6 +292,7 @@ output:
           type: file
           description: Mate-pair merge statistics, paired-end only (Optional)
           pattern: "*-pairingStats.txt"
+          ontologies: []
   sqm:
     - - meta:
           type: map
@@ -302,13 +304,51 @@ output:
           type: file
           description: Phasing square matrices, emitted only with more than two variants (Optional)
           pattern: "**.sqm"
+          ontologies: []
+  versions_irmacore:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - irma_core:
+          type: string
+          description: The name of the tool
+      - irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+  versions_samtools:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - samtools:
+          type: string
+          description: The name of the tool
+      - samtools --version 2>/dev/null | head -1 | grep -oE "[0-9.]+" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - irma_core:
+          type: string
+          description: The name of the tool
+      - irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - samtools:
+          type: string
+          description: The name of the tool
+      - samtools --version 2>/dev/null | head -1 | grep -oE "[0-9.]+" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

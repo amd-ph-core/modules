@@ -31,7 +31,7 @@ nextflow_process {
             assertAll(
                 { assert process.success },
                 { assert process.out.varpipe_zip.size() > 0 },
-                { assert snapshot(process.out.versions).match() }
+                { assert snapshot([ versions: process.out.versions_tar ]).match() }
             )
         }
     }
@@ -60,7 +60,7 @@ nextflow_process {
             assertAll(
                 { assert process.success },
                 { assert process.out.varpipe_zip.size() > 0 },
-                { assert snapshot(process.out.versions).match() }
+                { assert snapshot([ versions: process.out.versions_tar ]).match() }
             )
         }
     }

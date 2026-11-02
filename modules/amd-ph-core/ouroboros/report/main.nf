@@ -20,7 +20,7 @@ process OUROBOROS_REPORT {
     output:
     tuple val(meta), val(gene), path("${gene}-coverageDiagram.pdf"), emit: coverage_diagram , optional: true
     tuple val(meta), val(gene), path("${gene}-heuristics.pdf")     , emit: heuristic_diagram, optional: true
-    path "versions.yml"                                            , emit: versions
+    tuple val("${task.process}"), val('matplotlib'), eval('python3 -c "import matplotlib; print(matplotlib.__version__)" 2>/dev/null || echo unknown'), emit: versions_matplotlib, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,18 +37,10 @@ process OUROBOROS_REPORT {
         coverage_diagram.py "${meta.id}" ${gene} ${coverage} ${gene}-coverageDiagram.pdf 2>/dev/null || true
     fi
     heuristic_diagram.py ${min_variant_qual} ${min_variant_freq} ${min_column_coverage} ${min_confidence} ${alleles} ${gene}-heuristics.pdf 2>/dev/null || true
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)' 2>/dev/null || echo unknown)
-    END_VERSIONS
     """
 
     stub:
     """
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)' 2>/dev/null || echo unknown)
-    END_VERSIONS
+    touch ${gene}-coverageDiagram.pdf ${gene}-heuristics.pdf
     """
 }

@@ -1,6 +1,5 @@
 name: "varpipe_structuralvariants"
-description: Custom module for detecting structural variants in TB genomes using
-  coverage analysis
+description: Custom module for detecting structural variants in TB genomes using coverage analysis
 keywords:
   - structural variants
   - deletions
@@ -74,6 +73,11 @@ output:
         pattern: "versions.yml"
         ontologies:
           - edam: http://edamontology.org/format_3750 # YAML
+topics:
+  versions:
+    - versions.yml:
+        type: string
+        description: The name of the process
 authors:
   - "@ztb2"
   - "@lekalle"

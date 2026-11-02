@@ -11,7 +11,8 @@ tools:
       homepage: https://broadinstitute.github.io/picard/
       documentation: https://gatk.broadinstitute.org/hc/en-us/articles/360037227392-BuildBamIndex-Picard
       tool_dev_url: https://github.com/broadinstitute/picard
-      licence: ["MIT"]
+      licence:
+        - "MIT"
       identifier: biotools:picard_tools
 input:
   - - meta:
@@ -36,13 +37,29 @@ output:
           description: BAI index
           pattern: "*.bai"
           ontologies: []
+  versions_picard:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - picard:
+          type: string
+          description: The name of the tool
+      - 'picard CreateSequenceDictionary --version 2>&1 | grep -o "Version:.*" | cut -f2- -d:':
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: "versions.yml"
-        ontologies:
-          - edam: http://edamontology.org/format_3750 # YAML
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - picard:
+          type: string
+          description: The name of the tool
+      - 'picard CreateSequenceDictionary --version 2>&1 | grep -o "Version:.*" | cut -f2- -d:':
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@ztb2"
   - "@supark87"

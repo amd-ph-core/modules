@@ -48,7 +48,7 @@ process OUROBOROS_RECRUIT {
     tuple val(meta), path("round_timings.tsv")     , emit: timings
     tuple val(meta), path("R*.defer.tsv")          , emit: deferred  , optional: true
     tuple val(meta), path("R*.collapse.tsv")       , emit: collapse  , optional: true
-    path "versions.yml"                            , emit: versions
+    tuple val("${task.process}"), val('rammap'), eval('rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown'), emit: versions_rammap, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -257,11 +257,6 @@ process OUROBOROS_RECRUIT {
     for r in \$(seq 1 \$LAST_ROUND); do
         [ -e "R\${r}.sort_stats.txt" ] && cat "R\${r}.sort_stats.txt" >> sorted_read_stats.txt
     done
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1 || echo unknown)
-    END_VERSIONS
     """
 
     stub:
@@ -272,10 +267,5 @@ process OUROBOROS_RECRUIT {
     : > chimeric.fa
     printf 'Gene\\tRead Patterns\\tRead Count\\n' > sorted_read_stats.txt
     printf 'round\\tseconds\\tconverged\\treason\\n1\\t0\\t1\\treference_stable\\n' > round_timings.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1 || echo unknown)
-    END_VERSIONS
     """
 }

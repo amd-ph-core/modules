@@ -41,7 +41,6 @@ workflow OUROBOROS_GATHER {
     }
 
     OUROBOROS_RECRUIT( ch_reads_refs, recruit_opts, max_rounds )
-    ch_versions = ch_versions.mix( OUROBOROS_RECRUIT.out.versions.first() )
 
     // ── the gather -> assemble boundary ──
     // Per-gene sorted reads across every round; the round prefix is stripped so the key is the gene.

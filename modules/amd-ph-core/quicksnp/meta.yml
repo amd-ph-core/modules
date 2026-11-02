@@ -17,7 +17,8 @@ tools:
         evolutionary relationships between samples.
       homepage: https://github.com/k-florek/QuickSNP
       documentation: https://github.com/k-florek/QuickSNP
-      licence: ["GNU General Public License v3.0"]
+      licence:
+        - "GNU General Public License v3.0"
       identifier: "biotools:quicksnp"
 input:
   - - meta:
@@ -49,13 +50,29 @@ output:
           ontologies:
             - edam: "http://edamontology.org/data_0872" # Phylogenetic tree
             - edam: "http://edamontology.org/format_1910" # Newick format
+  versions_python:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The name of the tool
+      - python3 --version | sed "s/Python //g":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: "versions.yml"
-        ontologies:
-          - edam: http://edamontology.org/format_3750 # YAML
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The name of the tool
+      - python3 --version | sed "s/Python //g":
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@arunbodd"
   - "@djfeistel"

@@ -10,7 +10,7 @@ process VARPIPE_BWAMEM {
 
     output:
     tuple val(meta), path("*.sam")  , emit: sam
-    path  "versions.yml"            , emit: versions
+    tuple val("${task.process}"), val('bwa'), eval('bwa 2>&1 | sed -n "s/^Version: //p"'), emit: versions_bwa, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,11 +29,6 @@ process VARPIPE_BWAMEM {
         ${reads} \\
         > ${prefix}.sam
 
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -41,10 +36,5 @@ process VARPIPE_BWAMEM {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.sam
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
-    END_VERSIONS
     """
 }

@@ -10,7 +10,7 @@ process PICARD_BUILDBAMINDEX {
 
     output:
     tuple val(meta), path("*.bai"), emit: bai
-    path "versions.yml", emit: versions
+    tuple val("${task.process}"), val('picard'), eval('picard CreateSequenceDictionary --version 2>&1 | grep -o "Version:.*" | cut -f2- -d:'), emit: versions_picard, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,20 +21,10 @@ process PICARD_BUILDBAMINDEX {
         picard BuildBamIndex \\
             INPUT=${input} \\
             VALIDATION_STRINGENCY=${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        picard: \$(picard CreateSequenceDictionary --version 2>&1 | grep -o 'Version:.*' | cut -f2- -d:)
-    END_VERSIONS
     """
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.bai
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        picard: \$(picard CreateSequenceDictionary --version 2>&1 | grep -o 'Version:.*' | cut -f2- -d:)
-    END_VERSIONS
     """
 }

@@ -11,7 +11,7 @@ process VARPIPE_TAR {
 
     output:
     path("*.tar.gz"), emit: varpipe_zip
-    path("versions.yml"), emit: versions
+    tuple val("${task.process}"), val('tar'), eval('tar --version | head -1 | sed "s/^tar (GNU tar) //"'), emit: versions_tar, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,21 +31,17 @@ process VARPIPE_TAR {
         -f ${prefix}.tar.gz \\
         ${prefix} \\
         ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        tar: \$(echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//')
-    END_VERSIONS
     """
 
     stub:
     def prefix = task.ext.prefix ?: "varpipe_outputs_${date}"
+    // `echo "" | gzip >` rather than `touch`. A touched `.tar.gz` is a zero-byte
+    // file, not a valid gzip stream, so anything that opens it as one -- nf-test's
+    // gzip parser included -- fails on a file that merely looks present. The
+    // linter accepts this exact form only: its regex is
+    // `echo\s+""\s*\|\s*gzip\s*>\s*.*\.gz$`, so `gzip -n` is rejected even though
+    // it is the more reproducible flag.
     """
-    touch ${prefix}.tar.gz
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        tar: \$(echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//')
-    END_VERSIONS
+    echo "" | gzip > ${prefix}.tar.gz
     """
 }

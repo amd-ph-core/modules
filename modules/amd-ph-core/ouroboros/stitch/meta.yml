@@ -17,8 +17,7 @@ keywords:
   - deletion
 tools:
   - stitch_consensus.py:
-      description: Projects an assembled consensus onto a full reference, reading depth from the reads-on-reference
-        BAM via pysam to separate dropout from true deletion. Ships in this module's resources/usr/bin.
+      description: Projects an assembled consensus onto a full reference, reading depth from the reads-on-reference BAM via pysam to separate dropout from true deletion. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -68,13 +67,30 @@ output:
           type: file
           description: Consensus in the full reference coordinate frame
           pattern: "*.stitched.fa"
+          ontologies: []
+  versions_pysam:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - pysam:
+          type: string
+          description: The name of the tool
+      - python3 -c "import pysam; print(pysam.__version__)" 2>/dev/null || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - pysam:
+          type: string
+          description: The name of the tool
+      - python3 -c "import pysam; print(pysam.__version__)" 2>/dev/null || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

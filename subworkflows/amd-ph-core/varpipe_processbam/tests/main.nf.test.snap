@@ -1,14 +1,14 @@
 {
     "varpipe-processbam subworkflow test [paired-end]": {
         "content": [
-            "513d9d2bb6052e3310d59253772120c3",
+            "c53d63fcfa8b1c3933612a94708689e",
             [
                 [
                     {
                         "id": "test",
                         "single_end": false
                     },
-                    "test_sdrcsm.bai:md5,d724e9222a64e4ddc8ca88fcfa2457b9"
+                    "test_sdrcsm.bai:md5,f697b73da3c37bfd19d5d71393f41e38"
                 ]
             ],
             [
@@ -17,7 +17,7 @@
                         "id": "test",
                         "single_end": false
                     },
-                    "test.tsv:md5,0c3551327db4f3f295770ef65330e498"
+                    "test.tsv:md5,8d9da07d55e76f071e677e1279a77a5d"
                 ]
             ],
             [
@@ -50,23 +50,18 @@
             [
                 "versions.yml:md5,07bf3fc7cf98ca4e2683c00ba953acff",
                 "versions.yml:md5,0a28adf0a64795120091e52b77f9917d",
-                "versions.yml:md5,107411d5f05c5ade52c9a7e79e8e4e11",
                 "versions.yml:md5,171e9245bca8c680671bf1acd97d1d56",
-                "versions.yml:md5,32537ad67b22a054a9c251a82b486dd4",
-                "versions.yml:md5,350639575c0394c8e78968e0c6007009",
                 "versions.yml:md5,4db4be4c0b1621826dcea5cca2ea17c8",
                 "versions.yml:md5,5a6601607c0bbb26a6aaf4323a1715a7",
-                "versions.yml:md5,78b211ef0137e1d39795c92341898c78",
-                "versions.yml:md5,9359d3568b8649182aaeaa45c2ccf9a7",
                 "versions.yml:md5,a69134b233ba85ef72907990b0ffc6b8",
                 "versions.yml:md5,d07559a625a4ec155a84002f9fec274f",
                 "versions.yml:md5,deaf225634889a97ea43349634fd593b"
             ]
         ],
+        "timestamp": "2026-11-01T17:34:40.536279194",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-03-15T23:05:05.194206111"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     }
 }

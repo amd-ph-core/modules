@@ -24,7 +24,17 @@ process GENOTYPE_CALL {
     // Versions go to the `versions` TOPIC rather than a versions.yml path, matching the two nf-core
     // blast modules this is used alongside. A pipeline collects every reporter with one
     // `channel.topic('versions')` instead of threading a version channel through each subworkflow.
-    tuple val("${task.process}"), val("genotype_call"), eval("python3 --version 2>&1 | sed 's/^Python //'"), topic: versions
+    // The channel name on the version tuple below is required, not decorative. Without it
+    // nf-core 4.1.0 lint CRASHES on this module: `_parse_output_emits` takes its unnamed-output
+    // branch and appends a 3-element failure tuple to a 4-field LintResult, raising
+    // `TypeError: LintResult.__init__() missing 1 required positional argument: 'file_path'`
+    // and aborting the entire run. It also makes `main_nf_version_emit` balance.
+    //
+    // Note the parser reads EVERY non-empty line in this block, comments included, and any line
+    // carrying the channel-declaration keyword is taken for a real channel. Spelling that keyword
+    // out in a comment here registers a nameless output and makes `--fix` fail with
+    // "list index out of range", so this note deliberately describes it instead.
+    tuple val("${task.process}"), val("genotype_call"), eval("python3 --version 2>&1 | sed 's/^Python //'"), emit: versions_genotype, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

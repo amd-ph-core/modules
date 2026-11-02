@@ -2,15 +2,30 @@
     "minimap2": {
         "content": [
             "4a9ed7e8f094a7ecb104743b1e5c01d",
-            [
-                "versions.yml:md5,08f5431660fdb76f728f33683b3460ab"
-            ]
+            {
+                "versions": {
+                    "minimap2": [
+                        [
+                            "CLOCKWORK_MINIMAP2",
+                            "minimap2",
+                            "2.30-r1287"
+                        ]
+                    ],
+                    "samtools": [
+                        [
+                            "CLOCKWORK_MINIMAP2",
+                            "samtools",
+                            "1.22.1"
+                        ]
+                    ]
+                }
+            }
         ],
+        "timestamp": "2026-11-01T16:58:10.252951407",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-03-10T23:18:02.467960903"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     },
     "minimap2 - stub": {
         "content": [
@@ -25,7 +40,18 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,08f5431660fdb76f728f33683b3460ab"
+                    [
+                        "CLOCKWORK_MINIMAP2",
+                        "minimap2",
+                        "2.30-r1287"
+                    ]
+                ],
+                "2": [
+                    [
+                        "CLOCKWORK_MINIMAP2",
+                        "samtools",
+                        "1.22.1"
+                    ]
                 ],
                 "sam": [
                     [
@@ -36,15 +62,26 @@
                         "test.contam.sam:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,08f5431660fdb76f728f33683b3460ab"
+                "versions_minimap2": [
+                    [
+                        "CLOCKWORK_MINIMAP2",
+                        "minimap2",
+                        "2.30-r1287"
+                    ]
+                ],
+                "versions_samtools": [
+                    [
+                        "CLOCKWORK_MINIMAP2",
+                        "samtools",
+                        "1.22.1"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-11-01T16:58:23.239299708",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-03-10T22:55:48.858294721"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     }
 }

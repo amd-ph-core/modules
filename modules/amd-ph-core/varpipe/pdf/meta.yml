@@ -1,6 +1,5 @@
 name: "varpipe_pdf"
-description: Custom module for generating a pdf summary report of varpipe
-  results
+description: Custom module for generating a pdf summary report of varpipe results
 keywords:
   - structural variants
   - summary
@@ -43,6 +42,11 @@ output:
         pattern: "versions.yml"
         ontologies:
           - edam: http://edamontology.org/format_3750 # YAML
+topics:
+  versions:
+    - versions.yml:
+        type: string
+        description: The name of the process
 authors:
   - "@ztb2"
   - "@lekalle"

@@ -64,7 +64,6 @@ workflow OUROBOROS_ASSEMBLE_STAGE {
         ch_amplicon_bam       = OUROBOROS_AMPLICONCALL.out.bam
         ch_amplicon_consensus = OUROBOROS_AMPLICONCALL.out.consensus
         ch_amplicon_bed       = OUROBOROS_AMPLICONCALL.out.bed
-        ch_versions           = ch_versions.mix( OUROBOROS_AMPLICONCALL.out.versions.first() )
 
         if (stitch) {
             ch_stitch_in = OUROBOROS_ASSEMBLE.out.amended
@@ -73,7 +72,6 @@ workflow OUROBOROS_ASSEMBLE_STAGE {
 
             OUROBOROS_STITCH( ch_stitch_in, amplicon_min_depth )
             ch_stitched = OUROBOROS_STITCH.out.stitched
-            ch_versions = ch_versions.mix( OUROBOROS_STITCH.out.versions.first() )
 
             // A full-length clean gene's stitched output is byte-identical to its amended consensus, so
             // it is relabelled rather than recomputed. Emitted as its own channel for the caller to

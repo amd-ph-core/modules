@@ -55,7 +55,6 @@ workflow OUROBOROS_ASSEMBLE {
 
     // One task per bin. Each converges on its own schedule.
     OUROBOROS_POLISH( ch_per_bin, align_opts, max_iter )
-    ch_versions = ch_versions.mix( OUROBOROS_POLISH.out.versions.first() )
 
     // Route bins that aligned nothing away from calling. A 68-read bin whose reads the aligner cannot
     // anchor produces a zero-byte SAM, and variant calling on that fails — but the bin is a real
@@ -85,7 +84,6 @@ workflow OUROBOROS_ASSEMBLE {
         call_opts.amend_indels,
         call_opts.refchg_min_strand_frac
     )
-    ch_versions = ch_versions.mix( OUROBOROS_CALL.out.versions.first() )
 
     // Diagnostic PDFs. pairing is paired-end only, so the remainder join fills it with [] when absent.
     ch_report_in = OUROBOROS_CALL.out.coverage
@@ -102,7 +100,6 @@ workflow OUROBOROS_ASSEMBLE {
         call_opts.min_column_coverage,
         call_opts.min_confidence
     )
-    ch_versions = ch_versions.mix( OUROBOROS_REPORT.out.versions.first() )
 
     emit:
     consensus     = OUROBOROS_CALL.out.consensus       // channel: [ val(meta), val(gene), path(fasta) ]

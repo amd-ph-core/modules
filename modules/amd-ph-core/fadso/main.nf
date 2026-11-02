@@ -59,11 +59,14 @@ process FADSO {
     def outputs = meta.single_end
         ? "${prefix}.downsampled.fastq.gz"
         : "${prefix}_1.downsampled.fastq.gz ${prefix}_2.downsampled.fastq.gz"
+    // Each output is gzipped directly rather than copied from a shared temp file.
+    // The previous form was functionally fine but tripped `test_stub_gzip_syntax`:
+    // that rule inspects every line ending in `.gz` and demands it match
+    // `echo "" | gzip > ...`, and `rm tmp.gz` ends in `.gz` without matching. Writing
+    // each file in the loop removes the temp file and the false positive together.
     """
-    echo "" | gzip > tmp.gz
     for out in ${outputs}; do
-        cp tmp.gz "\$out"
+        echo "" | gzip > "\$out"
     done
-    rm tmp.gz
     """
 }

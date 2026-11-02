@@ -29,7 +29,9 @@ process OUROBOROS_AMPLICONCALL {
     tuple val(meta), val(gene), path("${gene}.amplicon.consensus.fa")                         , emit: consensus
     tuple val(meta), val(gene), path("${gene}.amplicon.islands.bed")                          , emit: bed
     tuple val(meta), val(gene), path("${gene}.ref")                                           , emit: ref
-    path "versions.yml"                                                                       , emit: versions
+    tuple val("${task.process}"), val('irma_core'), eval('irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1'), emit: versions_irmacore, topic: versions
+    tuple val("${task.process}"), val('rammap'), eval('rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1'), emit: versions_rammap, topic: versions
+    tuple val("${task.process}"), val('samtools'), eval('samtools --version 2>/dev/null | head -1 | grep -oE "[0-9.]+" | head -1'), emit: versions_samtools, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -69,25 +71,11 @@ process OUROBOROS_AMPLICONCALL {
           if(cov && !inq){st=\$2-1; inq=1}
           if(!cov && inq){print \$1, st, \$2-1; inq=0} }
         END{ if(inq) print \$1, st, \$2 }' > ${gene}.amplicon.islands.bed
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version 2>&1 | grep -oE '[0-9][^ ]*' | head -1)
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1)
-        samtools: \$(samtools --version 2>/dev/null | head -1 | grep -oE '[0-9.]+' | head -1)
-    END_VERSIONS
     """
 
     stub:
     """
     touch ${gene}.amplicon.bam ${gene}.amplicon.bam.bai ${gene}.amplicon.consensus.fa \\
           ${gene}.amplicon.islands.bed ${gene}.ref
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version 2>&1 | grep -oE '[0-9][^ ]*' | head -1)
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1)
-        samtools: \$(samtools --version 2>/dev/null | head -1 | grep -oE '[0-9.]+' | head -1)
-    END_VERSIONS
     """
 }

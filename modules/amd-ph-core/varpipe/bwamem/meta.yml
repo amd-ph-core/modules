@@ -16,7 +16,8 @@ tools:
       homepage: http://bio-bwa.sourceforge.net/
       documentation: https://bio-bwa.sourceforge.net/bwa.shtml
       arxiv: arXiv:1303.3997
-      licence: ["GPL-3.0-or-later"]
+      licence:
+        - "GPL-3.0-or-later"
       identifier: ""
 input:
   - - meta:
@@ -66,13 +67,29 @@ output:
             SAM file
           pattern: "*.sam"
           ontologies: []
+  versions_bwa:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - bwa:
+          type: string
+          description: The name of the tool
+      - 'bwa 2>&1 | sed -n "s/^Version: //p"':
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: "versions.yml"
-        ontologies:
-          - edam: http://edamontology.org/format_3750 # YAML
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - bwa:
+          type: string
+          description: The name of the tool
+      - 'bwa 2>&1 | sed -n "s/^Version: //p"':
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@ztb2"
   - "@supark87"

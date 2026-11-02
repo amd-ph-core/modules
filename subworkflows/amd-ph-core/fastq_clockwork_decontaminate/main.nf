@@ -15,23 +15,31 @@ workflow FASTQ_CLOCKWORK_DECONTAMINATE {
     ch_ref_metadata  // path (mandatory): Path to reference metadata for decontamination
 
     main:
+    // Intentionally empty, and kept only for interface compatibility. Both
+    // modules in this subworkflow report through the `versions` TOPIC, which the
+    // consuming pipeline collects globally via `channel.topic('versions')` --
+    // topics are not scoped to a subworkflow, so nothing is lost by this channel
+    // carrying nothing. Mixing them in here is not an option: the `emit: versions`
+    // output they used to expose no longer exists.
+    //
+    // The emit stays because removing it would break any pipeline that reads
+    // `FASTQ_CLOCKWORK_DECONTAMINATE.out.versions`. It can go once that is
+    // confirmed unused.
     ch_versions = Channel.empty()
 
     CLOCKWORK_MINIMAP2 (
         ch_reads,
         ch_reference
     )
-    ch_versions = ch_versions.mix(CLOCKWORK_MINIMAP2.out.versions.first())
 
     CLOCKWORK_REMOVECONTAM (
         CLOCKWORK_MINIMAP2.out.sam,
         ch_ref_metadata
     )
-    ch_versions = ch_versions.mix(CLOCKWORK_REMOVECONTAM.out.versions.first())
 
     emit:
     counts               = CLOCKWORK_REMOVECONTAM.out.counts               // channel: [ val(meta), path(counts) ]
     decontaminated_fastq = CLOCKWORK_REMOVECONTAM.out.decontaminated_fastq // channel: [ val(meta), path(decontaminated_fastq) ]
     contaminant_fastq    = CLOCKWORK_REMOVECONTAM.out.contaminant_fastq    // channel: [ val(meta), path(contaminant_fastq) ]
-    versions             = ch_versions                                     // channel: [ versions.yml ]
+    versions             = ch_versions                                     // channel: empty; versions arrive via the `versions` topic
 }
