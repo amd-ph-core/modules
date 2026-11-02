@@ -10,17 +10,17 @@ nextflow_workflow {
     tag "kraken2hunter/classify"
     tag "binman/residual"
     tag "binman/assignbins"
-    tag "mmseqs/translatedsearch"
+    tag "subworkflows/../../modules/nf-core/mmseqs/easysearch"
     tag "subworkflows/../../modules/nf-core/minimap2/align"
 
-    // `modules/nf-core/minimap2/align` is checked in to this repo, as a deliberate exception to
-    // the .gitignore rule that keeps nf-core modules out. Nextflow resolves an `include` at PARSE
-    // time, so a subworkflow that composes an nf-core module cannot be tested at all unless the
-    // module is present, and the nf-test job does not install it. That is why varpipe_core and
-    // varpipe_variantanalysis print "Dependency ... not found" on every run in this repo and have
-    // never actually executed. Vendoring the one module keeps this subworkflow out of that set.
-    // The lint matrix filters on `modules/amd-ph-core/**`, so the vendored copy is never linted
-    // as if it were ours.
+    // `modules/nf-core/minimap2/align` and `modules/nf-core/mmseqs/easysearch` are checked in to
+    // this repo, as a deliberate exception to the .gitignore rule that keeps nf-core modules out.
+    // Nextflow resolves an `include` at PARSE time, so a subworkflow that composes an nf-core
+    // module cannot be tested at all unless the module is present, and the nf-test job does not
+    // install it. That is why varpipe_core and varpipe_variantanalysis print
+    // "Dependency ... not found" on every run in this repo and have never actually executed.
+    // Vendoring the two modules keeps this subworkflow out of that set. The lint matrix filters
+    // on `modules/amd-ph-core/**`, so the vendored copies are never linted as if they were ours.
 
     test("stub - paired end, no enrichment tiers") {
 

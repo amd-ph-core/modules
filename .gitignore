@@ -27,4 +27,5 @@ work/
 # were ours.
 modules/nf-core/*
 !modules/nf-core/minimap2/
+!modules/nf-core/mmseqs/
 .venv*
