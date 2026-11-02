@@ -1,0 +1,176 @@
+nextflow_process {
+
+    name "Test Process BINMAN_ASSIGNBINS"
+    script "../main.nf"
+    process "BINMAN_ASSIGNBINS"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "binman"
+    tag "binman/assignbins"
+
+    // These run for real, and that is the point. The script is a Nextflow `template`, which has
+    // two failure modes a stub cannot reach: a backslash that was not doubled, so `split("\\t")`
+    // silently becomes `split("t")` and every tier parses to zero hits; and a `${...}` reference
+    // that does not resolve, which aborts the task. Both produce a run that LOOKS fine -- the
+    // first one especially, because "no reads recruited" is a legitimate result.
+    //
+    // The fixtures in tests/fixtures/ are cut down from a real run rather than invented: the
+    // bins.tsv and the residual pools come from a paired wastewater sample (Coronaviridae,
+    // taxid 11118, plus the taxid-0 unresolved row that must be skipped), trimmed to 20 pairs.
+    // The m8 and PAF are written against those read names so the joins actually land, and they
+    // overlap on purpose -- two fragments are hit by both tiers, which is what makes the union
+    // non-trivial rather than a concatenation.
+
+    test("paired end - both tiers") {
+
+        when {
+            process {
+                """
+                def fixtures = "\$projectDir/modules/amd-ph-core/binman/assignbins/tests/fixtures"
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file("\${fixtures}/test.residual_pool_1.fastq.gz", checkIfExists: true),
+                        file("\${fixtures}/test.residual_pool_2.fastq.gz", checkIfExists: true)
+                    ],
+                    file("\${fixtures}/bins.tsv", checkIfExists: true),
+                    file("\${fixtures}/test.mmseqs.m8", checkIfExists: true),
+                    file("\${fixtures}/test.paf", checkIfExists: true)
+                ]
+                input[1] = file("\${fixtures}/blocks.tsv", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Eight fragments earn Coronaviridae across the two tiers -- six from the m8,
+                // four from the PAF, two of them shared -- so sixteen mates are binned and the
+                // other twenty-four stay residual. Asserting the arithmetic, not just that the
+                // file exists, is what distinguishes a working template from one whose tab
+                // escaping is broken: the broken one produces a valid, empty answer.
+                { assert path(process.out.report.get(0).get(1)).readLines().contains("enriched_mates_into_bins\t16") },
+                { assert path(process.out.report.get(0).get(1)).readLines().contains("residual_mates_out\t24") },
+                { assert path(process.out.report.get(0).get(1)).readLines().contains("enriched_mates_coronaviridae\t16") },
+                // The bin is named from the manifest taxid, never from a parsed filename.
+                { assert process.out.bins.get(0).get(1).collect { file(it).name }.sort() == [
+                    'taxid_11118_coronaviridae_enriched_R1.fastq.gz',
+                    'taxid_11118_coronaviridae_enriched_R2.fastq.gz'
+                ] },
+                { assert snapshot(
+                    path(process.out.report.get(0).get(1)).readLines(),
+                    process.out.residual,
+                    [ versions: process.out.versions ]
+                ).match("paired_both_tiers") }
+            )
+        }
+    }
+
+    test("paired end - no enrichment tiers") {
+
+        // Both tiers disabled. The distinction being tested is that an OMITTED tier is not an
+        // empty tier: the template must leave the flag off entirely rather than hand the script
+        // an empty path, and every residual read must survive to the residual rather than
+        // vanishing into a bin that recruited nothing.
+        when {
+            process {
+                """
+                def fixtures = "\$projectDir/modules/amd-ph-core/binman/assignbins/tests/fixtures"
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file("\${fixtures}/test.residual_pool_1.fastq.gz", checkIfExists: true),
+                        file("\${fixtures}/test.residual_pool_2.fastq.gz", checkIfExists: true)
+                    ],
+                    file("\${fixtures}/bins.tsv", checkIfExists: true),
+                    [],
+                    []
+                ]
+                input[1] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.report.get(0).get(1)).readLines().contains("enriched_mates_into_bins\t0") },
+                { assert path(process.out.report.get(0).get(1)).readLines().contains("residual_mates_out\t40") },
+                { assert snapshot(
+                    path(process.out.report.get(0).get(1)).readLines(),
+                    [ versions: process.out.versions ]
+                ).match("paired_no_tiers") }
+            )
+        }
+    }
+
+    test("paired end - identity floor rejects the PAF hits") {
+
+        // The thresholds now arrive through ext.args, because a module in a shared repo cannot
+        // read `params`. This proves they are actually plumbed: the fixture PAF is 70 matches
+        // over a 76-base block, i.e. 92%, so a 95% floor must reject all four hits and leave
+        // only the six the m8 contributed -- twelve mates instead of sixteen. Without the
+        // plumbing, ext.args would be ignored and this would still report 16.
+        config "./nextflow.config"
+
+        when {
+            process {
+                """
+                def fixtures = "\$projectDir/modules/amd-ph-core/binman/assignbins/tests/fixtures"
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file("\${fixtures}/test.residual_pool_1.fastq.gz", checkIfExists: true),
+                        file("\${fixtures}/test.residual_pool_2.fastq.gz", checkIfExists: true)
+                    ],
+                    file("\${fixtures}/bins.tsv", checkIfExists: true),
+                    file("\${fixtures}/test.mmseqs.m8", checkIfExists: true),
+                    file("\${fixtures}/test.paf", checkIfExists: true)
+                ]
+                input[1] = file("\${fixtures}/blocks.tsv", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.report.get(0).get(1)).readLines().contains("enriched_mates_into_bins\t12") },
+                { assert snapshot(
+                    path(process.out.report.get(0).get(1)).readLines(),
+                    [ versions: process.out.versions ]
+                ).match("paired_strict_identity") }
+            )
+        }
+    }
+
+    test("stub - single end") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                def fixtures = "\$projectDir/modules/amd-ph-core/binman/assignbins/tests/fixtures"
+                input[0] = [
+                    [ id:'test', single_end:true ],
+                    file("\${fixtures}/test.residual_pool_1.fastq.gz", checkIfExists: true),
+                    file("\${fixtures}/bins.tsv", checkIfExists: true),
+                    [],
+                    []
+                ]
+                input[1] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match("single_stub") }
+            )
+        }
+    }
+}

@@ -1,0 +1,153 @@
+{
+    "single_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "taxid_12058_picornaviridae_enriched_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.residual_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.assignment_report.tsv:md5,ec705723472fa60a5a6866bac8625719"
+                    ]
+                ],
+                "3": [
+                    "versions.yml:md5,c03110fcbaec60b01b51cbdcab376207"
+                ],
+                "bins": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "taxid_12058_picornaviridae_enriched_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.assignment_report.tsv:md5,ec705723472fa60a5a6866bac8625719"
+                    ]
+                ],
+                "residual": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.residual_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,c03110fcbaec60b01b51cbdcab376207"
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T20:11:48.992503094",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "paired_strict_identity": {
+        "content": [
+            [
+                "metric\tvalue",
+                "residual_mates_in\t40",
+                "enriched_mates_into_bins\t12",
+                "held_cross_mapped_mates\t0",
+                "rrna_control_only_mates\t2",
+                "residual_mates_out\t28",
+                "enriched_mates_coronaviridae\t12"
+            ],
+            {
+                "versions": [
+                    "versions.yml:md5,c03110fcbaec60b01b51cbdcab376207"
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T20:11:45.850543072",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "paired_both_tiers": {
+        "content": [
+            [
+                "metric\tvalue",
+                "residual_mates_in\t40",
+                "enriched_mates_into_bins\t16",
+                "held_cross_mapped_mates\t0",
+                "rrna_control_only_mates\t0",
+                "residual_mates_out\t24",
+                "enriched_mates_coronaviridae\t16"
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    [
+                        "test.residual_1.fastq.gz:md5,f8bf76c61e75682f4205be811a1a22ca",
+                        "test.residual_2.fastq.gz:md5,1b0cf8601183989c37a0fe7b59380791"
+                    ]
+                ]
+            ],
+            {
+                "versions": [
+                    "versions.yml:md5,c03110fcbaec60b01b51cbdcab376207"
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T20:11:39.15912748",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "paired_no_tiers": {
+        "content": [
+            [
+                "metric\tvalue",
+                "residual_mates_in\t40",
+                "enriched_mates_into_bins\t0",
+                "held_cross_mapped_mates\t0",
+                "rrna_control_only_mates\t0",
+                "residual_mates_out\t40"
+            ],
+            {
+                "versions": [
+                    "versions.yml:md5,c03110fcbaec60b01b51cbdcab376207"
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T20:11:42.550744753",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

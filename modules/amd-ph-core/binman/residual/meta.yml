@@ -1,0 +1,78 @@
+name: "binman_residual"
+description: Concatenate the unresolved and unclassified read streams into one residual pool per mate
+keywords:
+  - metagenomics
+  - read binning
+  - residual
+  - concatenate
+tools:
+  - "gzip":
+      description: |
+        Concatenated gzip members form a valid gzip stream, so the two streams are joined with
+        `cat` and no recompression. `gzip -t` then verifies that rather than assuming it.
+      homepage: "https://www.gnu.org/software/gzip/"
+      documentation: "https://www.gnu.org/software/gzip/manual/gzip.html"
+      licence:
+        - "GPL-3.0-or-later"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information, e.g. `[ id:'sample1', single_end:false ]`
+    - unresolved:
+        type: file
+        description: |
+          Optional, pass `[]` when absent. Reads that were classified but whose lowest common
+          ancestor sits above the bin rank. One file per mate. A library with an empty
+          unresolved bin is normal -- it measured 0.19% of a depleted wastewater library.
+        pattern: "*.{fastq,fq}.gz"
+        ontologies:
+          - edam: http://edamontology.org/format_1930 # FASTQ
+    - unclassified:
+        type: file
+        description: |
+          Optional, pass `[]` when absent. Reads the classifier could not place at any rank.
+          One file per mate. Typically 60-80% of a library, and 72.4% as measured, so an absent
+          unclassified stream almost always means the upstream call failed.
+        pattern: "*.{fastq,fq}.gz"
+        ontologies:
+          - edam: http://edamontology.org/format_1930 # FASTQ
+output:
+  residual:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - ${meta.id}.residual_pool_*.fastq.gz:
+          type: file
+          description: |
+            The residual pool, one file per mate: every read that earned no bin at the
+            requested rank, which is what the enrichment tiers search.
+          pattern: "*.residual_pool_*.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  versions_gzip:
+    - - ${task.process}:
+          type: string
+          description: Name of the process that produced the version
+      - gzip:
+          type: string
+          description: Name of the tool
+      - gzip --version | sed -n '1s/.* //p':
+          type: eval
+          description: Version of gzip
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: Name of the process that produced the version
+      - gzip:
+          type: string
+          description: Name of the tool
+      - gzip --version | sed -n '1s/.* //p':
+          type: eval
+          description: Version of gzip
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

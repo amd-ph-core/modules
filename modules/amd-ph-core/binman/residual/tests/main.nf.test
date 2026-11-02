@@ -1,0 +1,123 @@
+nextflow_process {
+
+    name "Test Process BINMAN_RESIDUAL"
+    script "../main.nf"
+    process "BINMAN_RESIDUAL"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "binman"
+    tag "binman/residual"
+
+    // These are real runs, not stubs. The module is cat + gzip -t + a line-count assertion, so
+    // nothing about it needs a reference database, and the one failure mode it has ever had --
+    // contributing only one of the two input streams while still looking plausible -- is
+    // exactly what a real run with a known read count catches.
+
+    test("paired end - both streams") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Two mates out, and each pool must hold the sum of its two inputs. Asserting
+                // the count here as well as inside the module is not redundant: the in-module
+                // check compares mate 1 only, because that is the cheap invariant, and this
+                // one covers mate 2.
+                { assert process.out.residual.get(0).get(1).size() == 2 },
+                { assert snapshot(process.out).match("paired_both_streams") }
+            )
+        }
+    }
+
+    test("single end - unclassified only") {
+
+        // The common shape: a library whose unresolved bin is empty. It measured 0.19% of a
+        // depleted wastewater library, so an absent unresolved stream is normal and must not
+        // be treated as a failure.
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:true ],
+                    [],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match("single_unclassified_only") }
+            )
+        }
+    }
+
+    test("paired end - neither stream fails the task") {
+
+        // Not a stub and not an error-tolerance test: this asserts the module STOPS. Neither
+        // stream present means the upstream call failed, because the unclassified stream alone
+        // is 60-80% of a real library. Letting that through produced an empty bin set that
+        // looked like a legitimate "nothing found" result.
+        when {
+            process {
+                """
+                input[0] = [ [ id:'test', single_end:false ], [], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert process.errorReport.contains("neither an unresolved bin nor an unclassified") }
+            )
+        }
+    }
+
+    test("stub - paired end") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ],
+                    []
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match("paired_stub") }
+            )
+        }
+    }
+}

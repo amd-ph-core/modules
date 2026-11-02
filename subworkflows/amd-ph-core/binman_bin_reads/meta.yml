@@ -1,0 +1,113 @@
+name: "binman_bin_reads"
+description: |
+  Sort metagenomic reads into clean taxonomic bins at a chosen rank: kraken2 rank-direct
+  binning, then two optional enrichment tiers that recruit the unresolved and unclassified
+  residual into the correct bin. Each tier scans only what the previous tiers left, and
+  cumulative recruitment equals the union of all tiers exactly.
+keywords:
+  - metagenomics
+  - read binning
+  - taxonomic classification
+  - read recruitment
+  - virus
+components:
+  - kraken2hunter/classify
+  - binman/residual
+  - mmseqs/translatedsearch
+  - minimap2/align
+  - binman/assignbins
+input:
+  - ch_reads:
+      type: file
+      description: |
+        Reads to bin.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.{fastq,fq}.gz"
+  - ch_kraken2_db:
+      type: directory
+      description: |
+        Kraken 2 database directory.
+        Structure: [ path(db) ]
+      pattern: "*"
+  - bin_rank:
+      type: string
+      description: |
+        Rank at which bins resolve, e.g. `family`. Reads whose lowest common ancestor sits above
+        this rank go to the unresolved bin and become input to the enrichment tiers.
+  - ch_mmseqs_db:
+      type: directory
+      description: |
+        Prebuilt MMseqs2 protein target database for the translated-search tier. Ignored unless
+        `run_mmseqs` is true.
+        Structure: [ path(db) ]
+      pattern: "*"
+  - ch_panel:
+      type: file
+      description: |
+        Dense nucleotide panel for the alignment tier, one combined FASTA across all target
+        clades rather than one per clade. Ignored unless `run_minimap2` is true.
+        Structure: [ path(fasta) ]
+      pattern: "*.{fa,fasta}"
+  - ch_panel_blocks:
+      type: file
+      description: |
+        The panel's `blocks.tsv`, mapping each panel record id to a clade. Without it the PAF
+        cannot be interpreted and the tier contributes nothing. Ignored unless `run_minimap2`
+        is true.
+        Structure: [ path(tsv) ]
+      pattern: "*.tsv"
+  - run_mmseqs:
+      type: boolean
+      description: |
+        Enable the translated-search tier. A caller should gate this on BOTH its own flag and
+        whether it actually holds the database: enabling a tier whose reference channel is empty
+        does not fail, it declares a process that never runs, and the tier is skipped in silence.
+  - run_minimap2:
+      type: boolean
+      description: |
+        Enable the dense-panel nucleotide tier. Same caveat as `run_mmseqs`: gate it on the
+        presence of both the panel and its blocks file.
+output:
+  - report:
+      type: file
+      description: |
+        Kraken 2 taxonomic report.
+        Structure: [ val(meta), path(txt) ]
+      pattern: "*.kraken2.report.txt"
+  - bins:
+      type: file
+      description: |
+        Tier-1 bins, before enrichment.
+        Structure: [ val(meta), path(bins) ]
+      pattern: "bins/taxid_*.fastq.gz"
+  - bin_manifest:
+      type: file
+      description: |
+        Manifest of every bin opened: taxid, rank, scientific name and counts. Join on the
+        taxid rather than parsing bin filenames.
+        Structure: [ val(meta), path(tsv) ]
+      pattern: "bins/bins.tsv"
+  - bins_enriched:
+      type: file
+      description: |
+        The bins after enrichment, one file per mate. Single-clade by construction: a read that
+        recruited to more than one clade is held in the residual instead.
+        Structure: [ val(meta), path(bins) ]
+      pattern: "enriched/*.fastq.gz"
+  - residual:
+      type: file
+      description: |
+        The honest remainder: reads no tier recruited, plus reads held back for cross-mapping.
+        Passed along rather than dropped.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.residual_*.fastq.gz"
+  - assignment:
+      type: file
+      description: |
+        Per-sample assignment metrics, including a per-clade enriched count.
+        Structure: [ val(meta), path(tsv) ]
+      pattern: "*.assignment_report.tsv"
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"
