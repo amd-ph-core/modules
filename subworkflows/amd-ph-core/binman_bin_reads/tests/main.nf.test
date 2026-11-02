@@ -13,23 +13,14 @@ nextflow_workflow {
     tag "mmseqs/translatedsearch"
     tag "subworkflows/../../modules/nf-core/minimap2/align"
 
-    // THIS TEST CANNOT RUN IN CI AS THE REPOSITORY STANDS, and that is a property of the
-    // repository rather than of this subworkflow. `modules/nf-core` is in .gitignore here, so
-    // the nf-core modules that amd-ph-core subworkflows include are never checked in and the
-    // CI nf-test job does not install them. Nextflow resolves an `include` at parse time, so a
-    // missing one is fatal and no amount of stubbing avoids it.
-    //
-    // This is pre-existing and not hypothetical: nf-test already prints, on every run in this
-    // repo, "Dependency .../modules/nf-core/untar/main.nf not found" for varpipe_core, the
-    // same for varpipe_variantanalysis, and for cat/fastq. Those subworkflow tests are in the
-    // same position. The CI job only selects tests changed since the previous commit, which is
-    // why they are not currently red.
-    //
-    // It DOES pass locally after `nf-core modules install minimap2/align`, and was run that
-    // way: 2 tests, both arms, with the enrichment tiers off and then on. Vendoring the
-    // nf-core modules this repo's subworkflows depend on -- or installing them in the nf-test
-    // action -- is the one change that would turn this and the three existing cases into live
-    // tests, and it is tracked as follow-up rather than smuggled into this PR.
+    // `modules/nf-core/minimap2/align` is checked in to this repo, as a deliberate exception to
+    // the .gitignore rule that keeps nf-core modules out. Nextflow resolves an `include` at PARSE
+    // time, so a subworkflow that composes an nf-core module cannot be tested at all unless the
+    // module is present, and the nf-test job does not install it. That is why varpipe_core and
+    // varpipe_variantanalysis print "Dependency ... not found" on every run in this repo and have
+    // never actually executed. Vendoring the one module keeps this subworkflow out of that set.
+    // The lint matrix filters on `modules/amd-ph-core/**`, so the vendored copy is never linted
+    // as if it were ours.
 
     test("stub - paired end, no enrichment tiers") {
 

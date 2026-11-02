@@ -23,6 +23,7 @@ consumers need in order to treat a bin as one organism group.
 Reads no tier recruited are written to the residual too, never dropped -- 9.1% of the pool as
 measured, which is reasonable overhead to pass along for downstream tools to mine.
 """
+
 import argparse
 import collections
 import csv
@@ -139,8 +140,7 @@ def iter_fastq(path):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--bin-manifest", required=True, help="bins.tsv emitted by kraken2-hunter")
     ap.add_argument("--residual-1", required=True, help="residual mate 1 (unresolved + unclassified)")
     ap.add_argument("--residual-2", help="residual mate 2, for paired input")
@@ -149,8 +149,12 @@ def main():
     ap.add_argument("--rammap-blocks", help="blocks.tsv mapping panel records to families")
     ap.add_argument("--rammap-min-aln-len", type=int, default=60)
     ap.add_argument("--rammap-min-identity", type=float, default=80.0)
-    ap.add_argument("--hold-cross-mapped", choices=["true", "false"], default="true",
-                    help="hold reads recruited to >1 family in the residual (measured cost 0.6%%)")
+    ap.add_argument(
+        "--hold-cross-mapped",
+        choices=["true", "false"],
+        default="true",
+        help="hold reads recruited to >1 family in the residual (measured cost 0.6%%)",
+    )
     ap.add_argument("--prefix", required=True)
     ap.add_argument("--outdir", default="enriched")
     a = ap.parse_args()
@@ -163,8 +167,7 @@ def main():
         print("no tier-1 bins in manifest; all residual reads stay residual", file=sys.stderr)
 
     mm, controls = load_mmseqs(a.mmseqs_hits, set(families))
-    rm = load_rammap(a.rammap_paf, a.rammap_blocks,
-                     a.rammap_min_aln_len, a.rammap_min_identity)
+    rm = load_rammap(a.rammap_paf, a.rammap_blocks, a.rammap_min_aln_len, a.rammap_min_identity)
 
     union = collections.defaultdict(set)
     for src in (mm, rm):
@@ -227,10 +230,13 @@ def main():
         for fam in sorted(k for k in counts if not k.startswith("_")):
             fh.write(f"enriched_mates_{fam}\\t{counts[fam]}\\n")
 
-    print(f"enriched {sum(v for k, v in counts.items() if not k.startswith('_')):,} reads into "
-          f"{sum(1 for k in counts if not k.startswith('_')):,} bins; "
-          f"{counts['_residual']:,} stay residual "
-          f"({counts['_cross_mapped']:,} held for cross-mapping)", file=sys.stderr)
+    print(
+        f"enriched {sum(v for k, v in counts.items() if not k.startswith('_')):,} reads into "
+        f"{sum(1 for k in counts if not k.startswith('_')):,} bins; "
+        f"{counts['_residual']:,} stay residual "
+        f"({counts['_cross_mapped']:,} held for cross-mapping)",
+        file=sys.stderr,
+    )
     return 0
 
 
