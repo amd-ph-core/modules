@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+# Intentionally declares NO kraken2 dependency, and main.nf has no `conda` directive.
+#
+# kraken2-hunter is a fork (hseabolt/kraken2 @ 23af0bd) that is not packaged for conda. Pinning
+# bioconda::kraken2 here would hand users upstream kraken2, which classifies identically but has
+# no --bin-out flag, so every run would die on an unrecognised option -- a confusing failure that
+# looks like a module bug rather than a missing patch. Naming a package that cannot provide the
+# patched behaviour would be worse than naming none.
+#
+# The file exists because nf-core's `environment_yml_exists` lint test requires it, and that test
+# cannot be waived in a modules repository: nf-core/tools only loads the `.nf-core.yml` lint
+# config when repo_type == "pipeline".
+channels:
+  - conda-forge
+  - bioconda
+dependencies: []

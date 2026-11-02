@@ -1,0 +1,136 @@
+name: "kraken2hunter_classify"
+description: Classify metagenomic reads with kraken2 and write per-rank taxonomic read bins in the same pass
+keywords:
+  - metagenomics
+  - taxonomic classification
+  - read binning
+  - kmer
+  - virus
+tools:
+  - "kraken2-hunter":
+      description: |
+        Fork of Kraken 2 (hseabolt/kraken2, commit 23af0bd, based on upstream 2.17.1) adding
+        rank-aware streaming read binning. Classification semantics and database format are
+        unchanged from upstream; the patch is an output-layer extension that appends each
+        classified fragment to a bin resolved at a requested taxonomic rank.
+      homepage: "https://github.com/hseabolt/kraken2"
+      documentation: "https://github.com/DerrickWood/kraken2/wiki/Manual"
+      tool_dev_url: "https://github.com/hseabolt/kraken2"
+      doi: "10.1186/s13059-019-1891-0"
+      licence:
+        - "MIT"
+      args_id: "$args"
+
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information, e.g. `[ id:'sample1', single_end:false ]`
+    - reads:
+        type: file
+        description: Mandatory. One FASTQ for single-end input, or two for paired-end. Gzipped.
+        pattern: "*.{fastq,fq}.gz"
+        ontologies:
+          - edam: http://edamontology.org/format_1930 # FASTQ
+  - db:
+      type: directory
+      description: Mandatory. Kraken 2 database directory, as built by `kraken2-build`.
+      pattern: "*"
+  - bin_rank:
+      type: string
+      description: |
+        Mandatory. Taxonomic rank at which to resolve bins, e.g. `family`, `genus`, `species`.
+        Reads whose classification sits above this rank go to the unresolved bin. The special
+        value `taxid` bins at the exact classified taxid instead of resolving to a rank.
+
+output:
+  report:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - ${meta.id}.kraken2.report.txt:
+          type: file
+          description: Kraken 2 taxonomic report, identical in format to upstream kraken2
+          pattern: "*.kraken2.report.txt"
+          ontologies: []
+  bin_manifest:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - bins/bins.tsv:
+          type: file
+          description: |
+            Tab-separated manifest of every bin written: bin taxid, rank, scientific name,
+            fragment/read/base counts, and the output file for each mate. Join on the taxid
+            rather than parsing bin filenames.
+          pattern: "bins/bins.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  bins:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - bins/taxid_*.fastq.gz:
+          type: file
+          description: Optional. Per-taxon read bins resolved at the requested rank, one file per mate.
+          pattern: "bins/taxid_*.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  unresolved:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - bins/unresolved_*.fastq.gz:
+          type: file
+          description: |
+            Optional. Reads that were classified, but whose lowest common ancestor sits above
+            the requested rank, so no bin at that rank exists for them.
+          pattern: "bins/unresolved_*.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  unclassified:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - ${meta.id}.unclassified*.fastq.gz:
+          type: file
+          description: Optional. Reads kraken2 could not classify at any rank.
+          pattern: "*.unclassified*.fastq.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  classified_reads:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - ${meta.id}.kraken2.output.txt.gz:
+          type: file
+          description: Optional. Per-read classification output, one line per fragment.
+          pattern: "*.kraken2.output.txt.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  versions_kraken2hunter:
+    - - ${task.process}:
+          type: string
+          description: Name of the process that produced the version
+      - kraken2-hunter:
+          type: string
+          description: Name of the tool
+      - kraken2 --version | sed -n "s/^Kraken version //p":
+          type: eval
+          description: Version of kraken2-hunter, with the "Kraken version " banner stripped
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: Name of the process that produced the version
+      - kraken2-hunter:
+          type: string
+          description: Name of the tool
+      - kraken2 --version | sed -n "s/^Kraken version //p":
+          type: eval
+          description: Version of kraken2-hunter, with the "Kraken version " banner stripped
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

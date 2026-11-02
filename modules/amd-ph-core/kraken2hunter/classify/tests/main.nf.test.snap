@@ -1,0 +1,304 @@
+{
+    "single_genus_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        [
+                            "unresolved_family_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "unresolved_family_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        [
+                            "test.unclassified_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.unclassified_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.kraken2.output.txt.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "6": [
+                    [
+                        "KRAKEN2HUNTER_CLASSIFY",
+                        "kraken2-hunter",
+                        "2.17.1"
+                    ]
+                ],
+                "bin_manifest": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "bins": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "classified_reads": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.kraken2.output.txt.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "unclassified": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        [
+                            "test.unclassified_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.unclassified_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "unresolved": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": true
+                        },
+                        [
+                            "unresolved_family_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "unresolved_family_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "versions_kraken2hunter": [
+                    [
+                        "KRAKEN2HUNTER_CLASSIFY",
+                        "kraken2-hunter",
+                        "2.17.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:46:58.934616245",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "paired_family_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "unresolved_family_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "unresolved_family_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.unclassified_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.unclassified_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.output.txt.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "6": [
+                    [
+                        "KRAKEN2HUNTER_CLASSIFY",
+                        "kraken2-hunter",
+                        "2.17.1"
+                    ]
+                ],
+                "bin_manifest": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "bins.tsv:md5,14833fb2b9aa50bcda9be454278b4ccc"
+                    ]
+                ],
+                "bins": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "taxid_12058_Picornaviridae_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "taxid_12058_Picornaviridae_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "classified_reads": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.output.txt.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "unclassified": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.unclassified_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.unclassified_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "unresolved": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "unresolved_family_R1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "unresolved_family_R2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "versions_kraken2hunter": [
+                    [
+                        "KRAKEN2HUNTER_CLASSIFY",
+                        "kraken2-hunter",
+                        "2.17.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:46:55.532357237",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
