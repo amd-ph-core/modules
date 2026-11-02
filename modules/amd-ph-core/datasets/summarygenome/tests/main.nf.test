@@ -1,0 +1,140 @@
+nextflow_process {
+
+    name "Test Process DATASETS_SUMMARYGENOME"
+    script "../main.nf"
+    process "DATASETS_SUMMARYGENOME"
+    config "./nextflow.config"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "datasets"
+    tag "datasets/summarygenome"
+
+    // hepatitis D virus 1 -- the smallest human-infecting virus genome, and the
+    // taxon nao-mgs-workflow uses for its own index smoke test. Restricted to
+    // complete assemblies it returns a stable two-row result, so the snapshot
+    // tracks the container rather than NCBI's growth.
+    //
+    // The two live tests are identical except for the image they run in: the
+    // module's own container, and an older StaPH-B tag. Each records the same
+    // payload twice:
+    //
+    //   *_exact  pins the full semver, so any container rebuild shows up.
+    //   *_major  normalises to `18.x`, so only a major bump shows up.
+    //
+    // nf-test requires snapshot ids to be unique within a file, so the two
+    // containers cannot literally share one key -- but the *_major contents are
+    // byte-identical across them, which is the property a consumer pipeline
+    // relies on when it swaps this container underneath a pinned snapshot.
+    //
+    // Versions are read from `process.out.versions_ncbidatasetscli`, the named
+    // emit that carries the `topic: versions` tuple. There is no `versions.yml`
+    // to read any more -- under nf-core 4.x the version is an `eval` captured at
+    // task time, and the tuple is [ process, tool, version ].
+    //
+    // Each arm wraps that tuple in a `[ versions: ... ]` map. The nf-core
+    // `test_snap_versions` rule greps the snapshot for the literal string
+    // "versions", and it checks only a single test -- its condition sits outside
+    // the loop over test names, so it sees whichever key the leaked loop variable
+    // happened to end on. Naming the key in every arm makes that independent of
+    // snapshot key order, which is not stable between runs.
+
+    test("hepatitis D virus 1 - current container") {
+
+        when {
+            process {
+                """
+                input[0] = [ [ id:'index' ], '2847173' ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    path(process.out.accessions[0][1]).readLines(),
+                    [ versions: process.out.versions_ncbidatasetscli ]
+                ).match("hdv1_current_exact") },
+                { assert snapshot(
+                    path(process.out.accessions[0][1]).readLines(),
+                    [ versions: process.out.versions_ncbidatasetscli.collect { proc, tool, ver ->
+                        [ proc, tool, ver.replaceAll(/^(\d+)\..*$/, '$1.x') ]
+                    } ]
+                ).match("hdv1_current_major") },
+                { assert path(process.out.report[0][1]).exists() }
+            )
+        }
+    }
+
+    test("hepatitis D virus 1 - baseline container") {
+
+        config "./nextflow.baseline.config"
+
+        when {
+            process {
+                """
+                input[0] = [ [ id:'index' ], '2847173' ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    path(process.out.accessions[0][1]).readLines(),
+                    [ versions: process.out.versions_ncbidatasetscli ]
+                ).match("hdv1_baseline_exact") },
+                { assert snapshot(
+                    path(process.out.accessions[0][1]).readLines(),
+                    [ versions: process.out.versions_ncbidatasetscli.collect { proc, tool, ver ->
+                        [ proc, tool, ver.replaceAll(/^(\d+)\..*$/, '$1.x') ]
+                    } ]
+                ).match("hdv1_baseline_major") },
+                { assert path(process.out.report[0][1]).exists() }
+            )
+        }
+    }
+
+    // taxid 32644 ("unidentified") is a real taxid that `datasets` accepts and
+    // answers with zero records and exit 0 -- the one case the emptiness guard
+    // exists for. An unknown taxid instead fails inside `datasets` itself.
+    test("taxon with no assemblies - current container") {
+
+        when {
+            process {
+                """
+                input[0] = [ [ id:'index' ], '32644' ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert process.errorReport.contains("No assemblies found for taxon") }
+            )
+        }
+    }
+
+    test("hepatitis D virus 1 - current container -stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [ [ id:'index' ], '2847173' ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match("hdv1_current_stub") }
+            )
+        }
+    }
+}

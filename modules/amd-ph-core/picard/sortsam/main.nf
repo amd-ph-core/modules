@@ -11,7 +11,7 @@ process PICARD_SORTSAM {
 
     output:
     tuple val(meta), path("*.bam"), emit: bam
-    path "versions.yml"                  , emit: versions
+    tuple val("${task.process}"), val('picard'), eval('picard SortSam --version 2>&1 | grep -o "Version:.*" | cut -f2- -d:'), emit: versions_picard, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,21 +35,11 @@ process PICARD_SORTSAM {
         --INPUT $bam \\
         --OUTPUT ${prefix}.bam \\
         --SORT_ORDER $sort_order
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        picard: \$(picard SortSam --version 2>&1 | grep -o 'Version:.*' | cut -f2- -d:)
-    END_VERSIONS
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.bam
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        picard: \$(picard SortSam --version 2>&1 | grep -o 'Version:.*' | cut -f2- -d: || echo 'stub')
-    END_VERSIONS
     """
 }

@@ -23,7 +23,7 @@ process OUROBOROS_STITCH {
 
     output:
     tuple val(meta), val(gene), path("${gene}.stitched.fa"), emit: stitched
-    path "versions.yml"                                    , emit: versions
+    tuple val("${task.process}"), val('pysam'), eval('python3 -c "import pysam; print(pysam.__version__)" 2>/dev/null || echo unknown'), emit: versions_pysam, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,20 +35,10 @@ process OUROBOROS_STITCH {
         --min-depth ${min_depth} \\
         -N ${gene} \\
         -o ${gene}.stitched.fa
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pysam: \$(python3 -c 'import pysam; print(pysam.__version__)' 2>/dev/null || echo unknown)
-    END_VERSIONS
     """
 
     stub:
     """
     touch ${gene}.stitched.fa
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pysam: \$(python3 -c 'import pysam; print(pysam.__version__)' 2>/dev/null || echo unknown)
-    END_VERSIONS
     """
 }

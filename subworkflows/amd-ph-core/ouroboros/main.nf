@@ -67,7 +67,6 @@ workflow OUROBOROS {
         .join( OUROBOROS_GATHER.out.sort_stats )
 
     OUROBOROS_GENOMEREPORT( ch_genome_report_in )
-    ch_versions = ch_versions.mix( OUROBOROS_GENOMEREPORT.out.versions.first() )
 
     emit:
     genomes            = OUROBOROS_GENOMEREPORT.out.report          // channel: [ val(meta), path(genomes.tsv) ]

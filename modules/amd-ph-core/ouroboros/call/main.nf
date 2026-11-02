@@ -49,7 +49,8 @@ process OUROBOROS_CALL {
     tuple val(meta), val(gene), path("${gene}.vcf")              , emit: vcf        , optional: true
     tuple val(meta), val(gene), path("${gene}-pairingStats.txt") , emit: pairing    , optional: true
     tuple val(meta), val(gene), path("${gene}*.sqm")             , emit: sqm        , optional: true
-    path "versions.yml"                                          , emit: versions
+    tuple val("${task.process}"), val('irma_core'), eval('irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1'), emit: versions_irmacore, topic: versions
+    tuple val("${task.process}"), val('samtools'), eval('samtools --version 2>/dev/null | head -1 | grep -oE "[0-9.]+" | head -1'), emit: versions_samtools, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -62,10 +63,17 @@ process OUROBOROS_CALL {
     // Opt-in indel folding: fold called indels into the amended consensus so it reflects real length
     // changes (N still means missing). Off by default, because IRMA routes indels to the VCF and keeps
     // the amended consensus length-locked; folding here would diverge the NM=0 parity baseline.
-    // Optional consensus depth floor. Applies to call.py ONLY -- CALL_OPTS is shared with
-    // generate_vcf.py, which does not know this flag. Defaults off: existing callers unchanged.
-    def mcd = ((task.ext.min_consensus_depth ?: 0) as int) > 0
-                  ? "--min-consensus-depth ${task.ext.min_consensus_depth} " : ''
+    // Extra flags for call.py ONLY -- deliberately NOT folded into CALL_OPTS, which is shared
+    // with generate_vcf.py, whose argparse rejects them. This is where
+    // `--min-consensus-depth N` now goes.
+    //
+    // Carried in `ext.args` rather than a bespoke `ext.min_consensus_depth`, which nf-core lint
+    // rejects: `main_nf_ext_key` permits only args/args<N>/prefix/prefix2/use_gpu, and a
+    // module-repo rule cannot be waived. Nothing in this repo or in the ouroboros pipeline ever
+    // set the old key, so it always fell back to 0 and the flag was never emitted -- the rename
+    // changes no current behaviour. Callers wanting the floor now pass
+    // `ext.args = '--min-consensus-depth 1'`.
+    def args = task.ext.args ? "${task.ext.args} " : ''
     def indel_opt = amend_indels ? "--deletion-file ${gene}-deletions.txt --insertion-file ${gene}-insertions.txt" : ''
     """
     # CALL_OPTS holds the thresholds shared by call.py AND generate_vcf.py. The caller-specific flags
@@ -85,10 +93,10 @@ process OUROBOROS_CALL {
         irma-core merge-sam --store-stats ${ref} ${sam} M-${gene}
         var_call_stats.py ${ref} M-${gene}.sam V-${gene}
         get_pairing_stats.py M-${gene}.stats > ${gene}-pairingStats.txt
-        call.py --print-all-sites --no-gap-allele ${mcd}\$CALL_OPTS \$CALLER_OPTS --paired-error ${gene}-pairingStats.txt ${ref} ${gene} V-${gene}.pileup.msgpack
+        call.py --print-all-sites --no-gap-allele ${args}\$CALL_OPTS \$CALLER_OPTS --paired-error ${gene}-pairingStats.txt ${ref} ${gene} V-${gene}.pileup.msgpack
     else
         var_call_stats.py ${ref} ${sam} V-${gene}
-        call.py --print-all-sites --no-gap-allele ${mcd}\$CALL_OPTS \$CALLER_OPTS ${ref} ${gene} V-${gene}.pileup.msgpack
+        call.py --print-all-sites --no-gap-allele ${args}\$CALL_OPTS \$CALLER_OPTS ${ref} ${gene} V-${gene}.pileup.msgpack
     fi
 
     # === PHASING === (only worthwhile with more than two variants)
@@ -116,12 +124,6 @@ process OUROBOROS_CALL {
     else
         AMENDED_LEN=0
     fi
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version 2>&1 | grep -oE '[0-9][^ ]*' | head -1)
-        samtools: \$(samtools --version 2>/dev/null | head -1 | grep -oE '[0-9.]+' | head -1)
-    END_VERSIONS
     """
 
     stub:
@@ -129,11 +131,5 @@ process OUROBOROS_CALL {
     mkdir -p amended_consensus
     touch ${gene}.bam ${gene}.bam.bai ${gene}.fasta ${gene}-variants.txt ${gene}-allAlleles.txt ${gene}-coverage.txt
     AMENDED_LEN=0
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version 2>&1 | grep -oE '[0-9][^ ]*' | head -1)
-        samtools: \$(samtools --version 2>/dev/null | head -1 | grep -oE '[0-9.]+' | head -1)
-    END_VERSIONS
     """
 }

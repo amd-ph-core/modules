@@ -9,8 +9,14 @@ process VARPIPE_REPORT {
     tuple val(meta), path(statsFile), path(targetRegionCoverage), path(drLociFinalAnnotation)
 
     output:
+    // Declared as the `versions` TOPIC while still being a real file. This
+    // module's script is a Python `template`, and Nextflow rejects an `eval`
+    // output on any non-Bash interpreter -- "Process output of type 'eval' is
+    // only allowed with Bash process scripts". Lint accepts `path "versions.yml"`
+    // on a topic line for exactly this reason, so the template keeps writing the
+    // file and the topic carries it.
     tuple val(meta), path("summary.txt"), emit: summary
-    path "versions.yml", emit: versions
+    path "versions.yml", emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

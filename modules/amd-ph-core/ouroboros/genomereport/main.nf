@@ -19,7 +19,7 @@ process OUROBOROS_GENOMEREPORT {
 
     output:
     tuple val(meta), path("*.genomes.tsv"), emit: report
-    path "versions.yml"                   , emit: versions
+    tuple val("${task.process}"), val('rammap'), eval('rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown'), emit: versions_rammap, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -59,20 +59,10 @@ process OUROBOROS_GENOMEREPORT {
         --ref-fasta ${panel_ref} \\
         --sam-dir . \\
         ${ss} > ${meta.id}.genomes.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1 || echo unknown)
-    END_VERSIONS
     """
 
     stub:
     """
     touch ${meta.id}.genomes.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1 || echo unknown)
-    END_VERSIONS
     """
 }

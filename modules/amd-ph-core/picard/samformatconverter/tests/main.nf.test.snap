@@ -11,7 +11,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,bff49c68114a1e99525df9aa872c71dc"
+                    [
+                        "PICARD_SAMFORMATCONVERTER",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ],
                 "bam": [
                     [
@@ -21,16 +25,20 @@
                         "test.bam:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,bff49c68114a1e99525df9aa872c71dc"
+                "versions_picard": [
+                    [
+                        "PICARD_SAMFORMATCONVERTER",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-11-01T17:00:53.937497691",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-04-23T11:15:22.231473"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     },
     "tuberculosis aligned sam": {
         "content": [
@@ -44,7 +52,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,bff49c68114a1e99525df9aa872c71dc"
+                    [
+                        "PICARD_SAMFORMATCONVERTER",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ],
                 "bam": [
                     [
@@ -54,15 +66,19 @@
                         "test.bam:md5,0eee8853c194859c2c3b2770442da79c"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,bff49c68114a1e99525df9aa872c71dc"
+                "versions_picard": [
+                    [
+                        "PICARD_SAMFORMATCONVERTER",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-11-01T17:00:48.326033587",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-04-23T11:26:51.118449"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     }
 }

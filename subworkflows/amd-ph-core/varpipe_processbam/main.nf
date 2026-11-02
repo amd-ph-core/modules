@@ -18,6 +18,11 @@ workflow VARPIPE_PROCESSBAM {
     ch_ref_fasta // channel (mandatory): [ val(meta), path(ref_fasta) ]
 
     main:
+    // Only modules that still write a versions.yml feed this channel. The
+    // amd-ph-core modules report through the `versions` TOPIC instead, which the
+    // consuming pipeline collects globally via `channel.topic('versions')`, so
+    // their versions do not travel through here and must not be mixed in -- the
+    // `emit: versions` output they used to expose no longer exists.
     ch_versions = Channel.empty()
     ch_multiqc_inputs = Channel.empty()
 
@@ -49,20 +54,17 @@ workflow VARPIPE_PROCESSBAM {
         ch_reads,
         ch_index
     )
-    ch_versions = ch_versions.mix(VARPIPE_BWAMEM.out.versions)
 
     // CONVERT SAM TO BAM
     PICARD_SAMFORMATCONVERTER (
         VARPIPE_BWAMEM.out.sam
     )
-    ch_versions = ch_versions.mix(PICARD_SAMFORMATCONVERTER.out.versions)
 
     // RUN MAPPING REPORT AND MARK DUPLICATES
     PICARD_SORTSAM (
         PICARD_SAMFORMATCONVERTER.out.bam,
         'coordinate'
     )
-    ch_versions = ch_versions.mix(PICARD_SORTSAM.out.versions)
 
     PICARD_MARKDUPLICATES (
         PICARD_SORTSAM.out.bam,
@@ -76,7 +78,6 @@ workflow VARPIPE_PROCESSBAM {
     PICARD_BUILDBAMINDEX (
         PICARD_MARKDUPLICATES.out.bam
     )
-    ch_versions = ch_versions.mix(PICARD_BUILDBAMINDEX.out.versions)
 
     SAMTOOLS_VIEW_UNMAPPED (
         PICARD_MARKDUPLICATES.out.bam.join(PICARD_BUILDBAMINDEX.out.bai),
@@ -97,7 +98,6 @@ workflow VARPIPE_PROCESSBAM {
     PICARD_BUILDBAMINDEX_2 (
         SAMTOOLS_VIEW.out.bam
     )
-    ch_versions = ch_versions.mix(PICARD_BUILDBAMINDEX_2.out.versions)
 
     SAMTOOLS_VIEW_MAPPED (
         SAMTOOLS_VIEW.out.bam.join(PICARD_BUILDBAMINDEX_2.out.bai),

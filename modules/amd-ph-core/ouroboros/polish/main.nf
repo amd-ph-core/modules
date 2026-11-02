@@ -58,7 +58,8 @@ process OUROBOROS_POLISH {
     tuple val(meta), val(gene), path("polished.ref"), path("polished.sam"), env('CONVERGE_REASON'), emit: aligned
     tuple val(meta), val(gene), env('INDELS_FOLDED')                      , emit: indels_folded
     tuple val(meta), val(gene), path("iter_timings.tsv")                  , emit: timings
-    path "versions.yml"                                                   , emit: versions
+    tuple val("${task.process}"), val('irma_core'), eval('irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1'), emit: versions_irmacore, topic: versions
+    tuple val("${task.process}"), val('rammap'), eval('rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown'), emit: versions_rammap, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -201,12 +202,6 @@ process OUROBOROS_POLISH {
     # Terminal state, exported so the caller can route a bin that produced nothing away from variant
     # calling rather than feeding it a zero-byte SAM.
     CONVERGE_REASON=\$REASON
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version 2>&1 | grep -oE '[0-9][^ ]*' | head -1)
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1 || echo unknown)
-    END_VERSIONS
     """
 
     stub:
@@ -215,11 +210,5 @@ process OUROBOROS_POLISH {
     INDELS_FOLDED=0
     CONVERGE_REASON=reference_stable
     printf 'iter\\tseconds\\tindex_s\\talign_s\\tscore\\tconverged\\treason\\n1\\t0\\t0\\t0\\t0\\t1\\treference_stable\\n' > iter_timings.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version 2>&1 | grep -oE '[0-9][^ ]*' | head -1)
-        rammap: \$(rammap --version 2>/dev/null | grep -oE '[0-9][^ ]*' | head -1 || echo unknown)
-    END_VERSIONS
     """
 }

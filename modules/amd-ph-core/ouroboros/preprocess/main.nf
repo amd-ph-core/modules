@@ -28,7 +28,7 @@ process OUROBOROS_PREPROCESS {
     tuple val(meta), path("*.fa") , emit: reads_fasta
     tuple val(meta), path("*.xfl"), emit: deflation_index
     tuple val(meta), path("QC_log.txt"), emit: qc_log
-    path "versions.yml"           , emit: versions
+    tuple val("${task.process}"), val('irma_core'), eval('irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1'), emit: versions_irmacore, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -55,21 +55,11 @@ process OUROBOROS_PREPROCESS {
         ${prefix}.xfl \\
         ${read_args} \\
         > ${prefix}.fa
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version | sed 's/irma-core //')
-    END_VERSIONS
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.fa ${prefix}.xfl QC_log.txt
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        irma_core: \$(irma-core --version | sed 's/irma-core //')
-    END_VERSIONS
     """
 }

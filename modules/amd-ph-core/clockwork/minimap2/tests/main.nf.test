@@ -30,7 +30,10 @@ nextflow_process {
             assert process.success
             assert snapshot(
                 bam(process.out.sam[0][1]).getReadsMD5(),
-                process.out.versions
+                [ versions: [
+                    minimap2: process.out.versions_minimap2,
+                    samtools: process.out.versions_samtools,
+                ] ]
             ).match()
         }
 

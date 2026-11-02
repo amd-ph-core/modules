@@ -22,8 +22,7 @@ keywords:
   - meta-assembly
 tools:
   - rammap:
-      description: Pure-Rust minimap2-compatible read mapper; used for both the MATCH and the per-gene ALIGN
-        steps, with native --filter-chimera.
+      description: Pure-Rust minimap2-compatible read mapper; used for both the MATCH and the per-gene ALIGN steps, with native --filter-chimera.
       homepage: https://github.com/jwanglab/rammap
       documentation: https://github.com/jwanglab/rammap
       licence:
@@ -44,49 +43,42 @@ tools:
         - MIT
       identifier: biotools:samtools
   - parse_sort_results.py:
-      description: Bins matched reads per target and applies the recruitment floors, including the secondary-population
-        keep. Ships in this module's resources/usr/bin.
+      description: Bins matched reads per target and applies the recruitment floors, including the secondary-population keep. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - combine_align_stats.py:
-      description: "Builds the next per-gene reference from the CUMULATIVE alignment JSONs across all rounds.
-        Cumulative is required, not an optimisation: a reference built from one round's JSON collapses
-        on a round that recruits few reads. Ships in this module's resources/usr/bin."
+      description: "Builds the next per-gene reference from the CUMULATIVE alignment JSONs across all rounds. Cumulative is required, not an optimisation: a reference built from one round's JSON collapses on a round that recruits few reads. Ships in this module's resources/usr/bin."
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - sam_align_stats.py:
-      description: Converts the rammap ALIGN SAM into per-position alignment statistics. Ships in this module's
-        resources/usr/bin.
+      description: Converts the rammap ALIGN SAM into per-position alignment statistics. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - blast_align_stats.py:
-      description: Converts BLAST tabular alignment output into per-position alignment statistics. Ships
-        in this module's resources/usr/bin.
+      description: Converts BLAST tabular alignment output into per-position alignment statistics. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - blast_match.py:
-      description: Partitions reads into match/class/nomatch/chimeric sets from BLAST hits. Ships in this
-        module's resources/usr/bin.
+      description: Partitions reads into match/class/nomatch/chimeric sets from BLAST hits. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - rammap_partition.py:
-      description: Partitions reads into match/class/nomatch/chimeric sets from a rammap PAF, using the
-        native ch:i:1 chimera tag. Ships in this module's resources/usr/bin.
+      description: Partitions reads into match/class/nomatch/chimeric sets from a rammap PAF, using the native ch:i:1 chimera tag. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -126,8 +118,7 @@ output:
           description: Groovy Map containing sample information
       - R*-*.ref:
           type: file
-          description: Per-gene refined references from every round; the highest round per gene is the one
-            assembly consumes (Optional)
+          description: Per-gene refined references from every round; the highest round per gene is the one assembly consumes (Optional)
           pattern: R*-*.ref
           ontologies: []
   sorted:
@@ -145,8 +136,7 @@ output:
           description: Groovy Map containing sample information
       - nomatch.fa:
           type: file
-          description: Reads never recruited. Every depth this pipeline reports is RECRUITED depth, so this
-            is what distinguishes "not recruited" from "not sequenced".
+          description: Reads never recruited. Every depth this pipeline reports is RECRUITED depth, so this is what distinguishes "not recruited" from "not sequenced".
           pattern: nomatch.fa
           ontologies: []
   chimeric:
@@ -176,7 +166,7 @@ output:
           description: Per-round seconds, convergence flag, and the reason the loop stopped
           pattern: round_timings.tsv
           ontologies:
-            - edam: http://edamontology.org/format_3475
+            - edam: http://edamontology.org/format_3475 # TSV
   deferred:
     - - meta:
           type: map
@@ -185,6 +175,8 @@ output:
           type: file
           description: R*.defer.tsv
           pattern: R*.defer.tsv
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
   collapse:
     - - meta:
           type: map
@@ -193,13 +185,31 @@ output:
           type: file
           description: R*.collapse.tsv
           pattern: R*.collapse.tsv
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions_rammap:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - rammap:
+          type: string
+          description: The name of the tool
+      - rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - rammap:
+          type: string
+          description: The name of the tool
+      - rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

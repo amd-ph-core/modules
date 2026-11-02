@@ -13,16 +13,14 @@ keywords:
   - pdf
 tools:
   - coverage_diagram.py:
-      description: Plots per-position depth, overlaying minority variants when the variant table and paired
-        stats are both available. Ships in this module's resources/usr/bin.
+      description: Plots per-position depth, overlaying minority variants when the variant table and paired stats are both available. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - heuristic_diagram.py:
-      description: Plots the caller's decision heuristics against the per-position allele table. Ships in
-        this module's resources/usr/bin.
+      description: Plots the caller's decision heuristics against the per-position allele table. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -81,6 +79,7 @@ output:
           type: file
           description: Depth plot for the gene (Optional)
           pattern: "*-coverageDiagram.pdf"
+          ontologies: []
   heuristic_diagram:
     - - meta:
           type: map
@@ -92,13 +91,30 @@ output:
           type: file
           description: Caller-heuristics plot for the gene (Optional)
           pattern: "*-heuristics.pdf"
+          ontologies: []
+  versions_matplotlib:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - matplotlib:
+          type: string
+          description: The name of the tool
+      - python3 -c "import matplotlib; print(matplotlib.__version__)" 2>/dev/null || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - matplotlib:
+          type: string
+          description: The name of the tool
+      - python3 -c "import matplotlib; print(matplotlib.__version__)" 2>/dev/null || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

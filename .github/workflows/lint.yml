@@ -20,7 +20,16 @@ env:
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  NF_CORE_VER: "3.5.1"
+  NF_CORE_VER: "4.1.0"
+  # nf-core 4.x's container_links test accepts only quay.io and
+  # community.wave.seqera.io/library by default, which fails nearly every module here: ph-core
+  # Tier 1 puts our images behind the cdc-amd mirror, dais-ribosome comes from ghcr.io, and the
+  # modules that follow the stock nf-core container pattern name biocontainers/. Those prefixes
+  # are declared with the sanctioned --registry flag rather than waived, because lint waivers in
+  # .nf-core.yml are pipeline-only -- nf-core/tools loads that lint config only when
+  # repo_type == "pipeline", so a `lint:` block in this repo would be silently ignored.
+  # Collected from the modules, not assumed, and kept to the minimum that passes.
+  NF_CORE_REGISTRIES: "cdc-amd,ghcr.io,biocontainers,quay.io,community.wave.seqera.io/library"
 
 jobs:
   pre-commit:
@@ -123,7 +132,7 @@ jobs:
         run: pip install nf-core==${{ env.NF_CORE_VER }}
 
       - name: Lint module ${{ matrix.module }}
-        run: nf-core modules lint ${{ matrix.module }}
+        run: nf-core modules lint --registry "${{ env.NF_CORE_REGISTRIES }}" ${{ matrix.module }}
 
   nf-core-lint-subworkflows:
     runs-on: ubuntu-latest
@@ -149,7 +158,7 @@ jobs:
 
       - name: Lint subworkflow ${{ matrix.subworkflow }}
         # Subworkflow meta.yml uses an extended components schema with per-entry git_remote fields for cross-org module references
-        run: nf-core subworkflows --git-remote https://github.com/amd-ph-core/modules.git lint ${{ matrix.subworkflow }}
+        run: nf-core subworkflows --git-remote https://github.com/amd-ph-core/modules.git lint --registry "${{ env.NF_CORE_REGISTRIES }}" ${{ matrix.subworkflow }}
 
   confirm-pass-lint:
     runs-on: ubuntu-latest

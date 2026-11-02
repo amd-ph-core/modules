@@ -34,6 +34,11 @@ workflow VARPIPE_CORE {
     snpeff_cache     // path (mandatory): Path to SnpEff cache directory containing annotation databases
 
     main:
+    // VARPIPE_TAR is absent from this channel on purpose: it is an inline-bash module, so it
+    // reports through the `versions` TOPIC, which a pipeline collects globally with
+    // `channel.topic('versions')`. The VARPIPE_* processes that DO appear below are
+    // template-script modules -- Nextflow forbids an `eval` output on a non-Bash interpreter,
+    // so those keep writing a real versions.yml and keep feeding this channel.
     ch_versions = Channel.empty()
     ch_multiqc_inputs = Channel.empty()
 
@@ -117,7 +122,6 @@ workflow VARPIPE_CORE {
     )
     ch_versions = ch_versions.mix(VARPIPE_CREATEANNOTATIONS_ALL.out.versions.first())
 
-
     VARPIPE_PARSEANNOTATIONS_TARGETED(
         VARPIPE_CREATEANNOTATIONS_TARGETED.out.drLociAnnotation,
         mutationloci
@@ -196,7 +200,6 @@ workflow VARPIPE_CORE {
         ch_varpipe_outputs.files.collect(),
         datestamp
     )
-    ch_versions = ch_versions.mix(VARPIPE_TAR.out.versions)
 
     emit:
     lineage                         = VARPIPE_LINEAGE.out.lineage_report            // channel: [ val(meta), path(lineage_report) ]

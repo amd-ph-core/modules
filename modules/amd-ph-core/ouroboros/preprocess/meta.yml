@@ -15,8 +15,7 @@ keywords:
   - fastq
 tools:
   - irma-core:
-      description: Rust reimplementation of IRMA's core routines; the preprocess subcommand filters, optionally
-        adapter-trims, and deflates reads.
+      description: Rust reimplementation of IRMA's core routines; the preprocess subcommand filters, optionally adapter-trims, and deflates reads.
       homepage: https://github.com/CDCgov/irma-core
       documentation: https://github.com/CDCgov/irma-core
       licence:
@@ -34,7 +33,7 @@ input:
         description: Input reads; a two-element list selects the paired path
         pattern: "*.{fastq,fq,fastq.gz,fq.gz}"
         ontologies:
-          - edam: http://edamontology.org/format_1930
+          - edam: http://edamontology.org/format_1930 # FASTQ
     - min_len:
         type: integer
         description: Minimum read length (Mandatory)
@@ -75,13 +74,29 @@ output:
           description: Read counts and filtering summary
           pattern: QC_log.txt
           ontologies: []
+  versions_irmacore:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - irma_core:
+          type: string
+          description: The name of the tool
+      - irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - irma_core:
+          type: string
+          description: The name of the tool
+      - irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

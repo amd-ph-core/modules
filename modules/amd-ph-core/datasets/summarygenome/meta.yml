@@ -1,0 +1,84 @@
+name: "datasets_summarygenome"
+description: Enumerate all genome assemblies under an NCBI taxon and emit a flat metadata TSV
+keywords:
+  - ncbi
+  - datasets
+  - assembly
+  - metadata
+  - taxonomy
+tools:
+  - "datasets":
+      description: |
+        NCBI Datasets command-line tool for querying and downloading biological
+        sequence data across all domains of life.
+      homepage: "https://www.ncbi.nlm.nih.gov/datasets/"
+      documentation: "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/"
+      tool_dev_url: "https://github.com/ncbi/datasets"
+      licence:
+        - "Public Domain"
+      identifier: ""
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample/run metadata, e.g. `[ id:'index' ]`
+    - taxon:
+        type: string
+        description: |
+          NCBI taxon to enumerate. Accepts a taxid or a scientific name, e.g.
+          `10239` (Viruses) or `2847173` (hepatitis D virus 1).
+
+output:
+  report:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample/run metadata, e.g. `[ id:'index' ]`
+      - "*.assembly_report.jsonl.gz":
+          type: file
+          description: |
+            Gzipped JSON Lines assembly data report, one record per assembly,
+            exactly as returned by `datasets summary genome taxon`.
+          pattern: "*.assembly_report.jsonl.gz"
+          ontologies:
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  accessions:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample/run metadata, e.g. `[ id:'index' ]`
+      - "*.accessions.txt":
+          type: file
+          description: |
+            Sorted assembly accessions extracted from the report, one per line.
+            Suitable as `--inputfile` for a downstream `datasets download`.
+          pattern: "*.accessions.txt"
+          ontologies: []
+  versions_ncbidatasetscli:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - ncbi-datasets-cli:
+          type: string
+          description: The name of the tool
+      - 'datasets --version 2>&1 | sed "s/datasets version: //"':
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - ncbi-datasets-cli:
+          type: string
+          description: The name of the tool
+      - 'datasets --version 2>&1 | sed "s/datasets version: //"':
+          type: eval
+          description: The expression to obtain the version of the tool
+
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

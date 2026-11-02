@@ -24,9 +24,7 @@ keywords:
   - reference-refinement
 tools:
   - local_sw:
-      description: Exhaustive local Smith-Waterman aligner with CIGAR output, built from the ouroboros patch
-        series on rammap-core. The LOCALSW path, where an exact alignment is wanted rather than a seeded
-        one.
+      description: Exhaustive local Smith-Waterman aligner with CIGAR output, built from the ouroboros patch series on rammap-core. The LOCALSW path, where an exact alignment is wanted rather than a seeded one.
       homepage: https://github.com/jwanglab/rammap
       documentation: https://github.com/jwanglab/rammap
       licence:
@@ -40,25 +38,21 @@ tools:
         - MIT
       identifier: ""
   - irma-core:
-      description: Rust reimplementation of IRMA's core routines; xflate inflates the read patterns to true
-        per-read depth once, before the loop.
+      description: Rust reimplementation of IRMA's core routines; xflate inflates the read patterns to true per-read depth once, before the loop.
       homepage: https://github.com/CDCgov/irma-core
       documentation: https://github.com/CDCgov/irma-core
       licence:
         - Apache-2.0
       identifier: ""
   - winnow_pileup.py:
-      description: Streams a SAM in one pass to winnow best-per-read alignments, sum the alignment score
-        used as the convergence objective, and build the per-position pileup JSON. Ships in this module's
-        resources/usr/bin.
+      description: Streams a SAM in one pass to winnow best-per-read alignments, sum the alignment score used as the convergence objective, and build the per-position pileup JSON. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - MIT
       identifier: ""
   - combine_sam_stats.py:
-      description: Amends a reference from a pileup JSON, folding indels above the given frequency thresholds
-        and flagging whether any indel was folded. Ships in this module's resources/usr/bin.
+      description: Amends a reference from a pileup JSON, folding indels above the given frequency thresholds and flagging whether any indel was folded. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -120,6 +114,7 @@ output:
           type: file
           description: CONVERGE_REASON
           pattern: CONVERGE_REASON
+          ontologies: []
   indels_folded:
     - - meta:
           type: map
@@ -142,14 +137,51 @@ output:
           description: Per-iteration seconds, alignment score, convergence flag, and why the loop stopped
           pattern: iter_timings.tsv
           ontologies:
-            - edam: http://edamontology.org/format_3475
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions_irmacore:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - irma_core:
+          type: string
+          description: The name of the tool
+      - irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+  versions_rammap:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - rammap:
+          type: string
+          description: The name of the tool
+      - rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - irma_core:
+          type: string
+          description: The name of the tool
+      - irma-core --version 2>&1 | grep -oE "[0-9][^ ]*" | head -1:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - rammap:
+          type: string
+          description: The name of the tool
+      - rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

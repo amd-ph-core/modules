@@ -25,8 +25,7 @@ tools:
         - MIT
       identifier: ""
   - genome_report.py:
-      description: Tabulates per-genome read count, length, percent called, identity and aligned fraction
-        from the per-target alignments. Ships in this module's resources/usr/bin.
+      description: Tabulates per-genome read count, length, percent called, identity and aligned fraction from the per-target alignments. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
@@ -50,8 +49,7 @@ input:
         ontologies: []
     - sort_stats:
         type: file
-        description: Per-gene read counts from gather, for the read-count column. Pass a NO_FILE placeholder
-          to omit (Optional)
+        description: Per-gene read counts from gather, for the read-count column. Pass a NO_FILE placeholder to omit (Optional)
         pattern: "*.txt"
         ontologies: []
 output:
@@ -61,18 +59,33 @@ output:
           description: Groovy Map containing sample information
       - "*.genomes.tsv":
           type: file
-          description: One row per genome — reads, length, percent called, identity to its own panel record,
-            aligned fraction
+          description: One row per genome — reads, length, percent called, identity to its own panel record, aligned fraction
           pattern: "*.genomes.tsv"
           ontologies:
-            - edam: http://edamontology.org/format_3475
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions_rammap:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - rammap:
+          type: string
+          description: The name of the tool
+      - rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: versions.yml
-        ontologies:
-          - edam: http://edamontology.org/format_3750
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - rammap:
+          type: string
+          description: The name of the tool
+      - rammap --version 2>/dev/null | grep -oE "[0-9][^ ]*" | head -1 || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:

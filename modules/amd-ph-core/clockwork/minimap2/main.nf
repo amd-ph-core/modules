@@ -10,7 +10,8 @@ process CLOCKWORK_MINIMAP2 {
 
     output:
     tuple val(meta), path("*.sam"), emit: sam
-    path("versions.yml")          , emit: versions
+    tuple val("${task.process}"), val('minimap2'), eval('minimap2 --version 2>&1'), emit: versions_minimap2, topic: versions
+    tuple val("${task.process}"), val('samtools'), eval('samtools --version | sed -n "1s/^samtools //p"'), emit: versions_samtools, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,12 +32,6 @@ process CLOCKWORK_MINIMAP2 {
         $reference \\
         $reads \\
         $sam_filter_output
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        minimap2: \$(minimap2 --version 2>&1)
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -45,11 +40,5 @@ process CLOCKWORK_MINIMAP2 {
 
     """
     touch $contam_sam
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        minimap2: \$(minimap2 --version 2>&1)
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-    END_VERSIONS
     """
 }

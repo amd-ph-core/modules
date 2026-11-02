@@ -1,15 +1,122 @@
 {
     "clockwork removecontam - stub": {
         "content": [
-            [
-                "versions.yml:md5,cbd11563140029de1513e6a8ce6e689f"
-            ]
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.decontaminated.1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.decontaminated.2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.contaminants.1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.contaminants.2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.counts.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "clockwork",
+                        "0.12.5"
+                    ]
+                ],
+                "4": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pysam",
+                        "0.23.3"
+                    ]
+                ],
+                "5": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pyfastaq",
+                        "3.17.0"
+                    ]
+                ],
+                "contaminant_fastq": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.contaminants.1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.contaminants.2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "counts": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.counts.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "decontaminated_fastq": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.decontaminated.1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.decontaminated.2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "versions_clockwork": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "clockwork",
+                        "0.12.5"
+                    ]
+                ],
+                "versions_pyfastaq": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pyfastaq",
+                        "3.17.0"
+                    ]
+                ],
+                "versions_pysam": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pysam",
+                        "0.23.3"
+                    ]
+                ]
+            }
         ],
+        "timestamp": "2026-11-01T16:58:45.019180126",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-07-17T17:25:19.516532066"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     },
     "clockwork removecontam": {
         "content": [
@@ -48,7 +155,25 @@
                     ]
                 ],
                 "3": [
-                    "versions.yml:md5,cbd11563140029de1513e6a8ce6e689f"
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "clockwork",
+                        "0.12.5"
+                    ]
+                ],
+                "4": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pysam",
+                        "0.23.3"
+                    ]
+                ],
+                "5": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pyfastaq",
+                        "3.17.0"
+                    ]
                 ],
                 "contaminant_fastq": [
                     [
@@ -83,15 +208,33 @@
                         ]
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,cbd11563140029de1513e6a8ce6e689f"
+                "versions_clockwork": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "clockwork",
+                        "0.12.5"
+                    ]
+                ],
+                "versions_pyfastaq": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pyfastaq",
+                        "3.17.0"
+                    ]
+                ],
+                "versions_pysam": [
+                    [
+                        "CLOCKWORK_REMOVECONTAM",
+                        "pysam",
+                        "0.23.3"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-11-01T16:58:35.769637494",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-07-17T17:25:09.770397854"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     }
 }

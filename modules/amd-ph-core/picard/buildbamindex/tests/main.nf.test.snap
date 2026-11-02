@@ -11,7 +11,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                    [
+                        "PICARD_BUILDBAMINDEX",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ],
                 "bai": [
                     [
@@ -21,16 +25,20 @@
                         "test.bai:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                "versions_picard": [
+                    [
+                        "PICARD_BUILDBAMINDEX",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-11-01T17:00:39.959528436",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-07-17T17:24:33.986896833"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     },
     "tuberculosis fasta": {
         "content": [
@@ -44,7 +52,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                    [
+                        "PICARD_BUILDBAMINDEX",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ],
                 "bai": [
                     [
@@ -54,15 +66,19 @@
                         "test.paired_end.sorted.bai:md5,704c10dd1326482448ca3073fdebc2f4"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,db73ba36acf1d19e7193e71ba8fe8d80"
+                "versions_picard": [
+                    [
+                        "PICARD_BUILDBAMINDEX",
+                        "picard",
+                        "3.4.0"
+                    ]
                 ]
             }
         ],
+        "timestamp": "2026-11-01T17:00:36.189002796",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-07-17T17:24:25.356707426"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
     }
 }

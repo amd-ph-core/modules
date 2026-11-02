@@ -2,4 +2,9 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::picard=3.3.0
+  # Pinned to match the container (cdc-amd/picard:3.4.0), NOT to the newest
+  # bioconda build. `bioconda_latest` will keep warning that 3.5.0 exists;
+  # taking that suggestion would make `-profile conda` run a different picard
+  # than `-profile docker`, which is the bug this pin exists to avoid. 3.3.0
+  # was that same mismatch in the other direction.
+  - bioconda::picard=3.4.0

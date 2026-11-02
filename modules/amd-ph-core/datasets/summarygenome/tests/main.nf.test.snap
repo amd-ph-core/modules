@@ -1,0 +1,147 @@
+{
+    "hdv1_current_major": {
+        "content": [
+            [
+                "GCA_018547865.1",
+                "GCF_018547865.1"
+            ],
+            {
+                "versions": [
+                    [
+                        "DATASETS_SUMMARYGENOME",
+                        "ncbi-datasets-cli",
+                        "18.x"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:21:58.405825291",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "hdv1_current_exact": {
+        "content": [
+            [
+                "GCA_018547865.1",
+                "GCF_018547865.1"
+            ],
+            {
+                "versions": [
+                    [
+                        "DATASETS_SUMMARYGENOME",
+                        "ncbi-datasets-cli",
+                        "18.35.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:21:58.396415949",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "hdv1_baseline_exact": {
+        "content": [
+            [
+                "GCA_018547865.1",
+                "GCF_018547865.1"
+            ],
+            {
+                "versions": [
+                    [
+                        "DATASETS_SUMMARYGENOME",
+                        "ncbi-datasets-cli",
+                        "18.15.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:22:03.352854205",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "hdv1_current_stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "index"
+                        },
+                        "index.assembly_report.jsonl.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "index"
+                        },
+                        "index.accessions.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    [
+                        "DATASETS_SUMMARYGENOME",
+                        "ncbi-datasets-cli",
+                        "18.35.0"
+                    ]
+                ],
+                "accessions": [
+                    [
+                        {
+                            "id": "index"
+                        },
+                        "index.accessions.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "index"
+                        },
+                        "index.assembly_report.jsonl.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "versions_ncbidatasetscli": [
+                    [
+                        "DATASETS_SUMMARYGENOME",
+                        "ncbi-datasets-cli",
+                        "18.35.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:22:10.180400482",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "hdv1_baseline_major": {
+        "content": [
+            [
+                "GCA_018547865.1",
+                "GCF_018547865.1"
+            ],
+            {
+                "versions": [
+                    [
+                        "DATASETS_SUMMARYGENOME",
+                        "ncbi-datasets-cli",
+                        "18.x"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-01T15:22:03.357238302",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

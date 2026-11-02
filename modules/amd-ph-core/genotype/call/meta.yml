@@ -23,12 +23,12 @@ keywords:
   - call
 tools:
   - genotype_call.py:
-      description: Aggregates BLAST HSPs per subject, ranks by summed bitscore, and reports the best call
-        with its runner-up and margin. Ships in this module's resources/usr/bin.
+      description: Aggregates BLAST HSPs per subject, ranks by summed bitscore, and reports the best call with its runner-up and margin. Ships in this module's resources/usr/bin.
       homepage: https://github.com/cdcent/oamd-bio-ouroboros
       documentation: https://github.com/cdcent/oamd-bio-ouroboros
       licence:
         - Apache-2.0
+      identifier: ""
 input:
   - - meta:
         type: map
@@ -41,16 +41,18 @@ input:
           The parser validates the field count and names and fails on the first mismatching line
           rather than mis-parsing silently.
         pattern: "*.{txt,tsv}"
-  - - genotype_opts:
-        type: map
-        description: |
-          Call settings, all optional:
-            columns     - outfmt 6 field names in file order. Must include qseqid, sseqid, pident,
-                          length, qstart, qend, qlen and bitscore. Default:
-                          'qseqid sseqid pident length qstart qend qlen slen bitscore'
-            min_pident  - drop HSPs below this percent identity (default 0.0)
-            min_qcov    - drop a subject below this aggregated query coverage, 0-1 (default 0.0)
-            tie_margin  - relative bitscore margin below which a call is `ambiguous` (default 0.02)
+        ontologies:
+          - edam: http://edamontology.org/format_3475 # TSV
+  - genotype_opts:
+      type: map
+      description: |
+        Call settings, all optional:
+          columns     - outfmt 6 field names in file order. Must include qseqid, sseqid, pident,
+                        length, qstart, qend, qlen and bitscore. Default:
+                        'qseqid sseqid pident length qstart qend qlen slen bitscore'
+          min_pident  - drop HSPs below this percent identity (default 0.0)
+          min_qcov    - drop a subject below this aggregated query coverage, 0-1 (default 0.0)
+          tie_margin  - relative bitscore margin below which a call is `ambiguous` (default 0.02)
 output:
   calls:
     - - meta:
@@ -65,6 +67,31 @@ output:
             no surviving hit produces a `no_hit` row rather than being dropped, so an empty result
             is distinguishable from a step that did not run.
           pattern: "*.genotype.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions_genotype:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - genotype_call:
+          type: string
+          description: The name of the tool
+      - python3 --version 2>&1 | sed 's/^Python //':
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - genotype_call:
+          type: string
+          description: The name of the tool
+      - python3 --version 2>&1 | sed 's/^Python //':
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@smagala"
 maintainers:
