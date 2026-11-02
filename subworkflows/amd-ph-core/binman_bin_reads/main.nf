@@ -36,12 +36,35 @@
 // on one library and would plausibly reach several GB at 214. Nothing downstream cares --
 // BINMAN_ASSIGNBINS reads plain or gzipped -- but the work directory does.
 //
+// Tier 2 is likewise the nf-core module rather than the MMSEQS_TRANSLATEDSEARCH module this
+// subworkflow carried at first, and in this case the public module is not merely equivalent but
+// CORRECTER. Measured on 2,000 real residual reads against the 2,622,400-ORF production target
+// database: both produce the same 65,108 rows with identical query/target pairs, alignment
+// coordinates, alignment lengths, e-values and bit scores. The only column that differed was
+// percent identity, and ours was the wrong one -- `mmseqs easy-search` passes
+// `--alignment-mode 3` to its internal `search`, which computes real sequence identity, whereas
+// a bare `mmseqs search` defaults to alignment mode 2 (score and end positions only) and
+// `convertalis` then reports an estimate. Re-running the search with `-a 1` to get an exact
+// backtrace settles it: 22 identities over 34 aligned residues, 64.700%, exactly what
+// easy-search reports, where the hand-rolled chain said 70.100%. Adding `--alignment-mode 3`
+// to the bespoke module made its output byte-identical to this one, which is both the proof of
+// cause and the reason not to keep maintaining a second copy.
+//
+// Nothing downstream read that column -- BINMAN_ASSIGNBINS uses only the query and target names
+// -- so no measurement is invalidated. Anyone who filtered tier-2 hits on identity, or on
+// `--min-seq-id`, was filtering on the estimate.
+//
+// MMSEQS_EASYSEARCH takes the residual mates as they are: `mmseqs createdb` reads gzipped FASTQ
+// directly, both mates in one query database, so no FASTQ-to-FASTA step is needed. It writes an
+// uncompressed `.tsv` in the 12-column BLAST format by default; set `--format-output` through
+// `ext.args` if you want the narrower table. BINMAN_ASSIGNBINS reads either.
+//
 
-include { KRAKEN2HUNTER_CLASSIFY  } from '../../../modules/amd-ph-core/kraken2hunter/classify/main'
-include { BINMAN_RESIDUAL         } from '../../../modules/amd-ph-core/binman/residual/main'
-include { MMSEQS_TRANSLATEDSEARCH } from '../../../modules/amd-ph-core/mmseqs/translatedsearch/main'
-include { MINIMAP2_ALIGN          } from '../../../modules/nf-core/minimap2/align/main'
-include { BINMAN_ASSIGNBINS       } from '../../../modules/amd-ph-core/binman/assignbins/main'
+include { KRAKEN2HUNTER_CLASSIFY } from '../../../modules/amd-ph-core/kraken2hunter/classify/main'
+include { BINMAN_RESIDUAL        } from '../../../modules/amd-ph-core/binman/residual/main'
+include { MMSEQS_EASYSEARCH      } from '../../../modules/nf-core/mmseqs/easysearch/main'
+include { MINIMAP2_ALIGN         } from '../../../modules/nf-core/minimap2/align/main'
+include { BINMAN_ASSIGNBINS      } from '../../../modules/amd-ph-core/binman/assignbins/main'
 
 workflow BINMAN_BIN_READS {
 
@@ -98,8 +121,16 @@ workflow BINMAN_BIN_READS {
     //
     ch_mmseqs_hits = ch_reads.map { meta, _reads -> [ meta, [] ] }
     if (run_mmseqs) {
-        MMSEQS_TRANSLATEDSEARCH(BINMAN_RESIDUAL.out.residual, ch_mmseqs_db)
-        ch_mmseqs_hits = MMSEQS_TRANSLATEDSEARCH.out.hits
+        // The database arrives as a bare path so that this subworkflow's input signature stays
+        // about the reference rather than about the module consuming it; MMSEQS_EASYSEARCH wants
+        // a meta on that channel, so one is attached here. `.first()` makes it a value channel,
+        // for the same reason it is needed on ch_panel_blocks below: a queue channel is consumed
+        // rather than broadcast and would starve every sample after the first.
+        MMSEQS_EASYSEARCH(
+            BINMAN_RESIDUAL.out.residual,
+            ch_mmseqs_db.map { db -> [ [ id:'target' ], db ] }.first(),
+        )
+        ch_mmseqs_hits = MMSEQS_EASYSEARCH.out.tsv
     }
 
     //

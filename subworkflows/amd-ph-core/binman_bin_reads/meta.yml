@@ -13,7 +13,7 @@ keywords:
 components:
   - kraken2hunter/classify
   - binman/residual
-  - mmseqs/translatedsearch
+  - mmseqs/easysearch
   - minimap2/align
   - binman/assignbins
 input:
@@ -37,8 +37,12 @@ input:
   - ch_mmseqs_db:
       type: directory
       description: |
-        Prebuilt MMseqs2 protein target database for the translated-search tier. Ignored unless
-        `run_mmseqs` is true.
+        Directory holding a prebuilt MMseqs2 protein target database for the translated-search
+        tier, as written by `mmseqs createdb <target.faa> <dir>/<name>` or by
+        `nf-core/mmseqs/createdb`. The directory must contain exactly one database: the module
+        resolves its basename by globbing `*.dbtype` at depth 1 and reducing the matches to
+        their longest common prefix, so `name` and `name_h` collapse to `name`, but a second,
+        unrelated database alongside it would not. Ignored unless `run_mmseqs` is true.
         Structure: [ path(db) ]
       pattern: "*"
   - ch_panel:
