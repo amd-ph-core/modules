@@ -44,7 +44,7 @@ process SAMTOOLS_ALIGNMENT {
     def stats_command = run_stats ? """
     samtools \\
         stats \\
-        --threads ${task.cpus} \\
+        --threads ${extra_threads} \\
         ${args} \\
         ${reference} \\
         ${input} \\
@@ -52,7 +52,7 @@ process SAMTOOLS_ALIGNMENT {
 
     samtools \\
         flagstat \\
-        --threads ${task.cpus} \\
+        --threads ${extra_threads} \\
         ${input} \\
         > ${prefix}.flagstat
 
@@ -84,6 +84,7 @@ process SAMTOOLS_ALIGNMENT {
         depth \\
         --threads ${extra_threads} \\
         ${args3} \\
+        ${reference} \\
         -o ${prefix}.depth.tsv \\
         ${input}
     """
