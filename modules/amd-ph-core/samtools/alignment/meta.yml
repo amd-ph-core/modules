@@ -1,0 +1,167 @@
+name: samtools_alignment
+description: |
+  Alignment QC for one coordinate-sorted BAM/CRAM in a single task: samtools
+  coverage and samtools depth always, and optionally samtools stats, flagstat
+  and idxstats plus a tar archive of those three files for downstream reports.
+  Running every step against the same staged alignment means it is staged once
+  instead of once per step.
+
+  ext.args is passed to samtools stats, ext.args2 to samtools coverage and
+  ext.args3 to samtools depth. flagstat and idxstats take no extra arguments.
+keywords:
+  - samtools
+  - bam
+  - cram
+  - alignment
+  - qc
+  - coverage
+  - depth
+  - statistics
+tools:
+  - samtools:
+      description: |
+        SAMtools is a set of utilities for interacting with and post-processing
+        short DNA sequence read alignments in the SAM, BAM and CRAM formats.
+      homepage: http://www.htslib.org/
+      documentation: http://www.htslib.org/doc/samtools.html
+      tool_dev_url: https://github.com/samtools/samtools
+      doi: 10.1093/bioinformatics/btp352
+      licence:
+        - "MIT"
+      identifier: biotools:samtools
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - input:
+        type: file
+        description: Mandatory. Coordinate-sorted BAM or CRAM file
+        pattern: "*.{bam,cram}"
+        ontologies:
+          - edam: http://edamontology.org/format_2572 # BAM
+          - edam: http://edamontology.org/format_3462 # CRAM
+    - index:
+        type: file
+        description: Mandatory. Index of the BAM or CRAM file
+        pattern: "*.{bai,csi,crai}"
+        ontologies:
+          - edam: http://edamontology.org/format_3327 # BAI
+    - fasta:
+        type: file
+        description: |
+          Optional. Reference FASTA the alignment was made against. Pass [] when
+          there is none. Required for CRAM input.
+        pattern: "*.{fa,fasta,fna}"
+        ontologies:
+          - edam: http://edamontology.org/format_1929 # FASTA
+    - fai:
+        type: file
+        description: Optional. Index of the reference FASTA. Pass [] when there is no reference.
+        pattern: "*.fai"
+        ontologies: []
+  - run_stats:
+      type: boolean
+      description: |
+        Mandatory. true also runs samtools stats, flagstat and idxstats and packs
+        their outputs into a tar archive; false runs coverage and depth only.
+output:
+  coverage:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.coverage.txt":
+          type: file
+          description: Per-reference-sequence coverage summary from samtools coverage
+          pattern: "*.coverage.txt"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  depth:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.depth.tsv":
+          type: file
+          description: |
+            Per-position read depth from samtools depth: reference name, position
+            and depth for each covered position
+          pattern: "*.depth.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  stats:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.stats":
+          type: file
+          description: Alignment statistics from samtools stats. Only when run_stats is true.
+          pattern: "*.stats"
+          ontologies: []
+  flagstat:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.flagstat":
+          type: file
+          description: Counts per SAM flag category from samtools flagstat. Only when run_stats is true.
+          pattern: "*.flagstat"
+          ontologies: []
+  idxstats:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.idxstats":
+          type: file
+          description: Mapped and unmapped read counts per reference sequence from samtools idxstats. Only when run_stats is true.
+          pattern: "*.idxstats"
+          ontologies: []
+  qc_bundle:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.samtools_qc.tar":
+          type: file
+          description: |
+            Uncompressed tar archive of the stats, flagstat and idxstats files,
+            laid out as flagstat/ and samtools/ for MultiQC. Only when run_stats
+            is true.
+          pattern: "*.samtools_qc.tar"
+          ontologies: []
+  versions_samtools:
+    - - ${task.process}:
+          type: string
+          description: Process name, emitted to the `versions` topic channel
+      - samtools:
+          type: string
+          description: Tool name, emitted to the `versions` topic channel
+      - samtools --version | sed -n "1s/^samtools //p":
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: Process name, emitted to the `versions` topic channel
+      - samtools:
+          type: string
+          description: Tool name, emitted to the `versions` topic channel
+      - samtools --version | sed -n "1s/^samtools //p":
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@fchen-cdc"
+maintainers:
+  - "@fchen-cdc"

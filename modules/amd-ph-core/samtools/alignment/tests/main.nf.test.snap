@@ -1,0 +1,238 @@
+{
+    "sarscov2 - bam - fasta - run_stats": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.coverage.txt:md5,99a521b3bf53b6acf8055a44a571ea84"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.depth.tsv:md5,32d3e164e4acc29128200fce85d238cd"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.stats:md5,a391612b5ef5b181e854ccaad8c8a068"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.flagstat:md5,4f7ffd1e6a5e85524d443209ac97d783"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.idxstats:md5,df60a8c8d6621100d05178c93fb053a2"
+                ]
+            ],
+            "test.samtools_qc.tar",
+            {
+                "versions": {
+                    "samtools": [
+                        [
+                            "SAMTOOLS_ALIGNMENT",
+                            "samtools",
+                            "1.22.1"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "timestamp": "2026-11-15T23:49:25.131176089",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - bam - no reference - run_stats": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.coverage.txt:md5,99a521b3bf53b6acf8055a44a571ea84"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.depth.tsv:md5,32d3e164e4acc29128200fce85d238cd"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.stats:md5,41ba8ad30ddb598dadb177a54c222ab9"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.flagstat:md5,4f7ffd1e6a5e85524d443209ac97d783"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.idxstats:md5,df60a8c8d6621100d05178c93fb053a2"
+                ]
+            ],
+            "test.samtools_qc.tar",
+            {
+                "versions": {
+                    "samtools": [
+                        [
+                            "SAMTOOLS_ALIGNMENT",
+                            "samtools",
+                            "1.22.1"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "timestamp": "2026-11-15T23:49:30.747957218",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - bam - fasta - run_stats - stub": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.coverage.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.depth.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.stats:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.flagstat:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.idxstats:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ]
+            ],
+            "test.samtools_qc.tar",
+            {
+                "versions": {
+                    "samtools": [
+                        [
+                            "SAMTOOLS_ALIGNMENT",
+                            "samtools",
+                            "1.22.1"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "timestamp": "2026-11-15T23:49:36.329976829",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - bam - fasta - coverage and depth only": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.coverage.txt:md5,99a521b3bf53b6acf8055a44a571ea84"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.depth.tsv:md5,32d3e164e4acc29128200fce85d238cd"
+                ]
+            ],
+            {
+                "versions": {
+                    "samtools": [
+                        [
+                            "SAMTOOLS_ALIGNMENT",
+                            "samtools",
+                            "1.22.1"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "timestamp": "2026-11-15T23:49:19.481063045",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    }
+}
