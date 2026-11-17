@@ -143,19 +143,20 @@ nextflow_process {
                 """
                 // Same header and length as the indexed genome, with only the
                 // first base changed, so only the sequence comparison can catch it.
-                def mutated = Channel
-                    .fromPath(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
-                    .map { genome ->
-                        def lines = genome.text.readLines()
-                        def first = lines.findIndexOf { line -> line && !line.startsWith('>') }
-                        def swapped = lines[first][0].toUpperCase() == 'A' ? 'C' : 'A'
-                        lines[first] = swapped + lines[first].substring(1)
-                        String.join(System.lineSeparator(), lines) + System.lineSeparator()
-                    }
-                    .collectFile(name: 'genome.fasta')
                 input[0] = MINIMAP2_INDEX.out.index
                     .filter { meta, _index -> meta.preset == 'sr' }
-                    .combine(mutated)
+                    .combine(
+                        Channel
+                            .fromPath(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                            .map { genome ->
+                                def lines = genome.text.readLines()
+                                def first = lines.findIndexOf { line -> line && !line.startsWith('>') }
+                                def swapped = lines[first][0].toUpperCase() == 'A' ? 'C' : 'A'
+                                lines[first] = swapped + lines[first].substring(1)
+                                String.join(System.lineSeparator(), lines) + System.lineSeparator()
+                            }
+                            .collectFile(name: 'genome.fasta')
+                    )
                     .map { _meta, index, mutated_fasta -> [ [ id:'test' ], index, mutated_fasta ] }
                 input[1] = 'sr'
                 """
