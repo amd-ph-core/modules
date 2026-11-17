@@ -47,6 +47,7 @@ process SAMTOOLS_ALIGNMENT {
         --threads ${extra_threads} \\
         ${args} \\
         ${reference} \\
+        ${fasta ? "--ref-seq ${fasta}" : ''} \\
         ${input} \\
         > ${prefix}.stats
 

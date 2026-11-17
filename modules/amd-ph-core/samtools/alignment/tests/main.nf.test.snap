@@ -25,7 +25,7 @@
                         "id": "test",
                         "single_end": false
                     },
-                    "test.stats:md5,9813b9275caee52b958bb11f94b49d6b"
+                    "test.stats:md5,dae369a0b738b8479f59c263a89b9d8c"
                 ]
             ],
             [
@@ -59,7 +59,7 @@
                 }
             }
         ],
-        "timestamp": "2026-11-16T13:38:36.470604301",
+        "timestamp": "2026-11-17T01:38:54.794248475",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.4"
