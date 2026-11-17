@@ -10,14 +10,14 @@ Exits non-zero with a message if anything differs.
 import hashlib
 import os
 import platform
-from pathlib import Path
 import struct
 import sys
+from pathlib import Path
 
-
-NT4 = bytes("ACGT".find(chr(value).upper().replace("U", "T"))
-            if chr(value).upper().replace("U", "T") in "ACGT" else 4
-            for value in range(256))
+NT4 = bytes(
+    "ACGT".find(chr(value).upper().replace("U", "T")) if chr(value).upper().replace("U", "T") in "ACGT" else 4
+    for value in range(256)
+)
 LOW = bytes(value & 15 for value in range(256))
 HIGH = bytes(value >> 4 for value in range(256))
 PRESET_INDEX_SETTINGS = {
@@ -58,6 +58,7 @@ def validate_index(index, fasta, preset=None):
     size = Path(index).stat().st_size
     settings = None
     with open(index, "rb") as handle:
+
         def read(count):
             value = handle.read(count)
             if len(value) != count:
@@ -84,15 +85,15 @@ def validate_index(index, fasta, preset=None):
             sequences = []
             for _ in range(count):
                 name = read(read(1)[0])
-                length, = struct.unpack("<I", read(4))
+                (length,) = struct.unpack("<I", read(4))
                 if name not in expected or expected[name][0] != length:
                     raise ValueError(f"Index/reference name or length mismatch: {name!r}")
                 sequences.append((name, length))
             # MMI2 stores positions and hash entries before its packed reference bases.
             for _ in range(1 << buckets):
-                positions, = struct.unpack("<I", read(4))
+                (positions,) = struct.unpack("<I", read(4))
                 skip(8 * positions)
-                hashes, = struct.unpack("<I", read(4))
+                (hashes,) = struct.unpack("<I", read(4))
                 skip(16 * hashes)
             start = handle.tell()
             bases = sum(length for _, length in sequences)
@@ -107,7 +108,7 @@ def validate_index(index, fasta, preset=None):
                     packed = read(min(65536, (remaining + first + 1) // 2))
                     decoded = bytearray(len(packed) * 2)
                     decoded[::2], decoded[1::2] = packed.translate(LOW), packed.translate(HIGH)
-                    sequence = decoded[first:first + remaining]
+                    sequence = decoded[first : first + remaining]
                     digest.update(sequence)
                     remaining -= len(sequence)
                     first = 0
@@ -134,11 +135,11 @@ def validate_index(index, fasta, preset=None):
     return settings
 
 
-
 if __name__ == "__main__":
     index = "${index}"
     fasta = "${fasta}"
     preset = "${preset}"
+    task_process = "${task.process}"
 
     try:
         window, kmer, flags = validate_index(index, fasta, preset)
@@ -151,4 +152,4 @@ if __name__ == "__main__":
     os.symlink(os.path.join("..", index), os.path.join("validated", os.path.basename(index)))
 
     with open("versions.yml", "w", encoding="utf-8") as handle:
-        handle.write(f'"${task.process}":\\n    python: "{platform.python_version()}"\\n')
+        handle.write(f'"{task_process}":\\n    python: "{platform.python_version()}"\\n')
