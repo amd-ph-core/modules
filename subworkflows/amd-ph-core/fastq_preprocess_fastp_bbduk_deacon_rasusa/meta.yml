@@ -13,8 +13,12 @@ keywords:
   - downsampling
   - metagenomics
 components:
-  - fastp
-  - fastplong
+  # fastp and fastplong come from nf-core, not amd-ph-core: naming the remote is what lets
+  # `nf-core subworkflows install` fetch them from the right organisation.
+  - fastp:
+      git_remote: https://github.com/nf-core/modules.git
+  - fastplong:
+      git_remote: https://github.com/nf-core/modules.git
   - bbmap/bbduk
   - deacon/filter
   - rasusa/reads
