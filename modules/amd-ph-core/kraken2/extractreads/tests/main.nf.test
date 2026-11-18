@@ -1,0 +1,237 @@
+nextflow_process {
+
+    name "Test Process KRAKEN2_EXTRACTREADS"
+    script "../main.nf"
+    process "KRAKEN2_EXTRACTREADS"
+    config "./nextflow.config"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "kraken2"
+    tag "kraken2/extractreads"
+    tag "nf-core/untar"
+
+    // Small SARS-CoV-2 Kraken2 database from nf-core test data.
+    setup {
+        run("UNTAR") {
+            script "../../../../nf-core/untar/main.nf"
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'kraken2_db' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/db/kraken2.tar.gz', checkIfExists: true)
+                ])
+                """
+            }
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - keep taxid") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = UNTAR.out.untar.map { _meta, db -> db }
+                input[2] = '2697049'
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Optional outputs stay off unless asked for.
+                { assert process.out.classified_reads_fastq.size() == 0 },
+                { assert process.out.unclassified_reads_fastq.size() == 0 },
+                { assert process.out.classified_reads_assignment.size() == 0 },
+                { assert process.out.extracted_kraken2_reads[0][1].size() == 2 },
+                { assert snapshot(
+                    process.out.extracted_kraken2_reads,
+                    process.out.report,
+                    process.out.reads_present,
+                    file(process.out.status[0][1]).name,
+                    process.out.findAll { key, _val -> key.startsWith('versions') }
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - exclude human (host removal)") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false, exclude:true ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = UNTAR.out.untar.map { _meta, db -> db }
+                input[2] = '9606'
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.extracted_kraken2_reads[0][1].size() == 2 },
+                // The test reads are all SARS-CoV-2, so removing human keeps them.
+                { assert process.out.reads_present[0][1] == 'true' },
+                { assert snapshot(
+                    process.out.extracted_kraken2_reads,
+                    process.out.report,
+                    process.out.reads_present,
+                    file(process.out.status[0][1]).name,
+                    process.out.findAll { key, _val -> key.startsWith('versions') }
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - exclude every read") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false, exclude:true ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = UNTAR.out.untar.map { _meta, db -> db }
+                input[2] = '2697049'
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Every read is SARS-CoV-2, so excluding it leaves nothing. The task
+                // still succeeds and says so, which is how pipelines skip the library.
+                { assert process.out.reads_present[0][1] == 'false' },
+                { assert process.out.extracted_kraken2_reads[0][1].size() == 2 },
+                { assert snapshot(
+                    process.out.extracted_kraken2_reads.collect { _meta, files -> files.collect { f -> file(f).name } },
+                    process.out.report,
+                    process.out.reads_present
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - single_end - keep taxid") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:true ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true)
+                ]
+                input[1] = UNTAR.out.untar.map { _meta, db -> db }
+                input[2] = '2697049'
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    process.out.extracted_kraken2_reads,
+                    process.out.report,
+                    process.out.reads_present,
+                    file(process.out.status[0][1]).name,
+                    process.out.findAll { key, _val -> key.startsWith('versions') }
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - save fastqs and assignments") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = UNTAR.out.untar.map { _meta, db -> db }
+                input[2] = '2697049'
+                input[3] = true
+                input[4] = true
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Kraken2's own outputs are recorded by name: their read order can
+                // depend on threading, unlike the extracted reads.
+                { assert snapshot(
+                    process.out.classified_reads_fastq.collect { _meta, files -> files.collect { f -> file(f).name } },
+                    process.out.unclassified_reads_fastq.collect { _meta, files -> files.collect { f -> file(f).name } },
+                    process.out.classified_reads_assignment.collect { _meta, f -> file(f).name },
+                    process.out.extracted_kraken2_reads,
+                    process.out.report
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                input[1] = UNTAR.out.untar.map { _meta, db -> db }
+                input[2] = '2697049'
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}
