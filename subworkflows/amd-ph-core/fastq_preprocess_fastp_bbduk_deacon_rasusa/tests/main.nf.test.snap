@@ -136,6 +136,22 @@
                             "id": "test",
                             "single_end": false
                         },
+                        "test.bbduk.log:md5,4b11f8d7dd7e38e430f5c8250e81d906"
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.bbduk.log:md5,4b11f8d7dd7e38e430f5c8250e81d906"
+                    ]
+                ],
+                "8": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
                         "test.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2"
                     ],
                     [
@@ -146,13 +162,29 @@
                         "test_long.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2"
                     ]
                 ],
-                "8": [
+                "9": [
                     "test.bbduk.summary.txt:md5,f2e533180fe7487898b65e979a793f4c",
                     "test.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2",
                     "test.fastp.json:md5,d41d8cd98f00b204e9800998ecf8427e",
                     "test_long.bbduk.summary.txt:md5,f2e533180fe7487898b65e979a793f4c",
                     "test_long.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2",
                     "test_long.fastplong.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "bbduk_log": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.bbduk.log:md5,4b11f8d7dd7e38e430f5c8250e81d906"
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.bbduk.log:md5,4b11f8d7dd7e38e430f5c8250e81d906"
+                    ]
                 ],
                 "bbduk_stats": [
                     [
@@ -270,7 +302,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-11-18T11:37:42.128431065",
+        "timestamp": "2026-11-18T12:54:10.299528926",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

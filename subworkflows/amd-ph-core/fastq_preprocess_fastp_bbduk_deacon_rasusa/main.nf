@@ -99,6 +99,7 @@ workflow FASTQ_PREPROCESS_FASTP_BBDUK_DEACON_RASUSA {
     //
     ch_rrna_reads  = channel.empty()
     ch_bbduk_stats = channel.empty()
+    ch_bbduk_log   = channel.empty()
     if (skip_rrna_depletion) {
         ch_depleted_reads = ch_trimmed_reads
     }
@@ -107,6 +108,9 @@ workflow FASTQ_PREPROCESS_FASTP_BBDUK_DEACON_RASUSA {
         ch_depleted_reads = BBMAP_BBDUK.out.reads
         ch_rrna_reads     = BBMAP_BBDUK.out.matched
         ch_bbduk_stats    = BBMAP_BBDUK.out.stats
+        // The exact count of records removed. #Matched in the stats file undercounts paired-end
+        // removal, because one matching mate moves the pair.
+        ch_bbduk_log      = BBMAP_BBDUK.out.log
         // The truncated stats copy, not the full one: MultiQC writes every row it parses into
         // its own outputs, and against SILVA SSU+LSU NR99 the full file has 93,601 rows, 23 MB
         // of multiqc_data.json per sample. The truncated copy gives the same summary from 38 KB.
@@ -148,6 +152,7 @@ workflow FASTQ_PREPROCESS_FASTP_BBDUK_DEACON_RASUSA {
     fastplong_json = FASTPLONG.out.json      // channel: [ val(meta), path(json) ]
     fastplong_html = FASTPLONG.out.html      // channel: [ val(meta), path(html) ]
     bbduk_stats    = ch_bbduk_stats          // channel: [ val(meta), path(txt) ]
+    bbduk_log      = ch_bbduk_log            // channel: [ val(meta), path(log) ]
     deacon_json    = ch_deacon_json          // channel: [ val(meta), path(json) ]
     multiqc_files  = ch_multiqc_files        // channel: path(file)
 }

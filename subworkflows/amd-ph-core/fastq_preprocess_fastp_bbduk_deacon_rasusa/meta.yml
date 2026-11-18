@@ -116,6 +116,14 @@ output:
         depletion is skipped.
         Structure: [ val(meta), path(txt) ]
       pattern: "*.bbduk.txt"
+  - bbduk_log:
+      type: file
+      description: |
+        bbduk's stderr log. Its `Total Removed:` and `Result:` lines are the exact record counts;
+        the stats file's #Matched undercounts paired-end removal. Empty when rRNA depletion is
+        skipped.
+        Structure: [ val(meta), path(log) ]
+      pattern: "*.bbduk.log"
   - deacon_json:
       type: file
       description: |
