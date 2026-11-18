@@ -98,6 +98,7 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 ## Available subworkflows
 
 - `fastq_clockwork_decontaminate` - Read decontamination using Clockwork
+- `fastq_preprocess_fastp_bbduk_deacon_rasusa` - QQQ read preprocessing: adapter trimming, rRNA depletion, host removal, optional downsampling
 - `varpipe_core` - Top-level TB varpipe analysis workflow
 - `varpipe_processbam` - BAM processing for varpipe (sort, index, mark duplicates)
 - `varpipe_variantanalysis` - Variant calling, filtering, and annotation
