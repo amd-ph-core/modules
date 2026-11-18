@@ -1,0 +1,279 @@
+{
+    "paired-end - defaults - rRNA depletion takes reads before host removal sees them": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    [
+                        "test.clean_1.fq.gz",
+                        "test.clean_2.fq.gz"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    [
+                        "test.matched_1.fastq.gz",
+                        "test.matched_2.fastq.gz"
+                    ]
+                ]
+            ],
+            [
+                "test.bbduk.summary.txt",
+                "test.deacon.json",
+                "test.fastp.json"
+            ]
+        ],
+        "timestamp": "2026-11-18T11:37:07.329445296",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "mixed short and long - all steps on - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test_1.downsampled.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test_2.downsampled.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.downsampled.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.matched_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.matched_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.matched.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.fastp.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.fastp.html:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.fastplong.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.fastplong.html:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "6": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.bbduk.txt:md5,f2e533180fe7487898b65e979a793f4c"
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.bbduk.txt:md5,f2e533180fe7487898b65e979a793f4c"
+                    ]
+                ],
+                "7": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2"
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2"
+                    ]
+                ],
+                "8": [
+                    "test.bbduk.summary.txt:md5,f2e533180fe7487898b65e979a793f4c",
+                    "test.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2",
+                    "test.fastp.json:md5,d41d8cd98f00b204e9800998ecf8427e",
+                    "test_long.bbduk.summary.txt:md5,f2e533180fe7487898b65e979a793f4c",
+                    "test_long.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2",
+                    "test_long.fastplong.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "bbduk_stats": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.bbduk.txt:md5,f2e533180fe7487898b65e979a793f4c"
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.bbduk.txt:md5,f2e533180fe7487898b65e979a793f4c"
+                    ]
+                ],
+                "deacon_json": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2"
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2"
+                    ]
+                ],
+                "fastp_html": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.fastp.html:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "fastp_json": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.fastp.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "fastplong_html": [
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.fastplong.html:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "fastplong_json": [
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.fastplong.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "multiqc_files": [
+                    "test.bbduk.summary.txt:md5,f2e533180fe7487898b65e979a793f4c",
+                    "test.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2",
+                    "test.fastp.json:md5,d41d8cd98f00b204e9800998ecf8427e",
+                    "test_long.bbduk.summary.txt:md5,f2e533180fe7487898b65e979a793f4c",
+                    "test_long.deacon.json:md5,073d626aee5a0d7c3edb5e81df1f53a2",
+                    "test_long.fastplong.json:md5,d41d8cd98f00b204e9800998ecf8427e"
+                ],
+                "reads": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test_1.downsampled.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test_2.downsampled.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.downsampled.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "rrna_reads": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.matched_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.matched_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ],
+                    [
+                        {
+                            "id": "test_long",
+                            "single_end": true
+                        },
+                        "test_long.matched.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-18T11:37:42.128431065",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

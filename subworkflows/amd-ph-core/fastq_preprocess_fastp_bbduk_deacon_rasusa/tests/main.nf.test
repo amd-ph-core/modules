@@ -1,0 +1,362 @@
+nextflow_workflow {
+
+    name "Test Subworkflow FASTQ_PREPROCESS_FASTP_BBDUK_DEACON_RASUSA"
+    script "../main.nf"
+    workflow "FASTQ_PREPROCESS_FASTP_BBDUK_DEACON_RASUSA"
+    config "./nextflow.config"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/fastq_preprocess_fastp_bbduk_deacon_rasusa"
+    tag "subworkflows/../../modules/nf-core/fastp"
+    tag "subworkflows/../../modules/nf-core/fastplong"
+    tag "bbmap/bbduk"
+    tag "deacon/filter"
+    tag "deacon/index"
+    tag "rasusa/reads"
+
+    // The reads are SARS-CoV-2 throughout: 100 Illumina pairs, and a nanopore run. Each test picks
+    // the rRNA reference and the host index so that exactly the step under test has something to
+    // remove -- SARS-CoV-2 itself where the step should take reads, a human genome fragment where
+    // it should take none. Assertions are on read counts from the emitted streams rather than on
+    // md5 snapshots, so a rebuilt container or a patch release of a tool does not churn them.
+
+    test("paired-end - defaults - rRNA depletion takes reads before host removal sees them") {
+
+        setup {
+            run("DEACON_INDEX") {
+                script "../../../../modules/amd-ph-core/deacon/index/main.nf"
+                process {
+                    """
+                    input[0] = channel.value([
+                        [ id:'sarscov2' ],
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                    ])
+                    """
+                }
+            }
+        }
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.empty()
+                input[2] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true))
+                input[3] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[4] = false
+                input[5] = false
+                input[6] = true
+                input[7] = null
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            def count = { fastq -> path(fastq).linesGzip.size().intdiv(4) }
+            def trimmed = new groovy.json.JsonSlurper().parse(path(workflow.out.fastp_json[0][1]).toFile())
+            def matched = count(workflow.out.rrna_reads[0][1][0])
+            def deacon  = new groovy.json.JsonSlurper().parse(path(workflow.out.deacon_json[0][1]).toFile())
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.reads.size() == 1 },
+                { assert workflow.out.reads[0][1].size() == 2 },
+                // Both references match these reads, so the order decides which step takes them.
+                // bbduk runs first and takes nearly everything; deacon is left only what bbduk
+                // missed. Were the order reversed, deacon would remove the bulk instead.
+                { assert matched > 0.9 * trimmed.summary.after_filtering.total_reads.intdiv(2) },
+                { assert deacon.seqs_in < 0.1 * trimmed.summary.after_filtering.total_reads },
+                { assert workflow.out.multiqc_files.size() == 3 },
+                { assert snapshot(
+                    workflow.out.reads.collect { meta, reads -> [ meta, reads.collect { fastq -> file(fastq).name } ] },
+                    workflow.out.rrna_reads.collect { meta, reads -> [ meta, reads.collect { fastq -> file(fastq).name } ] },
+                    workflow.out.multiqc_files.collect { report -> file(report).name }.sort(),
+                ).match() }
+            )
+        }
+    }
+
+    test("paired-end - defaults - host removal takes host reads that are not rRNA") {
+
+        setup {
+            run("DEACON_INDEX") {
+                script "../../../../modules/amd-ph-core/deacon/index/main.nf"
+                process {
+                    """
+                    input[0] = channel.value([
+                        [ id:'sarscov2' ],
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                    ])
+                    """
+                }
+            }
+        }
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.empty()
+                input[2] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true))
+                input[3] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[4] = false
+                input[5] = false
+                input[6] = true
+                input[7] = null
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            def count  = { fastq -> path(fastq).linesGzip.size().intdiv(4) }
+            def deacon = new groovy.json.JsonSlurper().parse(path(workflow.out.deacon_json[0][1]).toFile())
+            assertAll(
+                { assert workflow.success },
+                // Nothing matches the human rRNA stand-in, so bbduk passes everything on...
+                { assert workflow.out.rrna_reads.every { _meta, reads -> reads.every { fastq -> count(fastq) == 0 } } },
+                // ...and deacon removes it as host. Its own report and the emitted stream agree.
+                { assert deacon.seqs_removed > 0.9 * deacon.seqs_in },
+                { assert count(workflow.out.reads[0][1][0]) * 2 == deacon.seqs_out },
+            )
+        }
+    }
+
+    test("paired-end - every optional step skipped - reads are fastp's output") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.empty()
+                input[2] = channel.value([])
+                input[3] = channel.value([])
+                input[4] = true
+                input[5] = true
+                input[6] = true
+                input[7] = null
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            def count   = { fastq -> path(fastq).linesGzip.size().intdiv(4) }
+            def trimmed = new groovy.json.JsonSlurper().parse(path(workflow.out.fastp_json[0][1]).toFile())
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.rrna_reads.size() == 0 },
+                { assert workflow.out.bbduk_stats.size() == 0 },
+                { assert workflow.out.deacon_json.size() == 0 },
+                { assert workflow.out.reads[0][1].every { fastq -> file(fastq).name.endsWith('.fastp.fastq.gz') } },
+                { assert count(workflow.out.reads[0][1][0]) * 2 == trimmed.summary.after_filtering.total_reads },
+                { assert workflow.out.multiqc_files.size() == 1 },
+            )
+        }
+    }
+
+    test("paired-end - downsampling on - caps read pairs and keeps mates in step") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.empty()
+                input[2] = channel.value([])
+                input[3] = channel.value([])
+                input[4] = true
+                input[5] = true
+                input[6] = false
+                input[7] = 10
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            def count = { fastq -> path(fastq).linesGzip.size().intdiv(4) }
+            def names = { fastq -> path(fastq).linesGzip.findAll { line -> line.startsWith('@') }.collect { line -> line.tokenize(' ')[0] } }
+            def reads = workflow.out.reads[0][1]
+            assertAll(
+                { assert workflow.success },
+                { assert reads.every { fastq -> file(fastq).name.endsWith('.downsampled.fastq.gz') } },
+                { assert count(reads[0]) == 10 },
+                { assert count(reads[1]) == 10 },
+                { assert names(reads[0]) == names(reads[1]) },
+            )
+        }
+    }
+
+    test("long reads - defaults - fastplong trims and the rest of the chain runs") {
+
+        setup {
+            run("DEACON_INDEX") {
+                script "../../../../modules/amd-ph-core/deacon/index/main.nf"
+                process {
+                    """
+                    input[0] = channel.value([
+                        [ id:'homo_sapiens' ],
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                    ])
+                    """
+                }
+            }
+        }
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = channel.of([
+                    [ id:'test_long', single_end:true ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true)
+                ])
+                input[2] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true))
+                input[3] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[4] = false
+                input[5] = false
+                input[6] = true
+                input[7] = null
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            def count   = { fastq -> path(fastq).linesGzip.size().intdiv(4) }
+            def trimmed = new groovy.json.JsonSlurper().parse(path(workflow.out.fastplong_json[0][1]).toFile())
+            def matched = [ workflow.out.rrna_reads[0][1] ].flatten().sum { fastq -> count(fastq) }
+            def deacon  = new groovy.json.JsonSlurper().parse(path(workflow.out.deacon_json[0][1]).toFile())
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.fastp_json.size() == 0 },
+                { assert workflow.out.fastplong_json.size() == 1 },
+                // bbduk takes a few noisy nanopore reads even against an unrelated reference --
+                // 17 of 100 here, on short low-complexity k-mers -- so the invariant asserted is
+                // conservation: every trimmed read lands in exactly one of bbduk's two streams.
+                { assert matched + deacon.seqs_in == trimmed.summary.after_filtering.total_reads },
+                // The host index is not SARS-CoV-2, so deacon keeps everything it is given.
+                { assert deacon.seqs_out == deacon.seqs_in },
+                { assert count([ workflow.out.reads[0][1] ].flatten()[0]) == deacon.seqs_out },
+            )
+        }
+    }
+
+    test("mixed short and long - all steps on - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                    ]
+                ])
+                input[1] = channel.of([
+                    [ id:'test_long', single_end:true ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true)
+                ])
+                input[2] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true))
+                input[3] = channel.value(file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true))
+                input[4] = false
+                input[5] = false
+                input[6] = false
+                input[7] = 10
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(workflow.out).match() }
+            )
+        }
+    }
+
+    test("downsampling on without a cap - fails at launch") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = channel.empty()
+                input[2] = channel.value([])
+                input[3] = channel.value([])
+                input[4] = true
+                input[5] = true
+                input[6] = false
+                input[7] = null
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.any { line -> line.contains('max_reads must be a positive integer') } },
+            )
+        }
+    }
+
+    test("a switch passed as a channel - fails at launch") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = channel.empty()
+                input[2] = channel.value([])
+                input[3] = channel.value([])
+                input[4] = channel.value(true)
+                input[5] = true
+                input[6] = true
+                input[7] = null
+                input[8] = 42
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.any { line -> line.contains('skip_rrna_depletion must be a boolean') } },
+            )
+        }
+    }
+}

@@ -1,0 +1,131 @@
+name: "fastq_preprocess_fastp_bbduk_deacon_rasusa"
+description: |
+  Read preprocessing as the QQQ pipeline runs it, for metagenomic short and long reads: adapter
+  trimming with fastp or fastplong, rRNA depletion with bbduk, host removal with deacon, and
+  downsampling with rasusa, in that order. rRNA depletion and host removal are on by default;
+  downsampling is off. fastp's JSON report supplies every read-level QC metric, so no separate
+  QC tool runs.
+keywords:
+  - quality control
+  - adapter trimming
+  - rRNA depletion
+  - host removal
+  - downsampling
+  - metagenomics
+components:
+  - fastp
+  - fastplong
+  - bbmap/bbduk
+  - deacon/filter
+  - rasusa/reads
+input:
+  - ch_short_reads:
+      type: file
+      description: |
+        Short reads, single- or paired-end, trimmed with fastp.
+        Structure: [ val(meta), [ path(reads) ] ]
+      pattern: "*.{fastq,fq}.gz"
+  - ch_long_reads:
+      type: file
+      description: |
+        Long reads, one file per sample, trimmed with fastplong. meta.single_end must be true.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.{fastq,fq}.gz"
+  - ch_rrna_ref:
+      type: file
+      description: |
+        rRNA reference FASTA for bbduk. Ignored when skip_rrna_depletion is true; pass
+        `channel.value([])` then.
+        Structure: [ path(fasta) ]
+      pattern: "*.{fa,fasta,fna}{,.gz}"
+  - ch_host_index:
+      type: file
+      description: |
+        deacon minimizer index of the host genome. Ignored when skip_dehost is true; pass
+        `channel.value([])` then.
+        Structure: [ path(idx) ]
+      pattern: "*.idx"
+  - skip_rrna_depletion:
+      type: boolean
+      description: |
+        Skip rRNA depletion. A plain boolean, not a channel.
+  - skip_dehost:
+      type: boolean
+      description: |
+        Skip host removal. A plain boolean, not a channel.
+  - skip_downsample:
+      type: boolean
+      description: |
+        Skip downsampling. A plain boolean, not a channel.
+  - max_reads:
+      type: integer
+      description: |
+        Reads (single-end) or read pairs (paired-end) to keep per sample. Samples already under
+        the cap pass through whole. Required to be positive unless skip_downsample is true.
+  - downsample_seed:
+      type: integer
+      description: |
+        Random seed for rasusa, so a downsampled sample is reproducible.
+output:
+  - reads:
+      type: file
+      description: |
+        Reads after every enabled step: trimmed, rRNA-depleted, host-removed and capped.
+        Structure: [ val(meta), [ path(reads) ] ]
+      pattern: "*.{fastq,fq}.gz"
+  - rrna_reads:
+      type: file
+      description: |
+        Reads bbduk matched to the rRNA reference. Taken before host removal, so they contain
+        host sequence, including the mate of any read that matched. Empty when rRNA depletion
+        is skipped.
+        Structure: [ val(meta), [ path(reads) ] ]
+      pattern: "*.matched*.fastq.gz"
+  - fastp_json:
+      type: file
+      description: |
+        fastp JSON report for short reads.
+        Structure: [ val(meta), path(json) ]
+      pattern: "*.json"
+  - fastp_html:
+      type: file
+      description: |
+        fastp HTML report for short reads.
+        Structure: [ val(meta), path(html) ]
+      pattern: "*.html"
+  - fastplong_json:
+      type: file
+      description: |
+        fastplong JSON report for long reads.
+        Structure: [ val(meta), path(json) ]
+      pattern: "*.json"
+  - fastplong_html:
+      type: file
+      description: |
+        fastplong HTML report for long reads.
+        Structure: [ val(meta), path(html) ]
+      pattern: "*.html"
+  - bbduk_stats:
+      type: file
+      description: |
+        Complete bbduk stats file, one row per matched reference record. Empty when rRNA
+        depletion is skipped.
+        Structure: [ val(meta), path(txt) ]
+      pattern: "*.bbduk.txt"
+  - deacon_json:
+      type: file
+      description: |
+        deacon filter report with input, output and removed read counts. Empty when host
+        removal is skipped.
+        Structure: [ val(meta), path(json) ]
+      pattern: "*.deacon.json"
+  - multiqc_files:
+      type: file
+      description: |
+        Every file MultiQC should parse from this subworkflow: fastp and fastplong JSON, the
+        truncated bbduk stats, and deacon JSON.
+        Structure: [ path(file) ]
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"
