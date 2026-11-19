@@ -13,6 +13,16 @@ nextflow_process {
 
     // Small SARS-CoV-2 Kraken2 database from nf-core test data.
     setup {
+        // nf-core untar is installed at test time, pinned to a commit, the same
+        // way varpipe/bwamem installs nf-core bwa/index.
+        nfcoreInitialise("${launchDir}/library/")
+        nfcoreInstall(
+            "${launchDir}/library/",
+            [
+                [name: "untar", sha: "d090922b1a4b80ba283186459ababf8e308abcbb"]
+            ]
+        )
+        nfcoreLink("${launchDir}/library/", "${baseDir}/modules/")
         run("UNTAR") {
             script "../../../../nf-core/untar/main.nf"
             process {
@@ -63,6 +73,10 @@ nextflow_process {
                 ).match() }
             )
         }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
     }
 
     test("sarscov2 - fastq - paired_end - exclude human (host removal)") {
@@ -100,6 +114,10 @@ nextflow_process {
                 ).match() }
             )
         }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
     }
 
     test("sarscov2 - fastq - paired_end - exclude every read") {
@@ -136,6 +154,10 @@ nextflow_process {
                 ).match() }
             )
         }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
     }
 
     test("sarscov2 - fastq - single_end - keep taxid") {
@@ -166,6 +188,10 @@ nextflow_process {
                     process.out.findAll { key, _val -> key.startsWith('versions') }
                 ).match() }
             )
+        }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
         }
     }
 
@@ -203,6 +229,10 @@ nextflow_process {
                 ).match() }
             )
         }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
+        }
     }
 
     test("sarscov2 - fastq - paired_end - stub") {
@@ -232,6 +262,10 @@ nextflow_process {
                 { assert process.success },
                 { assert snapshot(process.out).match() }
             )
+        }
+
+        cleanup {
+            nfcoreUnlink("${launchDir}/library/", "${baseDir}/modules/nf-core")
         }
     }
 }
