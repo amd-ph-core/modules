@@ -1,0 +1,198 @@
+nextflow_process {
+
+    name "Test Process SAMTOOLS_ALIGNMENT"
+    script "../main.nf"
+    process "SAMTOOLS_ALIGNMENT"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "samtools"
+    tag "samtools/alignment"
+
+    test("sarscov2 - bam - fasta - coverage and depth only") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                ]
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // run_stats is false, so none of the stats outputs may appear.
+                { assert process.out.stats.size() == 0 },
+                { assert process.out.flagstat.size() == 0 },
+                { assert process.out.idxstats.size() == 0 },
+                { assert process.out.qc_bundle.size() == 0 },
+                { assert snapshot(
+                    process.out.coverage,
+                    process.out.depth,
+                    [ versions: [
+                        samtools: process.out.versions_samtools
+                    ] ]
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - bam - fasta - run_stats") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                ]
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            // Reads the QC archive and returns its file entries, without the
+            // leading "./" and without directory entries.
+            def bundlePath    = { file(process.out.qc_bundle[0][1]).toString() }
+            def bundleMembers = {
+                ['tar', '-tf', bundlePath()].execute().text.readLines()
+                    .findAll { !it.endsWith('/') }
+            }
+            // Prints one file from the archive to a string.
+            def bundleFile = { String name ->
+                def member = bundleMembers().find { it.replaceFirst('^\\./', '') == name }
+                assert member : "${name} is missing from the QC archive"
+                ['tar', '-xOf', bundlePath(), member].execute().text
+            }
+            assertAll(
+                { assert process.success },
+                // A tar archive's checksum changes with file timestamps, so the
+                // snapshot records only its name and its contents are checked here.
+                { assert process.out.qc_bundle.size() == 1 },
+                // The archive must hold the three QC files in the layout MultiQC
+                // expects, with the same content as the standalone outputs.
+                { assert bundleMembers().collect { it.replaceFirst('^\\./', '') }.sort() ==
+                    [ 'flagstat/test.flagstat', 'samtools/test.idxstats', 'samtools/test.stats' ] },
+                { assert bundleFile('flagstat/test.flagstat') == file(process.out.flagstat[0][1]).text },
+                { assert bundleFile('samtools/test.stats')    == file(process.out.stats[0][1]).text },
+                { assert bundleFile('samtools/test.idxstats') == file(process.out.idxstats[0][1]).text },
+                { assert snapshot(
+                    process.out.coverage,
+                    process.out.depth,
+                    process.out.stats,
+                    process.out.flagstat,
+                    process.out.idxstats,
+                    file(process.out.qc_bundle[0][1]).name,
+                    [ versions: [
+                        samtools: process.out.versions_samtools
+                    ] ]
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - bam - no reference - run_stats") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                    [],
+                    []
+                ]
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            // Reads the QC archive and returns its file entries, without the
+            // leading "./" and without directory entries.
+            def bundlePath    = { file(process.out.qc_bundle[0][1]).toString() }
+            def bundleMembers = {
+                ['tar', '-tf', bundlePath()].execute().text.readLines()
+                    .findAll { !it.endsWith('/') }
+            }
+            // Prints one file from the archive to a string.
+            def bundleFile = { String name ->
+                def member = bundleMembers().find { it.replaceFirst('^\\./', '') == name }
+                assert member : "${name} is missing from the QC archive"
+                ['tar', '-xOf', bundlePath(), member].execute().text
+            }
+            assertAll(
+                { assert process.success },
+                { assert process.out.qc_bundle.size() == 1 },
+                // The archive must hold the three QC files in the layout MultiQC
+                // expects, with the same content as the standalone outputs.
+                { assert bundleMembers().collect { it.replaceFirst('^\\./', '') }.sort() ==
+                    [ 'flagstat/test.flagstat', 'samtools/test.idxstats', 'samtools/test.stats' ] },
+                { assert bundleFile('flagstat/test.flagstat') == file(process.out.flagstat[0][1]).text },
+                { assert bundleFile('samtools/test.stats')    == file(process.out.stats[0][1]).text },
+                { assert bundleFile('samtools/test.idxstats') == file(process.out.idxstats[0][1]).text },
+                { assert snapshot(
+                    process.out.coverage,
+                    process.out.depth,
+                    process.out.stats,
+                    process.out.flagstat,
+                    process.out.idxstats,
+                    file(process.out.qc_bundle[0][1]).name,
+                    [ versions: [
+                        samtools: process.out.versions_samtools
+                    ] ]
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - bam - fasta - run_stats - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ], // meta map
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                ]
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    process.out.coverage,
+                    process.out.depth,
+                    process.out.stats,
+                    process.out.flagstat,
+                    process.out.idxstats,
+                    file(process.out.qc_bundle[0][1]).name,
+                    [ versions: [
+                        samtools: process.out.versions_samtools
+                    ] ]
+                ).match() }
+            )
+        }
+    }
+}

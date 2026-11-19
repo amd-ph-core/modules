@@ -77,6 +77,7 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 - `picard/buildbamindex` - Build BAM index
 - `picard/samformatconverter` - Convert between SAM/BAM formats
 - `picard/sortsam` - Sort SAM/BAM files
+- `samtools/alignment` - Alignment QC in one task: coverage and depth, plus optional stats, flagstat and idxstats
 
 ### TB varpipe analysis
 

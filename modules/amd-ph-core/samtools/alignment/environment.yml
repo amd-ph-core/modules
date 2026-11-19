@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # Pinned to match the container (cdc-amd/samtools:1.22.1), NOT to the newest
+  # bioconda build, so `-profile conda` runs the same samtools as
+  # `-profile docker`.
+  - bioconda::htslib=1.22.1
+  - bioconda::samtools=1.22.1
+  - conda-forge::tar=1.34
