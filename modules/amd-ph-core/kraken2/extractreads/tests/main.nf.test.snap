@@ -1,0 +1,420 @@
+{
+    "sarscov2 - fastq - paired_end - exclude human (host removal)": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false,
+                        "exclude": true
+                    },
+                    [
+                        "test.extracted_kraken2_read_1.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+                        "test.extracted_kraken2_read_2.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false,
+                        "exclude": true
+                    },
+                    "test.kraken2.report.txt:md5,4227755fe40478b8d7dc8634b489761e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false,
+                        "exclude": true
+                    },
+                    "true"
+                ]
+            ],
+            "test.extract_kraken_reads.status.json",
+            {
+                "versions_extractor": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "extract_kraken_reads_parallel.py",
+                        "1.0.0"
+                    ]
+                ],
+                "versions_kraken2": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "kraken2",
+                        "2.1.6"
+                    ]
+                ],
+                "versions_pigz": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "pigz",
+                        "2.8"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-18T13:34:38.543467909",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - fastq - paired_end - save fastqs and assignments": {
+        "content": [
+            [
+                [
+                    "test.classified_1.fastq.gz",
+                    "test.classified_2.fastq.gz"
+                ]
+            ],
+            [
+                [
+                    "test.unclassified_1.fastq.gz",
+                    "test.unclassified_2.fastq.gz"
+                ]
+            ],
+            [
+                "test.kraken2.classifiedreads.txt"
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    [
+                        "test.extracted_kraken2_read_1.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+                        "test.extracted_kraken2_read_2.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.kraken2.report.txt:md5,4227755fe40478b8d7dc8634b489761e"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-18T13:35:00.609872965",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - fastq - single_end - keep taxid": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": true
+                    },
+                    "test.extracted_kraken2_read.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": true
+                    },
+                    "test.kraken2.report.txt:md5,4227755fe40478b8d7dc8634b489761e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": true
+                    },
+                    "true"
+                ]
+            ],
+            "test.extract_kraken_reads.status.json",
+            {
+                "versions_extractor": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "extract_kraken_reads_parallel.py",
+                        "1.0.0"
+                    ]
+                ],
+                "versions_kraken2": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "kraken2",
+                        "2.1.6"
+                    ]
+                ],
+                "versions_pigz": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "pigz",
+                        "2.8"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-18T13:34:53.410040076",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - fastq - paired_end - keep taxid": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    [
+                        "test.extracted_kraken2_read_1.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+                        "test.extracted_kraken2_read_2.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "test.kraken2.report.txt:md5,4227755fe40478b8d7dc8634b489761e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false
+                    },
+                    "true"
+                ]
+            ],
+            "test.extract_kraken_reads.status.json",
+            {
+                "versions_extractor": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "extract_kraken_reads_parallel.py",
+                        "1.0.0"
+                    ]
+                ],
+                "versions_kraken2": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "kraken2",
+                        "2.1.6"
+                    ]
+                ],
+                "versions_pigz": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "pigz",
+                        "2.8"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-18T13:34:31.034233399",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - fastq - paired_end - exclude every read": {
+        "content": [
+            [
+                [
+                    "test.extracted_kraken2_read_1.fastq.gz",
+                    "test.extracted_kraken2_read_2.fastq.gz"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false,
+                        "exclude": true
+                    },
+                    "test.kraken2.report.txt:md5,4227755fe40478b8d7dc8634b489761e"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test",
+                        "single_end": false,
+                        "exclude": true
+                    },
+                    "false"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-18T13:34:46.219250754",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - fastq - paired_end - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.extracted_kraken2_read_1.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
+                            "test.extracted_kraken2_read_2.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "true"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.extract_kraken_reads.status.json:md5,df060888cf7354632ab224b132ac40b6"
+                    ]
+                ],
+                "4": [
+                    
+                ],
+                "5": [
+                    
+                ],
+                "6": [
+                    
+                ],
+                "7": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "kraken2",
+                        "2.1.6"
+                    ]
+                ],
+                "8": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "extract_kraken_reads_parallel.py",
+                        "1.0.0"
+                    ]
+                ],
+                "9": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "pigz",
+                        "2.8"
+                    ]
+                ],
+                "classified_reads_assignment": [
+                    
+                ],
+                "classified_reads_fastq": [
+                    
+                ],
+                "extracted_kraken2_reads": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.extracted_kraken2_read_1.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
+                            "test.extracted_kraken2_read_2.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        ]
+                    ]
+                ],
+                "reads_present": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "true"
+                    ]
+                ],
+                "report": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.kraken2.report.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "status": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.extract_kraken_reads.status.json:md5,df060888cf7354632ab224b132ac40b6"
+                    ]
+                ],
+                "unclassified_reads_fastq": [
+                    
+                ],
+                "versions_extractor": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "extract_kraken_reads_parallel.py",
+                        "1.0.0"
+                    ]
+                ],
+                "versions_kraken2": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "kraken2",
+                        "2.1.6"
+                    ]
+                ],
+                "versions_pigz": [
+                    [
+                        "KRAKEN2_EXTRACTREADS",
+                        "pigz",
+                        "2.8"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-18T13:35:07.760583467",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    }
+}
