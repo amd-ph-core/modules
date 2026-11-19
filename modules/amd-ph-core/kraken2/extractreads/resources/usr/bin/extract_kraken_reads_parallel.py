@@ -15,7 +15,6 @@ import gzip
 import io
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import sqlite3
@@ -25,8 +24,8 @@ import tempfile
 import textwrap
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import BinaryIO, Iterator, TextIO
-
 
 VERSION = "1.0.0"
 ARTIFICIAL_SEQUENCE_TAXID = 81077
@@ -37,7 +36,7 @@ class ExtractionError(RuntimeError):
     """Base error for invalid or inconsistent extraction inputs."""
 
 
-class OrderMismatch(ExtractionError):
+class OrderMismatch(ExtractionError):  # noqa: N818 (name kept from Talos PR #61)
     """Raised when assignments and sequence records are not in the same order."""
 
 
@@ -65,12 +64,15 @@ class ExtractionStats:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Extract reads using Kraken/Kraken2 assignment output."
-    )
+    parser = argparse.ArgumentParser(description="Extract reads using Kraken/Kraken2 assignment output.")
     parser.add_argument("-k", "--kraken", "--kraken-file", dest="kraken_file", required=True)
     parser.add_argument(
-        "-s", "-s1", "-1", "-U", dest="seq_file1", required=True,
+        "-s",
+        "-s1",
+        "-1",
+        "-U",
+        dest="seq_file1",
+        required=True,
         help="First FASTA/FASTQ input; may be gzip-compressed.",
     )
     parser.add_argument("-s2", "-2", dest="seq_file2", default="")
@@ -88,15 +90,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--exclude", action="store_true")
     parser.add_argument("--fastq-output", dest="fastq_output", action="store_true")
     parser.add_argument(
-        "--threads", type=int, default=1,
+        "--threads",
+        type=int,
+        default=1,
         help="Total CPU budget used for streaming and compression.",
     )
     parser.add_argument(
-        "--gzip-output", action="store_true",
+        "--gzip-output",
+        action="store_true",
         help="Compress output with deterministic gzip metadata.",
     )
     parser.add_argument(
-        "--status-file", default="",
+        "--status-file",
+        default="",
         help="Optional JSON status path for workflow integration.",
     )
     parser.add_argument("--version", action="version", version=VERSION)
@@ -125,13 +131,11 @@ def parse_taxid(value: str) -> int:
 
 
 def iter_assignments(path: str) -> Iterator[Assignment]:
-    with open(path, "rt", encoding="utf-8", newline=None) as handle:
+    with open(path, encoding="utf-8", newline=None) as handle:
         for line_number, line in enumerate(handle, start=1):
             fields = line.rstrip("\r\n").split("\t")
             if len(fields) < 5:
-                raise ExtractionError(
-                    f"Malformed Kraken assignment at {path}:{line_number}: expected 5 fields"
-                )
+                raise ExtractionError(f"Malformed Kraken assignment at {path}:{line_number}: expected 5 fields")
             yield Assignment(fields[1], parse_taxid(fields[2]))
 
 
@@ -158,20 +162,16 @@ def parse_report_entry(line: str) -> tuple[int, int] | None:
     return taxid, indentation // 2
 
 
-def expanded_taxids(
-    requested: set[int], report_file: str, include_parents: bool, include_children: bool
-) -> set[int]:
+def expanded_taxids(requested: set[int], report_file: str, include_parents: bool, include_children: bool) -> set[int]:
     if not include_parents and not include_children:
         return set(requested)
     if not report_file:
-        raise ExtractionError(
-            "--report is required with --include-parents or --include-children"
-        )
+        raise ExtractionError("--report is required with --include-parents or --include-children")
 
     parent: dict[int, int | None] = {}
     children: dict[int, list[int]] = {}
     stack: list[tuple[int, int]] = []
-    with open(report_file, "rt", encoding="utf-8", newline=None) as handle:
+    with open(report_file, encoding="utf-8", newline=None) as handle:
         for line in handle:
             entry = parse_report_entry(line)
             if entry is None:
@@ -224,7 +224,7 @@ class InputHandle:
         elif self.path.endswith(".gz"):
             self.handle = gzip.open(self.path, "rt", encoding="utf-8", newline=None)
         else:
-            self.handle = open(self.path, "rt", encoding="utf-8", newline=None)
+            self.handle = open(self.path, encoding="utf-8", newline=None)
         return self.handle
 
     def __exit__(self, exc_type, exc, traceback) -> None:
@@ -311,9 +311,7 @@ def iter_fastq(handle: TextIO, path: str) -> Iterator[FastxRecord]:
             quality_length += len(quality_line)
         quality = "".join(quality_lines)
         if len(quality) != len(sequence):
-            raise ExtractionError(
-                f"Sequence and quality lengths differ for {description!r} in {path}"
-            )
+            raise ExtractionError(f"Sequence and quality lengths differ for {description!r} in {path}")
         identifier = description.split(None, 1)[0]
         yield FastxRecord(identifier, description, sequence, quality)
 
@@ -393,8 +391,7 @@ def staged_outputs(
         per_output_threads = max(1, available_output_threads // len(output_paths))
         with contextlib.ExitStack() as stack:
             handles = [
-                stack.enter_context(OutputHandle(path, gzip_output, per_output_threads, use_pigz))
-                for path in staged
+                stack.enter_context(OutputHandle(path, gzip_output, per_output_threads, use_pigz)) for path in staged
             ]
             yield handles
         commit_outputs(staged, output_paths, append)
@@ -459,9 +456,7 @@ def validate_pair(record1: FastxRecord, record2: FastxRecord) -> str:
     id1 = normalized_id(record1.identifier)
     id2 = normalized_id(record2.identifier)
     if id1 != id2:
-        raise ExtractionError(
-            f"Paired input IDs do not match: {record1.identifier!r} and {record2.identifier!r}"
-        )
+        raise ExtractionError(f"Paired input IDs do not match: {record1.identifier!r} and {record2.identifier!r}")
     return id1
 
 
@@ -479,14 +474,10 @@ def ordered_extract(
     input_workers = input_count if use_pigz else 0
     with fastx_records(args.seq_file1, input_format, use_pigz) as records1:
         second_context = (
-            fastx_records(args.seq_file2, input_format, use_pigz)
-            if args.seq_file2
-            else contextlib.nullcontext(None)
+            fastx_records(args.seq_file2, input_format, use_pigz) if args.seq_file2 else contextlib.nullcontext(None)
         )
         with second_context as records2:
-            with staged_outputs(
-                destinations, args.gzip_output, args.threads, input_workers, args.append
-            ) as outputs:
+            with staged_outputs(destinations, args.gzip_output, args.threads, input_workers, args.append) as outputs:
                 for assignment in iter_assignments(args.kraken_file):
                     try:
                         record1 = next(records1)
@@ -653,9 +644,7 @@ def run(args: argparse.Namespace) -> ExtractionStats:
     validate_args(args)
     started = time.monotonic()
     requested_taxids = {parse_taxid(value) for value in args.taxid}
-    selected_taxids = expanded_taxids(
-        requested_taxids, args.report_file, args.parents, args.children
-    )
+    selected_taxids = expanded_taxids(requested_taxids, args.report_file, args.parents, args.children)
     input_format = detect_format(args.seq_file1, args.threads > 1)
     if args.seq_file2:
         second_format = detect_format(args.seq_file2, args.threads > 1)
@@ -667,24 +656,18 @@ def run(args: argparse.Namespace) -> ExtractionStats:
     destinations = [args.output_file] + ([args.output_file2] if args.seq_file2 else [])
 
     if args.max_reads == 0:
-        with staged_outputs(
-            destinations, args.gzip_output, args.threads, 0, args.append
-        ):
+        with staged_outputs(destinations, args.gzip_output, args.threads, 0, args.append):
             pass
         stats = ExtractionStats(mode="ordered")
     else:
         try:
-            stats = ordered_extract(
-                args, selected_taxids, input_format, output_format, destinations
-            )
+            stats = ordered_extract(args, selected_taxids, input_format, output_format, destinations)
         except OrderMismatch as exc:
             print(
                 f"WARNING: {exc}; restarting with disk-backed compatibility mode",
                 file=sys.stderr,
             )
-            stats = fallback_extract(
-                args, selected_taxids, input_format, output_format, destinations
-            )
+            stats = fallback_extract(args, selected_taxids, input_format, output_format, destinations)
     stats.elapsed_seconds = time.monotonic() - started
     return stats
 
@@ -706,4 +689,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
