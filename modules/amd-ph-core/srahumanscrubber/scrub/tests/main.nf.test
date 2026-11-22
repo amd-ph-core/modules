@@ -87,6 +87,71 @@ nextflow_process {
         }
     }
 
+    test("mixed - fastq - paired_end - remove") {
+
+        config "./remove.config"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'mixed', single_end:false ],
+                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_1.fastq.gz", checkIfExists: true),
+                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_2.fastq.gz", checkIfExists: true) ]
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            def names = { f -> path(f).linesGzip.withIndex().findAll { line, i -> i % 4 == 0 }.collect { line, i -> line.tokenize()[0].replaceAll(/\/[12]$/, '') } }
+            def r1 = names(process.out.fastq[0][1][0])
+            def r2 = names(process.out.fastq[0][1][1])
+            assertAll(
+                { assert process.success },
+                // Exactly the 50 human pairs go and the 50 SARS-CoV-2 pairs stay, in step.
+                { assert report.reads_in == 200 },
+                { assert report.reads_removed == 100 },
+                { assert r1.size() == 50 && r1 == r2 },
+                { assert r1.every { n -> !n.contains('chr22_sim') } },
+                { assert snapshot(process.out.fastq, process.out.json).match() }
+            )
+        }
+    }
+
+    test("mixed - fastq - paired_end - mask") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'mixed_mask', single_end:false ],
+                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_1.fastq.gz", checkIfExists: true),
+                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_2.fastq.gz", checkIfExists: true) ]
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            def records = { f -> path(f).linesGzip.collate(4) }
+            def r1 = records(process.out.fastq[0][1][0])
+            assertAll(
+                { assert process.success },
+                // Every read stays; the 50 human pairs (both mates) are all N, the rest untouched.
+                { assert report.reads_out == 200 },
+                { assert report.reads_masked == 100 },
+                { assert r1.findAll { rec -> rec[0].contains('chr22_sim') }.every { rec -> rec[1] ==~ /N+/ } },
+                { assert r1.findAll { rec -> !rec[0].contains('chr22_sim') }.every { rec -> !(rec[1] ==~ /N+/) } },
+                { assert snapshot(process.out.fastq, process.out.json).match() }
+            )
+        }
+    }
+
     test("homo_sapiens - fastq - single_end - mask") {
 
         when {

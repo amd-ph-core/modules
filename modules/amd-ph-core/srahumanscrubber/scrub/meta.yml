@@ -9,9 +9,15 @@ description: |
   format can be given instead, such as one built with `srahumanscrubber/builddb`.
 
   The scrubber's default masks identified reads: each keeps its length, with every base N. Pass `-x`
-  through `ext.args` to remove them instead. Paired-end reads are interleaved and scrubbed with `-s`,
-  so when either mate is identified the pair is masked or removed together, and the two output files
-  stay in step.
+  through `ext.args` to remove them instead; no other scrub.sh option is supported. Paired-end reads
+  are interleaved and scrubbed as pairs (scrub.sh's `-s`), so when either mate is identified the pair
+  is masked or removed together, and the two output files stay in step.
+
+  The module runs scrub.sh's three steps (fastq_to_fasta.py, aligns_to, cut_spots_fastq.py) itself
+  rather than scrub.sh: the bioconda build of 2.2.1 rewrites scrub.sh and drops the pair flag from
+  the FASTA conversion, so with `-s` it numbers spots per read, cuts per pair, and removes the wrong
+  reads from any sample that is only partly human. Passing the flag to both helpers gives the
+  release's behaviour in the BioContainer and the AMDP image alike.
 keywords:
   - dehosting
   - host depletion

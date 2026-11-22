@@ -5,3 +5,7 @@
   (40 kb of chr22), in the same format as NCBI's `human_filter.db`.
 - `human_chr22_{1,2}.fastq.gz`: 50 error-free 2 x 100 bp pairs (300 bp fragments) simulated from
   that genome with a fixed seed, so every pair is identified as human by the database above.
+- `mixed_{1,2}.fastq.gz`: those 50 human pairs followed by the first 50 pairs of nf-core's
+  `genomics/sarscov2/illumina/fastq/test_{1,2}.fastq.gz`. A sample that is part human is what
+  shows whether the right pairs go: with every read human, or none, removing the wrong ones looks
+  the same as removing the right ones.
