@@ -38,10 +38,13 @@ process SRAHUMANSCRUBBER_BUILDDB {
     # k - 1 bases always contains a kept k-mer.
     db_kmers() { echo \$(( (\$(stat -c %s "\$1") - 24) / 8 )); }
 
-    # One plain FASTA per input; the tools do not read gzip.
+    # One plain, uppercase FASTA per input: the tools do not read gzip, and they
+    # silently skip lowercase bases, so a soft-masked genome (repeats in
+    # lowercase, about half of T2T-CHM13) would otherwise lose those k-mers.
+    upper() { gzip -cdf "\$1" | awk '/^>/ { print; next } { print toupper(\$0) }'; }
     mkdir -p plain
     for f in host/*; do
-        gzip -cdf "\$f" > "plain/\$(basename "\${f%.gz}")"
+        upper "\$f" > "plain/\$(basename "\${f%.gz}")"
     done
     : > host.list
     for f in plain/*; do
@@ -62,7 +65,7 @@ process SRAHUMANSCRUBBER_BUILDDB {
         # puts each k-mer in canonical orientation) and subtracted.
         : > shared.txt
         for f in ${protect_set.join(' ')}; do
-            gzip -cdf "\$f" > protect.fa
+            upper "\$f" > protect.fa
             aligns_to -db host.db -num_threads ${task.cpus} -print_kmers_only protect.fa >> shared.txt
         done
         rm -f protect.fa
