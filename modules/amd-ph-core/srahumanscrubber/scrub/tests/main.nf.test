@@ -1,0 +1,146 @@
+nextflow_process {
+
+    name "Test Process SRAHUMANSCRUBBER_SCRUB"
+    script "../main.nf"
+    process "SRAHUMANSCRUBBER_SCRUB"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "srahumanscrubber"
+    tag "srahumanscrubber/scrub"
+
+    // The database is a 1,245-k-mer STAT database of nf-core's 40 kb chr22 test genome
+    // (tests/data/README.md), so the real script runs in seconds; NCBI's human_filter.db
+    // is about 1 GB.
+
+    test("homo_sapiens - fastq - paired_end - remove") {
+
+        config "./remove.config"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human', single_end:false ],
+                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/human_chr22_1.fastq.gz", checkIfExists: true),
+                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/human_chr22_2.fastq.gz", checkIfExists: true) ]
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            assertAll(
+                { assert process.success },
+                { assert process.out.fastq[0][1].size() == 2 },
+                // Every simulated pair is human, so both mates of all 50 pairs go.
+                { assert report.mode == 'remove' },
+                { assert report.reads_in == 100 },
+                { assert report.reads_out == 0 },
+                { assert report.reads_removed == 100 },
+                // Both outputs hold no reads, so their decompressed content is empty and
+                // only the names are snapshotted.
+                { assert path(process.out.fastq[0][1][0]).linesGzip.size() == 0 },
+                { assert snapshot(
+                    process.out.fastq.collect { meta, reads -> [ meta, reads.collect { read -> file(read).name } ] },
+                    process.out.json,
+                    process.out.findAll { key, val -> key.startsWith('versions') }
+                ).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - remove") {
+
+        config "./remove.config"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'sarscov2', single_end:false ],
+                    [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                      file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            def r1 = path(process.out.fastq[0][1][0]).linesGzip
+            def r2 = path(process.out.fastq[0][1][1]).linesGzip
+            assertAll(
+                { assert process.success },
+                // No read is human: all 100 pairs stay, and the mates stay in step
+                // through the interleave and split.
+                { assert report.reads_in == 200 },
+                { assert report.reads_out == 200 },
+                { assert report.reads_removed == 0 },
+                { assert r1.size() == 400 && r2.size() == 400 },
+                { assert (0..<100).every { i -> r1[4 * i].split()[0] == r2[4 * i].split()[0] } },
+                { assert snapshot(process.out.fastq, process.out.json).match() }
+            )
+        }
+    }
+
+    test("homo_sapiens - fastq - single_end - mask") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human_se', single_end:true ],
+                    file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/human_chr22_1.fastq.gz", checkIfExists: true)
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            def seqs = path(process.out.fastq[0][1]).linesGzip.withIndex().findAll { line, i -> i % 4 == 1 }.collect { line, i -> line }
+            assertAll(
+                { assert process.success },
+                // The scrubber's default: identified reads stay, every base replaced by N.
+                { assert report.mode == 'mask' },
+                { assert report.reads_in == 50 },
+                { assert report.reads_out == 50 },
+                { assert report.reads_removed == 0 },
+                { assert report.reads_masked == 50 },
+                { assert seqs.every { s -> s ==~ /N+/ } },
+                { assert snapshot(process.out.fastq, process.out.json).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test', single_end:false ],
+                    [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                      file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fastq[0][1].size() == 2 },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

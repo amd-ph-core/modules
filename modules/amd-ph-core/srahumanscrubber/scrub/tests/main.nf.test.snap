@@ -1,0 +1,204 @@
+{
+    "homo_sapiens - fastq - paired_end - remove": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "human",
+                        "single_end": false
+                    },
+                    [
+                        "human.clean_1.fq.gz",
+                        "human.clean_2.fq.gz"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "human",
+                        "single_end": false
+                    },
+                    "human.srahumanscrubber.json:md5,d807cd53e3cf1fbb662e918449e46aeb"
+                ]
+            ],
+            {
+                "versions_aligns_to": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "aligns_to",
+                        "0.801"
+                    ]
+                ],
+                "versions_srahumanscrubber": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "sra-human-scrubber",
+                        "2.2.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-22T00:12:43.122489748",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sarscov2 - fastq - paired_end - remove": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "sarscov2",
+                        "single_end": false
+                    },
+                    [
+                        "sarscov2.clean_1.fq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+                        "sarscov2.clean_2.fq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "sarscov2",
+                        "single_end": false
+                    },
+                    "sarscov2.srahumanscrubber.json:md5,d77f108e612bae142e623e87177be46c"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-21T23:57:28.279585113",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "homo_sapiens - fastq - single_end - mask": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "human_se",
+                        "single_end": true
+                    },
+                    "human_se.clean.fq.gz:md5,32ca7dc92b0ef24174e912a8b49f14f0"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "human_se",
+                        "single_end": true
+                    },
+                    "human_se.srahumanscrubber.json:md5,e41e9ef0d06ce86660345b3ba80a2f84"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-21T23:57:32.110411344",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sarscov2 - fastq - paired_end - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.clean_1.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.clean_2.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.json:md5,b45b52aa8e4fdb0a89f005538cc584ef"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.log:md5,89710019c3486445ac62f2e8959cb5ca"
+                    ]
+                ],
+                "3": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "sra-human-scrubber",
+                        "2.2.1"
+                    ]
+                ],
+                "4": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "aligns_to",
+                        "0.801"
+                    ]
+                ],
+                "fastq": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.clean_1.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.clean_2.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "json": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.json:md5,b45b52aa8e4fdb0a89f005538cc584ef"
+                    ]
+                ],
+                "log": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.log:md5,89710019c3486445ac62f2e8959cb5ca"
+                    ]
+                ],
+                "versions_aligns_to": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "aligns_to",
+                        "0.801"
+                    ]
+                ],
+                "versions_srahumanscrubber": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "sra-human-scrubber",
+                        "2.2.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-22T00:12:02.215689648",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

@@ -1,0 +1,97 @@
+// Real-path tests for SRAHUMANSCRUBBER_BUILDDB. Not run in CI: the STAT tools have no
+// public image. To run them, copy this file to real.nf.test and point the process at
+// the AMDP image, e.g. with a local build of oamd-infra-dockerfiles
+// bio/ncbi-stat/oamd-bio-ncbi-stat-0.802.dockerfile tagged oamd-bio-ncbi-stat:0.802:
+//
+//   cp real.nf.test.disabled real.nf.test
+//   nf-test test modules/amd-ph-core/srahumanscrubber/builddb/tests/real.nf.test \
+//       --profile docker --config real.config
+//
+// where real.config sets process.withName.SRAHUMANSCRUBBER_BUILDDB.container =
+// 'oamd-bio-ncbi-stat:0.802' and docker.registry = ''.
+nextflow_process {
+
+    name "Test Process SRAHUMANSCRUBBER_BUILDDB (real)"
+    script "../main.nf"
+    process "SRAHUMANSCRUBBER_BUILDDB"
+
+    test("homo_sapiens - fasta - window 32") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'chr22_test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = []
+                input[2] = 32
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            assertAll(
+                { assert process.success },
+                { assert report.kmers == 1245 },
+                { assert report.shared_kmers_removed == 0 },
+                // Byte-identical to srahumanscrubber/scrub's test database
+                // (tests/data/chr22_test.w32.db), built from the same genome.
+                { assert path(process.out.db[0][1]).md5 == 'afcb414500cc0c3e01d497f737c9739d' }
+            )
+        }
+    }
+
+    test("homo_sapiens - fasta - protect itself") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'chr22_test_protected' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                ])
+                // Protecting the host genome itself removes every one of its k-mers.
+                input[1] = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                input[2] = 32
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            assertAll(
+                { assert process.success },
+                { assert report.host_kmers == 1245 },
+                { assert report.shared_kmers_removed == 1245 },
+                { assert report.kmers == 0 }
+            )
+        }
+    }
+
+    test("homo_sapiens - fasta - protect sarscov2") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'chr22_test_sarscov2' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                input[2] = 32
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            assertAll(
+                { assert process.success },
+                { assert report.shared_kmers_removed == 0 },
+                { assert report.kmers == 1245 }
+            )
+        }
+    }
+}

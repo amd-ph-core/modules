@@ -1,0 +1,143 @@
+name: "srahumanscrubber_scrub"
+description: |
+  Identify human reads with NCBI's SRA Human Read Scrubber (the human read removal tool, built on the
+  SRA Taxonomy Analysis Tool) and mask them with N or remove them.
+
+  A read is identified as human when any of its 32-mers is in the STAT k-mer database. NCBI's
+  database (`human_filter.db`, https://ftp.ncbi.nlm.nih.gov/sra/dbs/human_filter/) holds k-mers from
+  human RefSeq minus every k-mer also found in non-eukaryote RefSeq; any database in the same
+  format can be given instead, such as one built with `srahumanscrubber/builddb`.
+
+  The scrubber's default masks identified reads: each keeps its length, with every base N. Pass `-x`
+  through `ext.args` to remove them instead. Paired-end reads are interleaved and scrubbed with `-s`,
+  so when either mate is identified the pair is masked or removed together, and the two output files
+  stay in step.
+keywords:
+  - dehosting
+  - host depletion
+  - human read removal
+  - decontamination
+  - fastq
+  - k-mer
+tools:
+  - sra-human-scrubber:
+      description: |
+        NCBI's human read removal tool: masks or removes reads with hits to a human k-mer database,
+        for clinical samples and SRA submission.
+      homepage: "https://github.com/ncbi/sra-human-scrubber"
+      documentation: "https://github.com/ncbi/sra-human-scrubber#readme"
+      tool_dev_url: "https://github.com/ncbi/sra-human-scrubber"
+      doi: "10.1186/s13059-021-02490-0"
+      licence:
+        - "Public Domain"
+      identifier: ""
+      args_id: "$args"
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - reads:
+        type: file
+        description: |
+          One FASTQ file for single-end or long reads, or two for paired-end, gzipped or not. Paired
+          reads are sorted by name so mate 1 is always first, and must hold the same number of records.
+        pattern: "*.{fastq,fq}{,.gz}"
+        ontologies:
+          - edam: "http://edamontology.org/format_1930" # FASTQ
+  - db:
+      type: file
+      description: STAT k-mer database (k = 32), such as NCBI's human_filter.db
+      pattern: "*"
+      ontologies:
+        - edam: "http://edamontology.org/data_3210" # Genome index
+output:
+  fastq:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.clean*.fq.gz":
+          type: file
+          description: |
+            Scrubbed reads: `<prefix>.clean.fq.gz` for single-end input, `<prefix>.clean_1.fq.gz` and
+            `<prefix>.clean_2.fq.gz` for paired-end. BGZF when the image carries bgzip, plain gzip
+            otherwise.
+          pattern: "*.clean*.fq.gz"
+          ontologies:
+            - edam: "http://edamontology.org/format_1930" # FASTQ
+            - edam: http://edamontology.org/format_3989 # GZIP format
+  json:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.srahumanscrubber.json":
+          type: file
+          description: |
+            Read counts: `reads_in`, `reads_out`, `reads_removed` and `reads_masked` (all-N reads in
+            the output), with the database file name, the mode (`mask` or `remove`) and whether the
+            input was paired. Counts are records rather than pairs, as in the deacon and hostile
+            reports, so for paired-end input they are twice the number of pairs.
+          pattern: "*.srahumanscrubber.json"
+          ontologies:
+            - edam: "http://edamontology.org/format_3464" # JSON
+  log:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.srahumanscrubber.log":
+          type: file
+          description: The scrubber's own log (aligns_to version, threads, spot counts, timings)
+          pattern: "*.srahumanscrubber.log"
+          ontologies: []
+  versions_srahumanscrubber:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - sra-human-scrubber:
+          type: string
+          description: The name of the tool
+      - grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | sed "s/^sra-human-scrubber-//" | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+  versions_aligns_to:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - aligns_to:
+          type: string
+          description: The name of the tool
+      - aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - sra-human-scrubber:
+          type: string
+          description: The name of the tool
+      - grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | sed "s/^sra-human-scrubber-//" | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - aligns_to:
+          type: string
+          description: The name of the tool
+      - aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@smagala (James Smagala, gpa1@cdc.gov)"
+maintainers:
+  - "@smagala (James Smagala, gpa1@cdc.gov)"
+  - "@tstark-cdc (Thomas Stark, ynh4@cdc.gov)"

@@ -1,0 +1,128 @@
+name: "srahumanscrubber_builddb"
+description: |
+  Build a STAT k-mer database for `srahumanscrubber/scrub` from host FASTA, optionally removing every
+  host k-mer found in sequences to protect (pathogens, microbes, panels).
+
+  The database has the format of NCBI's `human_filter.db`: a header and a sorted set of canonical
+  32-mers. From each consecutive `window` of the host sequences the k-mer with the smallest hash is
+  kept (1 keeps every k-mer; NCBI's database is consistent with 32). The scrubber flags a read when
+  any of its k-mers is in the set, so an error-free host read of at least 2 x window + 31 bases is
+  always caught.
+
+  With `protect` FASTAs, `aligns_to` streams them against the host set and every host k-mer it meets
+  is subtracted, so a read from a protected sequence cannot be identified as host through a shared
+  k-mer. This is how NCBI builds `human_filter.db` (human RefSeq minus non-eukaryote RefSeq).
+keywords:
+  - dehosting
+  - host depletion
+  - human read removal
+  - k-mer
+  - database
+  - index
+tools:
+  - ncbi-stat:
+      description: |
+        NCBI's SRA Taxonomy Analysis Tool (STAT) k-mer database tools (ngs-tools, tools/tax):
+        build_index_of_each_file, merge_db, subtract_db and aligns_to.
+      homepage: "https://github.com/ncbi/ngs-tools/tree/master/tools/tax"
+      documentation: "https://www.ncbi.nlm.nih.gov/sra/docs/sra-taxonomy-analysis-tool/"
+      tool_dev_url: "https://github.com/ncbi/ngs-tools"
+      doi: "10.1186/s13059-021-02490-0"
+      licence:
+        - "Public Domain"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map naming the database
+          e.g. [ id:'human_t2t' ]
+    - fasta:
+        type: file
+        description: Host sequences, one or more FASTA files, gzipped or not
+        pattern: "*.{fa,fasta,fna}{,.gz}"
+        ontologies:
+          - edam: "http://edamontology.org/format_1929" # FASTA
+  - protect:
+      type: file
+      description: |
+        Sequences to protect, one or more FASTA files, gzipped or not; pass [] for none. Every host
+        k-mer they contain is removed from the database.
+      pattern: "*.{fa,fasta,fna}{,.gz}"
+      ontologies:
+        - edam: "http://edamontology.org/format_1929" # FASTA
+  - window:
+      type: integer
+      description: Keep one k-mer (the minimum hash) per window of this many positions; 1 keeps all
+output:
+  db:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map naming the database
+            e.g. [ id:'human_t2t' ]
+      - "*.db":
+          type: file
+          description: STAT k-mer database (k = 32), for `scrub.sh -d`
+          pattern: "*.db"
+          ontologies:
+            - edam: "http://edamontology.org/data_3210" # Genome index
+  json:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map naming the database
+            e.g. [ id:'human_t2t' ]
+      - "*.builddb.json":
+          type: file
+          description: |
+            Build summary: k, window, file counts, host k-mers, host k-mers removed as shared with the
+            protected sequences, and the final k-mer count.
+          pattern: "*.builddb.json"
+          ontologies:
+            - edam: "http://edamontology.org/format_3464" # JSON
+  versions_aligns_to:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - aligns_to:
+          type: string
+          description: The name of the tool
+      - aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+  versions_build_index_of_each_file:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - build_index_of_each_file:
+          type: string
+          description: The name of the tool
+      - build_index_of_each_file 2>&1 | sed -n "s/.*build_index_of_each_file version //p" | head -n 1 | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - aligns_to:
+          type: string
+          description: The name of the tool
+      - aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - build_index_of_each_file:
+          type: string
+          description: The name of the tool
+      - build_index_of_each_file 2>&1 | sed -n "s/.*build_index_of_each_file version //p" | head -n 1 | grep . || echo unknown:
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@smagala (James Smagala, gpa1@cdc.gov)"
+maintainers:
+  - "@smagala (James Smagala, gpa1@cdc.gov)"
+  - "@tstark-cdc (Thomas Stark, ynh4@cdc.gov)"
