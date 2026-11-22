@@ -121,6 +121,39 @@ nextflow_process {
         }
     }
 
+    test("mixed - fastq - paired_end - remove - save removed") {
+
+        config "./remove_save.config"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'mixed', single_end:false ],
+                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_1.fastq.gz", checkIfExists: true),
+                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_2.fastq.gz", checkIfExists: true) ]
+                ])
+                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def names = { f -> path(f).linesGzip.withIndex().findAll { line, i -> i % 4 == 0 }.collect { line, i -> line.tokenize()[0].replaceAll(/\/[12]$/, '') } }
+            def kept1 = names(process.out.fastq[0][1][0])
+            def gone1 = names(process.out.removed[0][1][0])
+            def gone2 = names(process.out.removed[0][1][1])
+            assertAll(
+                { assert process.success },
+                // The saved reads are exactly the 50 human pairs, in step, and disjoint from the kept ones.
+                { assert gone1.size() == 50 && gone1 == gone2 },
+                { assert gone1.every { n -> n.contains('chr22_sim') } },
+                { assert kept1.size() == 50 && kept1.intersect(gone1).isEmpty() },
+                { assert snapshot(process.out.fastq, process.out.removed, process.out.json).match() }
+            )
+        }
+    }
+
     test("mixed - fastq - paired_end - mask") {
 
         when {

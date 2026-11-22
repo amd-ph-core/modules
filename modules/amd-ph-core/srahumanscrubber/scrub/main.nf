@@ -15,6 +15,8 @@ process SRAHUMANSCRUBBER_SCRUB {
     tuple val(meta), path("*.clean*.fq.gz")         , emit: fastq
     tuple val(meta), path("*.srahumanscrubber.json"), emit: json
     tuple val(meta), path("*.srahumanscrubber.log") , emit: log
+    // With -r: the identified reads as they were before masking or removal.
+    tuple val(meta), path("*.removed*.fq.gz")       , emit: removed, optional: true
     // scrub.sh has no --version. The bioconda wrapper names its install directory
     // after the release (SCRUBBER_SHARE=/usr/local/share/sra-human-scrubber-2.2.1),
     // so the version is read from there. `grep .` fails on empty input, so a
@@ -29,11 +31,15 @@ process SRAHUMANSCRUBBER_SCRUB {
     def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     // The interface is scrub.sh's: identified reads are masked with N by default,
-    // and -x removes them instead. No other scrub.sh option is supported here.
-    def unknown = args.tokenize().findAll { arg -> arg != '-x' }
+    // and -x removes them instead. -r also saves the identified reads, unmasked,
+    // as scrub.sh -r does (cut_spots_fastq.py writes them in the same pass). No
+    // other scrub.sh option is supported here.
+    def unknown = args.tokenize().findAll { arg -> !(arg in ['-x', '-r']) }
     if (unknown) {
-        error "SRAHUMANSCRUBBER_SCRUB: unsupported ext.args ${unknown}; only -x (remove rather than mask) is supported"
+        error "SRAHUMANSCRUBBER_SCRUB: unsupported ext.args ${unknown}; only -x (remove rather than mask) and -r (save identified reads) are supported"
     }
+    def save_removed = args.tokenize().contains('-r')
+    def removed_flag = save_removed ? '-r removed.fastq' : ''
     def mode         = args.tokenize().contains('-x') ? 'remove' : 'mask'
     def replace_flag = mode == 'mask' ? '-n' : ''
     // Paired reads are interleaved and scrubbed as pairs (-I, scrub.sh's -s): a
@@ -46,7 +52,7 @@ process SRAHUMANSCRUBBER_SCRUB {
     def write_output
     if (meta.single_end) {
         prepare_input = "gzip -cdf ${sorted_reads[0]} > input.fastq"
-        write_output  = "compress < clean.fastq > ${prefix}.clean.fq.gz"
+        write_output  = "write_reads() { compress < \$1.fastq > ${prefix}.\$1.fq.gz; }"
     } else {
         prepare_input = """\
 gzip -cdf ${sorted_reads[0]} | paste - - - - > r1.tsv
@@ -58,10 +64,12 @@ gzip -cdf ${sorted_reads[0]} | paste - - - - > r1.tsv
     paste r1.tsv r2.tsv | tr '\\t' '\\n' > input.fastq
     rm r1.tsv r2.tsv"""
         write_output  = """\
-paste - - - - - - - - < clean.fastq > clean.tsv
-    cut -f 1-4 clean.tsv | tr '\\t' '\\n' | compress > ${prefix}.clean_1.fq.gz
-    cut -f 5-8 clean.tsv | tr '\\t' '\\n' | compress > ${prefix}.clean_2.fq.gz
-    rm clean.tsv"""
+write_reads() {
+        paste - - - - - - - - < \$1.fastq > \$1.tsv
+        cut -f 1-4 \$1.tsv | tr '\\t' '\\n' | compress > ${prefix}.\$1_1.fq.gz
+        cut -f 5-8 \$1.tsv | tr '\\t' '\\n' | compress > ${prefix}.\$1_2.fq.gz
+        rm \$1.tsv
+    }"""
     }
     """
     # BGZF when the image has bgzip (as deacon/filter does), plain gzip otherwise.
@@ -86,7 +94,7 @@ paste - - - - - - - - < clean.fastq > clean.tsv
         fastq_to_fasta.py ${pair_flag} < input.fastq > reads.fasta
         aligns_to -db ${db} -num_threads ${task.cpus} reads.fasta \\
             > identified_spots.txt 2> ${prefix}.srahumanscrubber.log
-        cut_spots_fastq.py input.fastq ${replace_flag} ${pair_flag} < identified_spots.txt \\
+        cut_spots_fastq.py input.fastq ${replace_flag} ${pair_flag} ${removed_flag} < identified_spots.txt \\
             > clean.fastq 2>> ${prefix}.srahumanscrubber.log
         rm reads.fasta identified_spots.txt
     else
@@ -99,7 +107,13 @@ paste - - - - - - - - < clean.fastq > clean.tsv
     reads_masked=\$(count_masked < clean.fastq)
 
     ${write_output}
-    rm -f input.fastq clean.fastq
+    write_reads clean
+    if ${save_removed}; then
+        # cut_spots_fastq.py creates the file only when some spot was identified.
+        [ -e removed.fastq ] || : > removed.fastq
+        write_reads removed
+    fi
+    rm -f input.fastq clean.fastq removed.fastq
 
     # Counts are records, not pairs, as in the deacon and hostile reports, so a
     # paired-end sample's numbers are twice its pair counts.
@@ -113,7 +127,8 @@ paste - - - - - - - - < clean.fastq > clean.tsv
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
     def mode    = args.tokenize().contains('-x') ? 'remove' : 'mask'
-    def outputs = meta.single_end ? ["${prefix}.clean.fq.gz"] : ["${prefix}.clean_1.fq.gz", "${prefix}.clean_2.fq.gz"]
+    def kinds   = args.tokenize().contains('-r') ? ['clean', 'removed'] : ['clean']
+    def outputs = kinds.collectMany { kind -> meta.single_end ? ["${prefix}.${kind}.fq.gz"] : ["${prefix}.${kind}_1.fq.gz", "${prefix}.${kind}_2.fq.gz"] }
     """
     for f in ${outputs.join(' ')}; do
         echo "" | gzip > \$f

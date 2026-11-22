@@ -162,6 +162,48 @@
             "nextflow": "26.04.6"
         }
     },
+    "mixed - fastq - paired_end - remove - save removed": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        "mixed.clean_1.fq.gz:md5,ecc4b1841cd94704bba742ea4dcd48b0",
+                        "mixed.clean_2.fq.gz:md5,201ee95b559240e27830970b78a547c8"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        "mixed.removed_1.fq.gz:md5,008ff2adf433ea1d00679a44f3db5d2e",
+                        "mixed.removed_2.fq.gz:md5,d4aca4a35f19b940e56f357ec4b9255a"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    "mixed.srahumanscrubber.json:md5,facee47bad56d5f8e52416c3b31de140"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-22T10:18:12.780937169",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
     "sarscov2 - fastq - paired_end - stub": {
         "content": [
             {
@@ -196,13 +238,16 @@
                     ]
                 ],
                 "3": [
+                    
+                ],
+                "4": [
                     [
                         "SRAHUMANSCRUBBER_SCRUB",
                         "sra-human-scrubber",
                         "2.2.1"
                     ]
                 ],
-                "4": [
+                "5": [
                     [
                         "SRAHUMANSCRUBBER_SCRUB",
                         "aligns_to",
@@ -239,6 +284,9 @@
                         "test.srahumanscrubber.log:md5,89710019c3486445ac62f2e8959cb5ca"
                     ]
                 ],
+                "removed": [
+                    
+                ],
                 "versions_aligns_to": [
                     [
                         "SRAHUMANSCRUBBER_SCRUB",
@@ -255,7 +303,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-11-22T00:30:29.248949978",
+        "timestamp": "2026-11-22T10:20:51.682497815",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

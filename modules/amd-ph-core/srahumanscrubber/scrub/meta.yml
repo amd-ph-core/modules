@@ -9,7 +9,8 @@ description: |
   format can be given instead, such as one built with `srahumanscrubber/builddb`.
 
   The scrubber's default masks identified reads: each keeps its length, with every base N. Pass `-x`
-  through `ext.args` to remove them instead; no other scrub.sh option is supported. Paired-end reads
+  through `ext.args` to remove them instead, and `-r` also saves the identified reads, unmasked,
+  in the same pass; no other scrub.sh option is supported. Paired-end reads
   are interleaved and scrubbed as pairs (scrub.sh's `-s`), so when either mate is identified the pair
   is masked or removed together, and the two output files stay in step.
 
@@ -102,6 +103,23 @@ output:
           description: The scrubber's own log (aligns_to version, threads, spot counts, timings)
           pattern: "*.srahumanscrubber.log"
           ontologies: []
+  removed:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.removed*.fq.gz":
+          type: file
+          description: |
+            Only with `-r` in `ext.args`: the identified reads as they were in the input (not
+            masked), `<prefix>.removed.fq.gz` for single-end input, `<prefix>.removed_1.fq.gz` and
+            `<prefix>.removed_2.fq.gz` for paired-end, in step. Written in the same pass as the
+            scrubbed reads. Empty when nothing was identified.
+          pattern: "*.removed*.fq.gz"
+          ontologies:
+            - edam: "http://edamontology.org/format_1930" # FASTQ
+            - edam: http://edamontology.org/format_3989 # GZIP format
   versions_srahumanscrubber:
     - - ${task.process}:
           type: string
