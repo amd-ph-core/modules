@@ -9,7 +9,7 @@ process SRAHUMANSCRUBBER_BUILDDB {
     // from the same aligns_to, so one image serves this module and scrub.
     // Consumers override the registry and the exact tag via their own config, as
     // with the other AMDP images.
-    container 'oamd-bio-sra-human-scrubber:2.2.1'
+    container 'oamd-bio-sra-human-scrubber:2.2.1_a0267a0_v3'
 
     input:
     tuple val(meta), path(fasta, stageAs: "host/*")
