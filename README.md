@@ -72,6 +72,46 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 - `clockwork/minimap2` - Minimap2 alignment for contamination detection
 - `clockwork/removecontam` - Remove contaminating reads
 
+### Host and rRNA removal
+
+- `bbmap/bbduk` - Split reads into those that share a k-mer with a reference and those that do not, keeping both streams and the match stats (not a drop-in for nf-core's trimmer of the same name)
+- `deacon/filter` - Deplete host reads by minimizer matching against a deacon index
+- `deacon/index` - Build a deacon minimizer index from a FASTA
+- `hostess` - Remove host reads in a single alignment pass, optionally keeping the removed reads as a coordinate-sorted BAM
+
+### Read QC, conversion and downsampling
+
+- `falco` - FastQC-compatible read QC reports, one set per mate, named for MultiQC's FastQC parser
+- `fadso` - Downsample FASTQ to a fixed number of reads or pairs by approximate reservoir sampling, mates in lockstep
+- `rasusa/reads` - Downsample FASTQ to an exact number of reads or pairs, mates kept together
+- `samtools/collatefastq` - Convert a BAM, SAM or CRAM, aligned or not, to FASTQ, reporting the reads in each output so the caller learns the layout (paired, single-end, orphans)
+
+### Metagenomic read binning
+
+- `kraken2hunter/classify` - Classify reads with kraken2 and write per-rank taxonomic read bins in the same pass
+- `binman/residual` - Pool the unresolved and unclassified reads into one residual stream per mate
+- `binman/assignbins` - Fold translated-search and dense-panel recruitment hits into existing taxonomic read bins
+
+### Assembly and consensus (ouroboros)
+
+- `ouroboros/preprocess` - Quality-filter, optionally adapter-trim, and deflate reads into patterns
+- `ouroboros/recruit` - Recruit reads to genes and refine each reference until it stops moving, in one task per sample
+- `ouroboros/polish` - Iteratively polish one bin's reference to a fixpoint, in one task per bin
+- `ouroboros/call` - Variant calling and consensus from a converged reference: BAM, pileup, variant tables, phasing, VCF
+- `ouroboros/ampliconcall` - Reference-anchored, coverage-masked consensus for amplicon and patchy-coverage samples
+- `ouroboros/stitch` - Place the assembled consensus back into the full reference coordinate frame
+- `ouroboros/genomereport` - Per-sample genome table and contamination screen against each genome's own panel record
+- `ouroboros/report` - Per-gene coverage and caller-heuristics diagnostic PDFs
+
+### Typing and phylogenetics
+
+- `genotype/call` - Turn tabular BLAST hits into one genotype call per query, with its runner-up and the margin between them
+- `quicksnp` - Build a phylogenetic tree from a SNP distance matrix
+
+### Reference data
+
+- `datasets/summarygenome` - Enumerate the genome assemblies under an NCBI taxon as a flat metadata TSV
+
 ### BAM processing
 
 - `picard/buildbamindex` - Build BAM index
@@ -97,12 +137,18 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 
 ## Available subworkflows
 
+- `binman_bin_reads` - Sort metagenomic reads into taxonomic bins at a chosen rank: kraken2 binning, then optional tiers that recruit the residual into the right bin
 - `fastq_clockwork_decontaminate` - Read decontamination using Clockwork
+- `genotype` - Type assembled sequences against a reference database with BLAST, one call per query
+- `ouroboros` - The complete recruit, refine, polish and call core for a set of samples
+- `ouroboros_gather` - Recruit reads into bins and refine a reference for each, per sample
+- `ouroboros_assemble` - Polish and call every bin, one task per bin
+- `ouroboros_assemble_stage` - The polish-and-call half as a self-contained stage, with the stitch gate
 - `varpipe_core` - Top-level TB varpipe analysis workflow
 - `varpipe_processbam` - BAM processing for varpipe (sort, index, mark duplicates)
 - `varpipe_variantanalysis` - Variant calling, filtering, and annotation
 
-> **Note:** The tbvarpipe pipeline also uses standard modules from [nf-core/modules](https://github.com/nf-core/modules) (e.g., `bwa/index`, `samtools/*`, `gatk4/*`, `snpeff/snpeff`, `trimmomatic`, `cat/fastq`, `multiqc`). Those are installed separately via `nf-core modules install`.
+> **Note:** Some subworkflows also use standard modules from [nf-core/modules](https://github.com/nf-core/modules): `genotype` uses `blast/makeblastdb` and `blast/blastn`, `binman_bin_reads` uses `mmseqs/easysearch` and `minimap2/align`, and the tbvarpipe pipeline uses e.g. `bwa/index`, `samtools/*`, `gatk4/*`, `snpeff/snpeff`, `trimmomatic`, `cat/fastq` and `multiqc`. Those are installed separately via `nf-core modules install`.
 
 ## Help
 
