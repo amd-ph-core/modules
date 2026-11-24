@@ -38,12 +38,13 @@ process FALCO {
     files.eachWithIndex { read, i ->
         def name = files.size() == 1 ? prefix : "${prefix}_R${i + 1}"
         def link = "${name}${fastqExtension(read)}"
-        links   << "ln -s \"\$(readlink -f '${read}')\" '${link}'"
-        runs    << "falco ${args} --threads 1 --output 'falco_${name}' '${link}' &\n    pids=\"\$pids \$!\""
-        renames << "mv 'falco_${name}/${name}/fastqc_data.txt'    '${name}_fastqc_data.txt'"
-        renames << "mv 'falco_${name}/${name}/summary.txt'        '${name}_summary.txt'"
-        renames << "mv 'falco_${name}/${name}/fastqc_report.html' '${name}_fastqc_report.html'"
-        outdirs << "'falco_${name}'"
+        def out  = "falco_${name}"
+        links   << "ln -s \"\$(readlink -f ${shellQuote(read)})\" ${shellQuote(link)}"
+        runs    << "falco ${args} --threads 1 --output ${shellQuote(out)} ${shellQuote(link)} &\n    pids=\"\$pids \$!\""
+        renames << "mv ${shellQuote("${out}/${name}/fastqc_data.txt")} ${shellQuote("${name}_fastqc_data.txt")}"
+        renames << "mv ${shellQuote("${out}/${name}/summary.txt")} ${shellQuote("${name}_summary.txt")}"
+        renames << "mv ${shellQuote("${out}/${name}/fastqc_report.html")} ${shellQuote("${name}_fastqc_report.html")}"
+        outdirs << shellQuote(out)
     }
     // falco is handed a LINK named for the mate rather than the staged file. falco
     // records the name of the file it was given as `Filename`, and MultiQC's FastQC
@@ -83,15 +84,15 @@ process FALCO {
     def prefix = task.ext.prefix ?: "${meta.id}"
     if (reads.toList().size() == 1) {
         """
-        touch ${prefix}_fastqc_data.txt
-        touch ${prefix}_summary.txt
-        touch ${prefix}_fastqc_report.html
+        touch ${shellQuote("${prefix}_fastqc_data.txt")}
+        touch ${shellQuote("${prefix}_summary.txt")}
+        touch ${shellQuote("${prefix}_fastqc_report.html")}
         """
     }
     else {
         """
         for mate in 1 2; do
-            read_base="${prefix}_R\${mate}"
+            read_base=${shellQuote(prefix)}"_R\${mate}"
             touch "\${read_base}_fastqc_data.txt"
             touch "\${read_base}_summary.txt"
             touch "\${read_base}_fastqc_report.html"
@@ -106,4 +107,12 @@ process FALCO {
 //
 def fastqExtension(read) {
     return read.name.endsWith('.gz') ? '.fastq.gz' : '.fastq'
+}
+
+//
+// Single-quote a path for the shell, closing and reopening around any embedded
+// quote, so a file name or prefix with an apostrophe or a space stays one argument.
+//
+def shellQuote(path) {
+    return "'" + path.toString().replace("'", "'\\''") + "'"
 }
