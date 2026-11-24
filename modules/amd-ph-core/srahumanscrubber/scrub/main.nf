@@ -62,7 +62,7 @@ process SRAHUMANSCRUBBER_SCRUB {
 gzip -cdf ${in_1} | paste - - - - > r1.tsv
     gzip -cdf ${in_2} | paste - - - - > r2.tsv
     if [ "\$(wc -l < r1.tsv)" -ne "\$(wc -l < r2.tsv)" ]; then
-        echo "ERROR: ${in_1} and ${in_2} hold different numbers of records" >&2
+        printf 'ERROR: %s and %s hold different numbers of records\\n' ${in_1} ${in_2} >&2
         exit 1
     fi
     paste r1.tsv r2.tsv | tr '\\t' '\\n' > input.fastq
@@ -126,8 +126,8 @@ write_reads() {
 
     # Counts are records, not pairs, as in the deacon and hostile reports, so a
     # paired-end sample's numbers are twice its pair counts.
-    printf '{\\n  "tool": "sra-human-scrubber",\\n  "database": "%s",\\n  "mode": "%s",\\n  "paired": %s,\\n  "reads_in": %d,\\n  "reads_out": %d,\\n  "reads_removed": %d,\\n  "reads_masked": %d\\n}\\n' \\
-        "${db.name}" "${mode}" "${!meta.single_end}" \\
+    printf '{\\n  "tool": "sra-human-scrubber",\\n  "database": %s,\\n  "mode": "%s",\\n  "paired": %s,\\n  "reads_in": %d,\\n  "reads_out": %d,\\n  "reads_removed": %d,\\n  "reads_masked": %d\\n}\\n' \\
+        ${shellQuote(groovy.json.JsonOutput.toJson(db.name.toString()))} "${mode}" "${!meta.single_end}" \\
         "\$reads_in" "\$reads_out" "\$(( reads_in - reads_out ))" "\$reads_masked" \\
         > ${json_out}
     """
@@ -143,8 +143,8 @@ write_reads() {
         echo "" | gzip > "\$f"
     done
     echo "srahumanscrubber stub" > ${shellQuote("${prefix}.srahumanscrubber.log")}
-    printf '{\\n  "tool": "sra-human-scrubber",\\n  "database": "%s",\\n  "mode": "%s",\\n  "paired": %s,\\n  "reads_in": 0,\\n  "reads_out": 0,\\n  "reads_removed": 0,\\n  "reads_masked": 0\\n}\\n' \\
-        "${db.name}" "${mode}" "${!meta.single_end}" > ${shellQuote("${prefix}.srahumanscrubber.json")}
+    printf '{\\n  "tool": "sra-human-scrubber",\\n  "database": %s,\\n  "mode": "%s",\\n  "paired": %s,\\n  "reads_in": 0,\\n  "reads_out": 0,\\n  "reads_removed": 0,\\n  "reads_masked": 0\\n}\\n' \\
+        ${shellQuote(groovy.json.JsonOutput.toJson(db.name.toString()))} "${mode}" "${!meta.single_end}" > ${shellQuote("${prefix}.srahumanscrubber.json")}
     """
 }
 
