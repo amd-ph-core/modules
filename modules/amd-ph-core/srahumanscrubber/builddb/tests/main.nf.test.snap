@@ -1,0 +1,144 @@
+{
+    "homo_sapiens - fasta - window 32 - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "chr22_test"
+                        },
+                        "chr22_test.db:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "chr22_test"
+                        },
+                        "chr22_test.builddb.json:md5,ed65d1e7ded5f280cf60f642f3166635"
+                    ]
+                ],
+                "2": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "aligns_to",
+                        "unknown"
+                    ]
+                ],
+                "3": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "build_index_of_each_file",
+                        "unknown"
+                    ]
+                ],
+                "db": [
+                    [
+                        {
+                            "id": "chr22_test"
+                        },
+                        "chr22_test.db:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "json": [
+                    [
+                        {
+                            "id": "chr22_test"
+                        },
+                        "chr22_test.builddb.json:md5,ed65d1e7ded5f280cf60f642f3166635"
+                    ]
+                ],
+                "versions_aligns_to": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "aligns_to",
+                        "unknown"
+                    ]
+                ],
+                "versions_build_index_of_each_file": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "build_index_of_each_file",
+                        "unknown"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-22T00:11:43.764327916",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "homo_sapiens - fasta - protect - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "chr22_test_protected"
+                        },
+                        "chr22_test_protected.db:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "chr22_test_protected"
+                        },
+                        "chr22_test_protected.builddb.json:md5,a243e346fb94e85e0e8d673e304dbe35"
+                    ]
+                ],
+                "2": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "aligns_to",
+                        "unknown"
+                    ]
+                ],
+                "3": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "build_index_of_each_file",
+                        "unknown"
+                    ]
+                ],
+                "db": [
+                    [
+                        {
+                            "id": "chr22_test_protected"
+                        },
+                        "chr22_test_protected.db:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "json": [
+                    [
+                        {
+                            "id": "chr22_test_protected"
+                        },
+                        "chr22_test_protected.builddb.json:md5,a243e346fb94e85e0e8d673e304dbe35"
+                    ]
+                ],
+                "versions_aligns_to": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "aligns_to",
+                        "unknown"
+                    ]
+                ],
+                "versions_build_index_of_each_file": [
+                    [
+                        "SRAHUMANSCRUBBER_BUILDDB",
+                        "build_index_of_each_file",
+                        "unknown"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-22T00:11:47.705969832",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

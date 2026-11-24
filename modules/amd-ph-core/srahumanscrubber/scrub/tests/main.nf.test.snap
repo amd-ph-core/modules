@@ -1,0 +1,312 @@
+{
+    "homo_sapiens - fastq - paired_end - remove": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "human",
+                        "single_end": false
+                    },
+                    [
+                        "human.clean_1.fq.gz",
+                        "human.clean_2.fq.gz"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "human",
+                        "single_end": false
+                    },
+                    "human.srahumanscrubber.json:md5,d807cd53e3cf1fbb662e918449e46aeb"
+                ]
+            ],
+            {
+                "versions_aligns_to": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "aligns_to",
+                        "0.801"
+                    ]
+                ],
+                "versions_srahumanscrubber": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "sra-human-scrubber",
+                        "2.2.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-22T00:30:11.541064866",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sarscov2 - fastq - paired_end - remove": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "sarscov2",
+                        "single_end": false
+                    },
+                    [
+                        "sarscov2.clean_1.fq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+                        "sarscov2.clean_2.fq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "sarscov2",
+                        "single_end": false
+                    },
+                    "sarscov2.srahumanscrubber.json:md5,d77f108e612bae142e623e87177be46c"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-22T00:30:15.299956618",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "mixed - fastq - paired_end - mask": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed_mask",
+                        "single_end": false
+                    },
+                    [
+                        "mixed_mask.clean_1.fq.gz:md5,b03c175017ab7a8eb49b80da9a4c7fd6",
+                        "mixed_mask.clean_2.fq.gz:md5,57aa3827163f2c6d3ffc309fb5ddd1b6"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "mixed_mask",
+                        "single_end": false
+                    },
+                    "mixed_mask.srahumanscrubber.json:md5,124671e75e294d15fb1b2be9b117d702"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-22T00:30:22.227135265",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "mixed - fastq - paired_end - remove": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        "mixed.clean_1.fq.gz:md5,ecc4b1841cd94704bba742ea4dcd48b0",
+                        "mixed.clean_2.fq.gz:md5,201ee95b559240e27830970b78a547c8"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    "mixed.srahumanscrubber.json:md5,facee47bad56d5f8e52416c3b31de140"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-22T00:30:18.806698541",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "homo_sapiens - fastq - single_end - mask": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "human_se",
+                        "single_end": true
+                    },
+                    "human_se.clean.fq.gz:md5,32ca7dc92b0ef24174e912a8b49f14f0"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "human_se",
+                        "single_end": true
+                    },
+                    "human_se.srahumanscrubber.json:md5,e41e9ef0d06ce86660345b3ba80a2f84"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-22T00:30:25.58431528",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "mixed - fastq - paired_end - remove - save removed": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        "mixed.clean_1.fq.gz:md5,ecc4b1841cd94704bba742ea4dcd48b0",
+                        "mixed.clean_2.fq.gz:md5,201ee95b559240e27830970b78a547c8"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        "mixed.removed_1.fq.gz:md5,008ff2adf433ea1d00679a44f3db5d2e",
+                        "mixed.removed_2.fq.gz:md5,d4aca4a35f19b940e56f357ec4b9255a"
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    "mixed.srahumanscrubber.json:md5,facee47bad56d5f8e52416c3b31de140"
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-22T10:18:12.780937169",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sarscov2 - fastq - paired_end - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.clean_1.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.clean_2.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.json:md5,b45b52aa8e4fdb0a89f005538cc584ef"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.log:md5,89710019c3486445ac62f2e8959cb5ca"
+                    ]
+                ],
+                "3": [
+                    
+                ],
+                "4": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "sra-human-scrubber",
+                        "2.2.1"
+                    ]
+                ],
+                "5": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "aligns_to",
+                        "0.801"
+                    ]
+                ],
+                "fastq": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        [
+                            "test.clean_1.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+                            "test.clean_2.fq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        ]
+                    ]
+                ],
+                "json": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.json:md5,b45b52aa8e4fdb0a89f005538cc584ef"
+                    ]
+                ],
+                "log": [
+                    [
+                        {
+                            "id": "test",
+                            "single_end": false
+                        },
+                        "test.srahumanscrubber.log:md5,89710019c3486445ac62f2e8959cb5ca"
+                    ]
+                ],
+                "removed": [
+                    
+                ],
+                "versions_aligns_to": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "aligns_to",
+                        "0.801"
+                    ]
+                ],
+                "versions_srahumanscrubber": [
+                    [
+                        "SRAHUMANSCRUBBER_SCRUB",
+                        "sra-human-scrubber",
+                        "2.2.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-22T10:20:51.682497815",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

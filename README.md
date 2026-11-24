@@ -71,6 +71,8 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 
 - `clockwork/minimap2` - Minimap2 alignment for contamination detection
 - `clockwork/removecontam` - Remove contaminating reads
+- `srahumanscrubber/scrub` - Mask or remove human reads with NCBI's SRA Human Read Scrubber
+- `srahumanscrubber/builddb` - Build a scrubber k-mer database from host FASTA, optionally removing k-mers shared with sequences to protect
 
 ### Host and rRNA removal
 
