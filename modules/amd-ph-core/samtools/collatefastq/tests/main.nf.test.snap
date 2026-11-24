@@ -1,0 +1,149 @@
+{
+    "sarscov2 - paired-end - name-sorted and coordinate-sorted give the same reads": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "coord_sorted"
+                    },
+                    "100",
+                    "100",
+                    "0",
+                    "0"
+                ],
+                [
+                    {
+                        "id": "name_sorted"
+                    },
+                    "100",
+                    "100",
+                    "0",
+                    "0"
+                ]
+            ],
+            {
+                "versions_samtools": [
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ],
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-24T09:40:23.054437145",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sarscov2 - single-end - reads come out in other": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "0",
+                    "0",
+                    "100",
+                    "0"
+                ]
+            ],
+            {
+                "versions_samtools": [
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-24T09:40:28.54557855",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "homo_sapiens - aligned with secondary and supplementary records, and orphans": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "aligned"
+                    },
+                    "2000",
+                    "2000",
+                    "0",
+                    "0"
+                ],
+                [
+                    {
+                        "id": "orphans"
+                    },
+                    "1900",
+                    "1900",
+                    "0",
+                    "100"
+                ],
+                [
+                    {
+                        "id": "unaligned"
+                    },
+                    "2000",
+                    "2000",
+                    "0",
+                    "0"
+                ]
+            ],
+            {
+                "versions_samtools": [
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ],
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ],
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-24T09:40:34.084139959",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sarscov2 - paired-end - stub": {
+        "content": [
+            {
+                "versions_samtools": [
+                    [
+                        "SAMTOOLS_COLLATEFASTQ",
+                        "samtools",
+                        "1.25"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-11-24T09:40:41.454699142",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

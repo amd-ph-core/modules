@@ -1,0 +1,122 @@
+name: samtools_collatefastq
+description: |
+  Convert a BAM, SAM or CRAM, aligned or not and in any sort order, to FASTQ:
+  `samtools collate | samtools fastq`. The input's layout does not need to be
+  known in advance. All four FASTQs are always written, and the module reports
+  how many reads each holds as values, which is how a caller tells a paired-end
+  input from a single-end one, and finds orphans, without reading files.
+
+  Derived from nf-core/modules `samtools/collatefastq`, with these differences:
+    - always writes read 1, read 2, other and singleton, rather than choosing
+      them from `meta.single_end`, which a caller cannot know before reading
+      the BAM;
+    - adds `read_counts`;
+    - drops the `interleave` input;
+    - refuses `samtools collate -f` in `ext.args`, because fast mode outputs
+      only paired records and returns no reads at all from a single-end input;
+    - pins the samtools BioContainer rather than a Wave image. AMDP runs the
+      version nf-configs maps (oamd-bio-samtools), not this default.
+keywords:
+  - bam2fq
+  - samtools
+  - fastq
+  - unaligned bam
+tools:
+  - samtools:
+      description: Tools for dealing with SAM, BAM and CRAM files
+      homepage: "http://www.htslib.org"
+      documentation: "https://www.htslib.org/doc/samtools.html"
+      tool_dev_url: "https://github.com/samtools/samtools"
+      doi: 10.1093/gigascience/giab008
+      licence: ["MIT"]
+      identifier: biotools:samtools
+      args_id: "$args (samtools collate), $args2 (samtools fastq)"
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information, e.g. [ id:'test' ].
+          `single_end` is not read.
+    - input:
+        type: file
+        description: BAM, SAM or CRAM file
+        pattern: "*.{bam,cram,sam}"
+  - - meta2:
+        type: map
+        description: Groovy Map containing reference information, e.g. [ id:'genome' ]
+    - fasta:
+        type: file
+        description: Reference FASTA, needed only to decode a CRAM
+        pattern: "*.{fa,fasta}"
+    - fai:
+        type: file
+        description: Index of the reference FASTA
+        pattern: "*.fai"
+output:
+  fastq:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - "*_{1,2}.fq.gz":
+          type: file
+          description: Read 1 and read 2 of every complete pair. They hold no reads for a single-end input.
+          pattern: "*_{1,2}.fq.gz"
+  fastq_other:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - "*_other.fq.gz":
+          type: file
+          description: Reads with neither or both of the READ1 and READ2 flags. A single-end input's reads are here.
+          pattern: "*_other.fq.gz"
+  fastq_singleton:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - "*_singleton.fq.gz":
+          type: file
+          description: Reads flagged as paired whose mate is not in the input (orphans).
+          pattern: "*_singleton.fq.gz"
+  read_counts:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - cat read_counts/1:
+          type: eval
+          description: Reads in the read 1 file (= read pairs)
+      - cat read_counts/2:
+          type: eval
+          description: Reads in the read 2 file
+      - cat read_counts/other:
+          type: eval
+          description: Reads in the other file
+      - cat read_counts/singleton:
+          type: eval
+          description: Reads in the singleton file
+  versions_samtools:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - samtools:
+          type: string
+          description: The name of the tool
+      - samtools version | sed '1!d;s/.* //':
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - samtools:
+          type: string
+          description: The name of the tool
+      - samtools version | sed '1!d;s/.* //':
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@lescai"
+  - "@maxulysse"
+  - "@matthdsm"
+maintainers:
+  - "@smagala"
