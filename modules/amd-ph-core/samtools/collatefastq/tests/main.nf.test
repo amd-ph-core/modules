@@ -1,0 +1,167 @@
+nextflow_process {
+
+    name "Test Process SAMTOOLS_COLLATEFASTQ"
+    script "../main.nf"
+    process "SAMTOOLS_COLLATEFASTQ"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "samtools"
+    tag "samtools/collatefastq"
+
+    // Reads are compared as sets of (name without /1 or /2, sequence, quality).
+    // Collation reorders reads, so the same reads in another order is correct;
+    // a lost, duplicated or altered read is not.
+
+    test("sarscov2 - paired-end - name-sorted and coordinate-sorted give the same reads") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of(
+                    [ [ id:'name_sorted' ],  file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.name.sorted.bam', checkIfExists: true) ],
+                    [ [ id:'coord_sorted' ], file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true) ]
+                )
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            def counts = process.out.read_counts.collectEntries { meta, r1, r2, other, single -> [ (meta.id): [ r1, r2, other, single ] ] }
+            def readName = { header -> header.substring(1).tokenize(' ')[0] - ~'/[12]$' }
+            def reads  = { id, mate ->
+                def lines = path(process.out.fastq.find { meta, files -> meta.id == id }[1][mate]).linesGzip
+                lines.collate(4).collect { rec -> [ readName(rec[0]), rec[1], rec[3] ].join('\t') }.sort()
+            }
+            assertAll(
+                { assert process.success },
+                // 100 pairs, nothing unpaired: a coordinate-sorted BAM loses no mates to the singleton file
+                { assert counts == [ name_sorted: ['100', '100', '0', '0'], coord_sorted: ['100', '100', '0', '0'] ] },
+                { assert reads('name_sorted', 0) == reads('coord_sorted', 0) },
+                { assert reads('name_sorted', 1) == reads('coord_sorted', 1) },
+                { assert snapshot(process.out.read_counts.sort { rec -> rec[0].id }, process.out.findAll { key, val -> key.startsWith('versions') }).match() }
+            )
+        }
+    }
+
+    test("sarscov2 - single-end - reads come out in other") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.single_end.bam', checkIfExists: true)
+                ]
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // The layout is in the counts: no pairs, every read unflagged.
+                { assert process.out.read_counts[0][1..4] == ['0', '0', '100', '0'] },
+                { assert path(process.out.fastq_other[0][1]).linesGzip.size() == 400 },
+                { assert snapshot(process.out.read_counts.sort { rec -> rec[0].id }, process.out.findAll { key, val -> key.startsWith('versions') }).match() }
+            )
+        }
+    }
+
+    // The same human library as an unaligned BAM and as a coordinate-sorted alignment
+    // holding 964 secondary and 50 supplementary records, and an unaligned BAM in which
+    // 100 read 2s were removed. See data/genomics/eukaryotes/homo_sapiens/bam_input/
+    // README.md in oamd-bio-test-data (modules branch). A leaked secondary or
+    // supplementary record does not add a read: samtools fastq pairs it in place of
+    // its primary, so it shows up only as an altered read. Hence the aligned output is
+    // compared read for read with the unaligned one, not just counted.
+    test("homo_sapiens - aligned with secondary and supplementary records, and orphans") {
+
+        when {
+            process {
+                """
+                def base = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/bam_input'
+                input[0] = Channel.of(
+                    [ [ id:'unaligned' ], file(base + '/ubam_pe.bam', checkIfExists: true) ],
+                    [ [ id:'aligned' ],   file(base + '/aligned_pe.sorted.bam', checkIfExists: true) ],
+                    [ [ id:'orphans' ],   file(base + '/ubam_pe_orphans.bam', checkIfExists: true) ]
+                )
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            def counts   = process.out.read_counts.collectEntries { meta, r1, r2, other, single -> [ (meta.id): [ r1, r2, other, single ] ] }
+            def readName = { header -> header.substring(1).tokenize(' ')[0] - ~'/[12]$' }
+            def reads    = { id, mate ->
+                def lines = path(process.out.fastq.find { meta, files -> meta.id == id }[1][mate]).linesGzip
+                lines.collate(4).collect { rec -> [ readName(rec[0]), rec[1], rec[3] ].join('\t') }.sort()
+            }
+            def orphans  = path(process.out.fastq_singleton.find { meta, file -> meta.id == 'orphans' }[1]).linesGzip
+            assertAll(
+                { assert process.success },
+                { assert counts.unaligned == ['2000', '2000', '0', '0'] },
+                { assert counts.aligned == ['2000', '2000', '0', '0'] },
+                { assert reads('aligned', 0) == reads('unaligned', 0) },
+                { assert reads('aligned', 1) == reads('unaligned', 1) },
+                // 1,900 complete pairs and the 100 read 1s whose mate was removed
+                { assert counts.orphans == ['1900', '1900', '0', '100'] },
+                { assert orphans.collate(4).collect { rec -> readName(rec[0]) }.toSet().size() == 100 },
+                { assert snapshot(process.out.read_counts.sort { rec -> rec[0].id }, process.out.findAll { key, val -> key.startsWith('versions') }).match() }
+            )
+        }
+    }
+
+    test("collate -f is refused") {
+
+        config "./fast_mode.config"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.single_end.bam', checkIfExists: true)
+                ]
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert process.errorReport.contains('drops every unpaired read') || process.stdout.any { line -> line.contains('drops every unpaired read') } }
+            )
+        }
+    }
+
+    test("sarscov2 - paired-end - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.bam', checkIfExists: true)
+                ]
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.read_counts[0][1..4] == ['0', '0', '0', '0'] },
+                { assert process.out.fastq[0][1].size() == 2 },
+                { assert snapshot(process.out.findAll { key, val -> key.startsWith('versions') }).match() }
+            )
+        }
+    }
+}
