@@ -121,4 +121,52 @@ nextflow_process {
             )
         }
     }
+
+    // A prefix that matches an intermediate's name (shared, host) used to delete the
+    // final database or move a file onto itself, and ref.fa beside ref.fa.gz used to
+    // collapse into one input. Both cases fail on the module before the fix.
+    test("prefix shared, two inputs differing only in .gz") {
+        config "./prefix_shared.config"
+        when {
+            process {
+                """
+                def d = new File("${outputDir}/in"); d.mkdirs()
+                def a = new File(d, 'genome.fasta'); a.text = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true).text
+                def b = new File(d, 'genome.fasta.gz')
+                new java.util.zip.GZIPOutputStream(new FileOutputStream(b)).withWriter { w -> w << file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true).text }
+                input[0] = Channel.of([ [ id:'x' ], [ file(a.path), file(b.path) ] ])
+                input[1] = []
+                input[2] = 32
+                """
+            }
+        }
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.db[0][1]).name == 'shared.db' },
+                { assert report.host_files == 2 },
+                { assert report.kmers > 1245 }
+            )
+        }
+    }
+    test("prefix host") {
+        config "./prefix_host.config"
+        when {
+            process {
+                """
+                input[0] = Channel.of([ [ id:'x' ], file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true) ])
+                input[1] = []
+                input[2] = 32
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.db[0][1]).name == 'host.db' },
+                { assert path(process.out.db[0][1]).md5 == 'afcb414500cc0c3e01d497f737c9739d' }
+            )
+        }
+    }
 }

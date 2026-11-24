@@ -216,6 +216,36 @@ nextflow_process {
         }
     }
 
+    // A prefix containing a space stays one argument in every output path.
+    test("mixed - fastq - paired_end - remove - prefix with a space") {
+
+        config "./prefix_with_space.config"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'mixed', single_end:false ],
+                    [ file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_1.fastq.gz', checkIfExists: true),
+                      file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_2.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def report = new groovy.json.JsonSlurper().parse(file(process.out.json[0][1]))
+            assertAll(
+                { assert process.success },
+                { assert process.out.fastq[0][1].collect { f -> file(f).name }.sort() == ['sample 1.clean_1.fq.gz', 'sample 1.clean_2.fq.gz'] },
+                { assert file(process.out.json[0][1]).name == 'sample 1.srahumanscrubber.json' },
+                // 50 human pairs removed from 100: counts are records, so 200 in, 100 out
+                { assert report.reads_in == 200 && report.reads_out == 100 }
+            )
+        }
+    }
+
     test("sarscov2 - fastq - paired_end - stub") {
 
         options "-stub"

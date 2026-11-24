@@ -21,8 +21,8 @@ process SRAHUMANSCRUBBER_SCRUB {
     // after the release (SCRUBBER_SHARE=/usr/local/share/sra-human-scrubber-2.2.1),
     // so the version is read from there. `grep .` fails on empty input, so a
     // layout without that line records "unknown" rather than an empty string.
-    tuple val("${task.process}"), val('sra-human-scrubber'), eval('grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | sed "s/^sra-human-scrubber-//" | grep . || echo unknown'), topic: versions, emit: versions_srahumanscrubber
-    tuple val("${task.process}"), val('aligns_to'), eval('aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown'), topic: versions, emit: versions_aligns_to
+    tuple val("${task.process}"), val('sra-human-scrubber'), eval('grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | cut -d - -f 4 | grep . || echo unknown'), topic: versions, emit: versions_srahumanscrubber
+    tuple val("${task.process}"), val('aligns_to'), eval('aligns_to 2>&1 | grep -o "aligns_to version [0-9.]*" | head -n 1 | cut -d " " -f 3 | grep . || echo unknown'), topic: versions, emit: versions_aligns_to
 
     when:
     task.ext.when == null || task.ext.when
@@ -48,17 +48,21 @@ process SRAHUMANSCRUBBER_SCRUB {
     def pair_flag    = meta.single_end ? '' : '-I'
     // Sorted on the full file name so mate 1 is always first (see deacon/filter).
     def sorted_reads = meta.single_end ? [reads].flatten() : reads.sort { read -> read.name }
+    def in_1     = shellQuote(sorted_reads[0])
+    def in_2     = meta.single_end ? '' : shellQuote(sorted_reads[1])
+    def log_out  = shellQuote("${prefix}.srahumanscrubber.log")
+    def json_out = shellQuote("${prefix}.srahumanscrubber.json")
     def prepare_input
     def write_output
     if (meta.single_end) {
-        prepare_input = "gzip -cdf ${sorted_reads[0]} > input.fastq"
-        write_output  = "write_reads() { compress < \$1.fastq > ${prefix}.\$1.fq.gz; }"
+        prepare_input = "gzip -cdf ${in_1} > input.fastq"
+        write_output  = "write_reads() { compress < \$1.fastq > ${shellQuote(prefix)}.\$1.fq.gz; }"
     } else {
         prepare_input = """\
-gzip -cdf ${sorted_reads[0]} | paste - - - - > r1.tsv
-    gzip -cdf ${sorted_reads[1]} | paste - - - - > r2.tsv
+gzip -cdf ${in_1} | paste - - - - > r1.tsv
+    gzip -cdf ${in_2} | paste - - - - > r2.tsv
     if [ "\$(wc -l < r1.tsv)" -ne "\$(wc -l < r2.tsv)" ]; then
-        echo "ERROR: ${sorted_reads[0]} and ${sorted_reads[1]} hold different numbers of records" >&2
+        echo "ERROR: ${in_1} and ${in_2} hold different numbers of records" >&2
         exit 1
     fi
     paste r1.tsv r2.tsv | tr '\\t' '\\n' > input.fastq
@@ -66,24 +70,29 @@ gzip -cdf ${sorted_reads[0]} | paste - - - - > r1.tsv
         write_output  = """\
 write_reads() {
         paste - - - - - - - - < \$1.fastq > \$1.tsv
-        cut -f 1-4 \$1.tsv | tr '\\t' '\\n' | compress > ${prefix}.\$1_1.fq.gz
-        cut -f 5-8 \$1.tsv | tr '\\t' '\\n' | compress > ${prefix}.\$1_2.fq.gz
+        cut -f 1-4 \$1.tsv | tr '\\t' '\\n' | compress > ${shellQuote(prefix)}.\$1_1.fq.gz
+        cut -f 5-8 \$1.tsv | tr '\\t' '\\n' | compress > ${shellQuote(prefix)}.\$1_2.fq.gz
         rm \$1.tsv
     }"""
     }
     """
+    # A failure anywhere in a pipe fails the task: a gzip that dies on a truncated
+    # input would otherwise be hidden by the paste after it.
+    set -o pipefail
+
     # BGZF when the image has bgzip (as deacon/filter does), plain gzip otherwise.
     if command -v bgzip > /dev/null 2>&1; then
         compress() { bgzip --threads ${task.cpus} -c; }
     else
         compress() { gzip -n -c; }
     fi
-    count_records() { awk 'END { print int(NR / 4) }'; }
-    # A masked record keeps its length, with every base N.
-    count_masked() { awk 'NR % 4 == 2 && length(\$0) > 0 && \$0 !~ /[^Nn]/ { n++ } END { print n + 0 }'; }
+    count_records() { echo \$(( \$(wc -l < "\$1") / 4 )); }
+    # A masked record keeps its length, with every base N: count the sequence lines
+    # (the second of each four) that are one or more Ns and nothing else.
+    count_masked() { paste - - - - < "\$1" | cut -f 2 | { grep -c -E '^[Nn]+\$' || true; }; }
 
     ${prepare_input}
-    reads_in=\$(count_records < input.fastq)
+    reads_in=\$(count_records input.fastq)
 
     # scrub.sh's three steps, run directly rather than through scrub.sh: the
     # bioconda build of 2.2.1 (BioContainer 2.2.1--hdfd78af_0) rewrites scrub.sh
@@ -92,19 +101,19 @@ write_reads() {
     # flag to both helpers here gives the release's behaviour in any image.
     if [ "\$reads_in" -gt 0 ]; then
         fastq_to_fasta.py ${pair_flag} < input.fastq > reads.fasta
-        aligns_to -db ${db} -num_threads ${task.cpus} reads.fasta \\
-            > identified_spots.txt 2> ${prefix}.srahumanscrubber.log
+        aligns_to -db ${shellQuote(db)} -num_threads ${task.cpus} reads.fasta \\
+            > identified_spots.txt 2> ${log_out}
         cut_spots_fastq.py input.fastq ${replace_flag} ${pair_flag} ${removed_flag} < identified_spots.txt \\
-            > clean.fastq 2>> ${prefix}.srahumanscrubber.log
+            > clean.fastq 2>> ${log_out}
         rm reads.fasta identified_spots.txt
     else
         # cut_spots_fastq.py writes one empty record for an empty input.
         : > clean.fastq
-        echo "no reads in input" > ${prefix}.srahumanscrubber.log
+        echo "no reads in input" > ${log_out}
     fi
 
-    reads_out=\$(count_records < clean.fastq)
-    reads_masked=\$(count_masked < clean.fastq)
+    reads_out=\$(count_records clean.fastq)
+    reads_masked=\$(count_masked clean.fastq)
 
     ${write_output}
     write_reads clean
@@ -120,7 +129,7 @@ write_reads() {
     printf '{\\n  "tool": "sra-human-scrubber",\\n  "database": "%s",\\n  "mode": "%s",\\n  "paired": %s,\\n  "reads_in": %d,\\n  "reads_out": %d,\\n  "reads_removed": %d,\\n  "reads_masked": %d\\n}\\n' \\
         "${db.name}" "${mode}" "${!meta.single_end}" \\
         "\$reads_in" "\$reads_out" "\$(( reads_in - reads_out ))" "\$reads_masked" \\
-        > ${prefix}.srahumanscrubber.json
+        > ${json_out}
     """
 
     stub:
@@ -130,11 +139,19 @@ write_reads() {
     def kinds   = args.tokenize().contains('-r') ? ['clean', 'removed'] : ['clean']
     def outputs = kinds.collectMany { kind -> meta.single_end ? ["${prefix}.${kind}.fq.gz"] : ["${prefix}.${kind}_1.fq.gz", "${prefix}.${kind}_2.fq.gz"] }
     """
-    for f in ${outputs.join(' ')}; do
-        echo "" | gzip > \$f
+    for f in ${outputs.collect { o -> shellQuote(o) }.join(' ')}; do
+        echo "" | gzip > "\$f"
     done
-    echo "srahumanscrubber stub" > ${prefix}.srahumanscrubber.log
+    echo "srahumanscrubber stub" > ${shellQuote("${prefix}.srahumanscrubber.log")}
     printf '{\\n  "tool": "sra-human-scrubber",\\n  "database": "%s",\\n  "mode": "%s",\\n  "paired": %s,\\n  "reads_in": 0,\\n  "reads_out": 0,\\n  "reads_removed": 0,\\n  "reads_masked": 0\\n}\\n' \\
-        "${db.name}" "${mode}" "${!meta.single_end}" > ${prefix}.srahumanscrubber.json
+        "${db.name}" "${mode}" "${!meta.single_end}" > ${shellQuote("${prefix}.srahumanscrubber.json")}
     """
+}
+
+//
+// Single-quote a path for the shell, closing and reopening around any embedded
+// quote, so a staged name or prefix containing whitespace stays one argument.
+//
+def shellQuote(path) {
+    return "'" + path.toString().replace("'", "'\\''") + "'"
 }

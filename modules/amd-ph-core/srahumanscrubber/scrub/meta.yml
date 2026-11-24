@@ -127,7 +127,7 @@ output:
       - sra-human-scrubber:
           type: string
           description: The name of the tool
-      - grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | sed "s/^sra-human-scrubber-//" | grep . || echo unknown:
+      - grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | cut -d - -f 4 | grep . || echo unknown:
           type: eval
           description: The expression to obtain the version of the tool
   versions_aligns_to:
@@ -137,7 +137,7 @@ output:
       - aligns_to:
           type: string
           description: The name of the tool
-      - aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown:
+      - aligns_to 2>&1 | grep -o "aligns_to version [0-9.]*" | head -n 1 | cut -d " " -f 3 | grep . || echo unknown:
           type: eval
           description: The expression to obtain the version of the tool
 topics:
@@ -148,7 +148,7 @@ topics:
       - sra-human-scrubber:
           type: string
           description: The name of the tool
-      - grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | sed "s/^sra-human-scrubber-//" | grep . || echo unknown:
+      - grep -m1 -o "sra-human-scrubber-[0-9][0-9.]*" "$(command -v scrub.sh)" | cut -d - -f 4 | grep . || echo unknown:
           type: eval
           description: The expression to obtain the version of the tool
     - - ${task.process}:
@@ -157,7 +157,7 @@ topics:
       - aligns_to:
           type: string
           description: The name of the tool
-      - aligns_to 2>&1 | sed -n "s/.*aligns_to version //p" | head -n 1 | grep . || echo unknown:
+      - aligns_to 2>&1 | grep -o "aligns_to version [0-9.]*" | head -n 1 | cut -d " " -f 3 | grep . || echo unknown:
           type: eval
           description: The expression to obtain the version of the tool
 authors:
