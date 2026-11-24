@@ -100,7 +100,7 @@ output:
       - samtools:
           type: string
           description: The name of the tool
-      - samtools version | sed '1!d;s/.* //':
+      - samtools version | head -n 1 | cut -d ' ' -f 2:
           type: eval
           description: The expression to obtain the version of the tool
 topics:
@@ -111,7 +111,7 @@ topics:
       - samtools:
           type: string
           description: The name of the tool
-      - samtools version | sed '1!d;s/.* //':
+      - samtools version | head -n 1 | cut -d ' ' -f 2:
           type: eval
           description: The expression to obtain the version of the tool
 authors:

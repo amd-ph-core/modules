@@ -24,7 +24,7 @@ process SAMTOOLS_COLLATEFASTQ {
     //   paired-end input:  read_1 = read_2 > 0; other + singleton are orphans
     //   single-end input:  read_1 = read_2 = 0; the reads are in other
     tuple val(meta), eval("cat read_counts/1"), eval("cat read_counts/2"), eval("cat read_counts/other"), eval("cat read_counts/singleton"), emit: read_counts
-    tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), topic: versions, emit: versions_samtools
+    tuple val("${task.process}"), val('samtools'), eval("samtools version | head -n 1 | cut -d ' ' -f 2"), topic: versions, emit: versions_samtools
 
     when:
     task.ext.when == null || task.ext.when
