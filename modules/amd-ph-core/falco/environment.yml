@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::falco=1.2.5
+  - bioconda::falco=2.0.3

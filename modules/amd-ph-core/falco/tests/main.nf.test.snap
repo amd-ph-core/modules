@@ -33,7 +33,7 @@
                     [
                         "FALCO",
                         "falco",
-                        "1.2.5"
+                        "2.0.3"
                     ]
                 ],
                 "html": [
@@ -67,15 +67,15 @@
                     [
                         "FALCO",
                         "falco",
-                        "1.2.5"
+                        "2.0.3"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-08-06T12:58:06.517348258",
+        "timestamp": "2026-11-24T13:33:47.450411115",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.04.6"
         }
     },
     "sarscov2 - fastq - single_end": {
@@ -86,7 +86,7 @@
                         "id": "test",
                         "single_end": true
                     },
-                    "test_fastqc_data.txt:md5,16bc91c7edb3237df942ccbc15186b82"
+                    "test_fastqc_data.txt:md5,634d04b1dfb124ec6f32ea21f03bb918"
                 ]
             ],
             [
@@ -95,18 +95,18 @@
                         "id": "test",
                         "single_end": true
                     },
-                    "test_summary.txt:md5,58e633c32b2fdde961ea56098fe9d9f7"
+                    "test_summary.txt:md5,a911df8e3b5b5a06303939d8c12dcc88"
                 ]
             ],
             [
                 [
                     "FALCO",
                     "falco",
-                    "1.2.5"
+                    "2.0.3"
                 ]
             ]
         ],
-        "timestamp": "2026-10-20T13:38:01.681587316",
+        "timestamp": "2026-11-24T13:33:40.115395282",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -121,8 +121,8 @@
                         "single_end": false
                     },
                     [
-                        "test_R1_fastqc_data.txt:md5,c46b4b5445458fc4d02a10d8a3c92236",
-                        "test_R2_fastqc_data.txt:md5,d45bba8b8d9fe61dd6130d99fba0fcbd"
+                        "test_R1_fastqc_data.txt:md5,96aa55b9d3cb67b827568a8b81fc17d1",
+                        "test_R2_fastqc_data.txt:md5,097fbea5d7ca35bafc73b89fc42774ef"
                     ]
                 ]
             ],
@@ -133,8 +133,8 @@
                         "single_end": false
                     },
                     [
-                        "test_R1_summary.txt:md5,e6f918f7b8307472062735529c46cb9c",
-                        "test_R2_summary.txt:md5,b6aac37a107930cabf41e5a843e9f3b7"
+                        "test_R1_summary.txt:md5,72e0f09117ab70f79e3b97da4b5ca37c",
+                        "test_R2_summary.txt:md5,bded14cedb442263b6b39716ff162ae1"
                     ]
                 ]
             ],
@@ -142,11 +142,11 @@
                 [
                     "FALCO",
                     "falco",
-                    "1.2.5"
+                    "2.0.3"
                 ]
             ]
         ],
-        "timestamp": "2026-10-20T13:38:05.295163502",
+        "timestamp": "2026-11-24T13:33:43.781301817",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -195,7 +195,7 @@
                     [
                         "FALCO",
                         "falco",
-                        "1.2.5"
+                        "2.0.3"
                     ]
                 ],
                 "html": [
@@ -238,12 +238,12 @@
                     [
                         "FALCO",
                         "falco",
-                        "1.2.5"
+                        "2.0.3"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-20T12:50:47.695475117",
+        "timestamp": "2026-11-24T13:33:51.149616038",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

@@ -4,6 +4,12 @@ description: |
   Derived from nf-core/falco, with paired-end handling fixed so each mate gets its
   own output files instead of overwriting each other, and with output filenames that
   MultiQC's FastQC parser will pick up (see the `txt` output for details).
+
+  Uses falco 2.x, which reads its adapter, contaminant and limits files from its
+  install prefix and takes `--output DIR` in place of 1.x's -D/-S/-R; the module
+  renames its outputs to the names above. Each mate runs as its own single-threaded
+  falco, concurrently: on 2.x, --threads above 1 makes the per-tile quality figures
+  vary from run to run on the same reads.
 keywords:
   - quality control
   - qc
@@ -83,7 +89,7 @@ output:
       - falco:
           type: string
           description: Tool name, emitted to the `versions` topic channel
-      - falco --version | sed '1!d;s/.* //':
+      - falco --version | head -n 1:
           type: eval
           description: The expression to obtain the version of the tool
 topics:
@@ -94,7 +100,7 @@ topics:
       - falco:
           type: string
           description: Tool name, emitted to the `versions` topic channel
-      - falco --version | sed '1!d;s/.* //':
+      - falco --version | head -n 1:
           type: eval
           description: The expression to obtain the version of the tool
 authors:

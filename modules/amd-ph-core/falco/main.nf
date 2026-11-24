@@ -8,8 +8,8 @@ process FALCO {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/falco:1.2.5--h077b44d_0'
-        : 'biocontainers/falco:1.2.5--h077b44d_0'}"
+        ? 'https://depot.galaxyproject.org/singularity/falco:2.0.3--h3be2455_0'
+        : 'biocontainers/falco:2.0.3--h3be2455_0'}"
 
     input:
     tuple val(meta), path(reads)
@@ -18,108 +18,101 @@ process FALCO {
     tuple val(meta), path("*_fastqc_report.html"), emit: html
     tuple val(meta), path("*_fastqc_data.txt")   , emit: txt
     tuple val(meta), path("*_summary.txt")       , emit: summary
-    tuple val("${task.process}"), val('falco'), eval("falco --version | sed '1!d;s/.* //'"), topic: versions, emit: versions_falco
+    tuple val("${task.process}"), val('falco'), eval("falco --version | head -n 1"), topic: versions, emit: versions_falco
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    // --threads is deliberately not passed. falco accepts -t/--threads only as
-    // a FastQC compatibility stub — its own help marks it "[NOT YET IMPLEMENTED
-    // IN FALCO]" — so it has never done anything here. It is dropped rather
-    // than left in place because the meaning it would have if implemented is
-    // FastQC's: the number of *files* processed at once, which is what the loop
-    // below already does. Handing task.cpus to each of two concurrent
-    // invocations would then ask for twice the allocation.
-    if (reads.toList().size() == 1) {
-        // Linked to the prefix for the same reason as the paired branch below:
-        // falco records the name of the file it was handed as `Filename`, and
-        // MultiQC's FastQC parser takes its sample name from that rather than
-        // from the report's path.
-        """
-        case "${reads}" in
-            *.gz) ext=".fastq.gz" ;;
-            *)    ext=".fastq" ;;
-        esac
-        ln -s "\$(readlink -f "${reads}")" "${prefix}\${ext}"
-
-        falco ${args} \\
-            -D ${prefix}_fastqc_data.txt \\
-            -S ${prefix}_summary.txt \\
-            -R ${prefix}_fastqc_report.html \\
-            "${prefix}\${ext}"
-        """
+    // Each mate is named from its position in the staged list, `<prefix>_R1` and
+    // `<prefix>_R2` (or just `<prefix>` single-end), not from its filename, so the
+    // same sample reports under the same name whatever the sequencer or an
+    // upstream step called the file.
+    def files   = reads.toList()
+    def links   = []
+    def runs    = []
+    def renames = []
+    def outdirs = []
+    files.eachWithIndex { read, i ->
+        def name = files.size() == 1 ? prefix : "${prefix}_R${i + 1}"
+        def link = "${name}${fastqExtension(read)}"
+        def out  = "falco_${name}"
+        links   << "ln -s \"\$(readlink -f ${shellQuote(read)})\" ${shellQuote(link)}"
+        runs    << "falco ${args} --threads 1 --output ${shellQuote(out)} ${shellQuote(link)} &\n    pids=\"\$pids \$!\""
+        renames << "mv ${shellQuote("${out}/${name}/fastqc_data.txt")} ${shellQuote("${name}_fastqc_data.txt")}"
+        renames << "mv ${shellQuote("${out}/${name}/summary.txt")} ${shellQuote("${name}_summary.txt")}"
+        renames << "mv ${shellQuote("${out}/${name}/fastqc_report.html")} ${shellQuote("${name}_fastqc_report.html")}"
+        outdirs << shellQuote(out)
     }
-    else {
-        // Falco writes to fixed output names, so a single invocation over both
-        // mates overwrites R1's results with R2's. Run once per mate, naming
-        // everything `<prefix>_R1` and `<prefix>_R2` from the mate's position
-        // in the staged list rather than from its filename, so the same sample
-        // reports under the same name whatever the sequencer or an upstream
-        // step called the file.
-        //
-        // Falco is given a LINK named for the mate rather than the staged file
-        // itself, and this is the part that actually matters. Falco records the
-        // name of the file it was handed into the report, as `Filename`, and
-        // MultiQC's FastQC parser takes its sample name from that embedded
-        // value -- not from the report's path. Renaming only the outputs would
-        // leave the reports correctly named on disk and still grouped under the
-        // input's name in MultiQC, which is the bug this is meant to fix. The
-        // extension is carried over so falco still detects compression.
-        //
-        // The mates run concurrently rather than one after the other. falco is
-        // single-threaded, so this is the only parallelism available, and it
-        // roughly halves wall time on paired-end input. A second concurrent
-        // invocation costs little memory: falco's footprint is set by its fixed
-        // per-file tables rather than by the size of the input.
-        //
-        // Each PID is waited on individually so its status is checked. A bare
-        // `wait` returns zero however the children exited, which would leave a
-        // missing or truncated report behind a task that reported success.
-        """
-        pids=''
-        mate=1
-        for read_file in ${reads}; do
-            read_base="${prefix}_R\${mate}"
-            case "\$read_file" in
-                *.gz) ext=".fastq.gz" ;;
-                *)    ext=".fastq" ;;
-            esac
-            ln -s "\$(readlink -f "\$read_file")" "\${read_base}\${ext}"
-            falco ${args} \\
-                -D "\${read_base}_fastqc_data.txt" \\
-                -S "\${read_base}_summary.txt" \\
-                -R "\${read_base}_fastqc_report.html" \\
-                "\${read_base}\${ext}" &
-            pids="\$pids \$!"
-            mate=\$((mate + 1))
-        done
+    // falco is handed a LINK named for the mate rather than the staged file. falco
+    // records the name of the file it was given as `Filename`, and MultiQC's FastQC
+    // parser takes the sample name from that embedded value, not from the report's
+    // path; the extension is kept so falco still detects compression.
+    //
+    // Each mate runs as its own single-threaded falco, concurrently. falco 2.x can
+    // take both mates in one call on --threads, but then its per-tile quality
+    // figures depend on how the work is split between threads: measured on 2.0.3,
+    // two runs of the same pair at --threads 2 gave different fastqc_data.txt, and
+    // one in six differed under CPU contention, while --threads 1 was identical
+    // every time. A QC report that changes from run to run on the same reads is not
+    // one to publish, so the parallelism stays per mate.
+    //
+    // falco 2.x writes OUTDIR/<input name>/{fastqc_data.txt,summary.txt,fastqc_report.html};
+    // the outputs are renamed to the names MultiQC's FastQC module matches
+    // (`*fastqc_data.txt`). It reads its adapter, contaminant and limits files from
+    // its install prefix's share/falco.
+    //
+    // Each PID is waited on individually so its status is checked: a bare `wait`
+    // returns zero however the children exited, which would leave a missing or
+    // truncated report behind a task that reported success.
+    """
+    ${links.join('\n    ')}
 
-        for pid in \$pids; do
-            wait "\$pid"
-        done
-        """
-    }
+    pids=''
+    ${runs.join('\n    ')}
+    for pid in \$pids; do
+        wait "\$pid"
+    done
+
+    ${renames.join('\n    ')}
+    rm -rf ${outdirs.join(' ')}
+    """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     if (reads.toList().size() == 1) {
         """
-        touch ${prefix}_fastqc_data.txt
-        touch ${prefix}_summary.txt
-        touch ${prefix}_fastqc_report.html
+        touch ${shellQuote("${prefix}_fastqc_data.txt")}
+        touch ${shellQuote("${prefix}_summary.txt")}
+        touch ${shellQuote("${prefix}_fastqc_report.html")}
         """
     }
     else {
         """
         for mate in 1 2; do
-            read_base="${prefix}_R\${mate}"
+            read_base=${shellQuote(prefix)}"_R\${mate}"
             touch "\${read_base}_fastqc_data.txt"
             touch "\${read_base}_summary.txt"
             touch "\${read_base}_fastqc_report.html"
         done
         """
     }
+}
+
+//
+// The extension falco needs to see to detect compression: falco 2.x reads plain or
+// gzip/BGZF FASTQ and decides by the name.
+//
+def fastqExtension(read) {
+    return read.name.endsWith('.gz') ? '.fastq.gz' : '.fastq'
+}
+
+//
+// Single-quote a path for the shell, closing and reopening around any embedded
+// quote, so a file name or prefix with an apostrophe or a space stays one argument.
+//
+def shellQuote(path) {
+    return "'" + path.toString().replace("'", "'\\''") + "'"
 }

@@ -84,6 +84,32 @@ nextflow_process {
         }
     }
 
+    // A prefix with an apostrophe and a space stays one argument in every command.
+    test("sarscov2 - fastq - paired_end - prefix with an apostrophe") {
+
+        config "./prefix_apostrophe.config"
+
+        when {
+            process {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                      file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.txt[0][1].collect { f -> file(f).name } == ["O'Brien 1_R1_fastqc_data.txt", "O'Brien 1_R2_fastqc_data.txt"] },
+                { assert path(process.out.txt[0][1][0]).text =~ /(?m)^Filename\tO'Brien 1_R1\.fastq\.gz$/ },
+            )
+        }
+    }
+
     test("sarscov2 - fastq - single_end - stub") {
 
         options "-stub"
