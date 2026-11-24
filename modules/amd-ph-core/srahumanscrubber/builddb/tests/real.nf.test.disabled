@@ -38,7 +38,7 @@ nextflow_process {
                 { assert report.kmers == 1245 },
                 { assert report.shared_kmers_removed == 0 },
                 // Byte-identical to srahumanscrubber/scrub's test database
-                // (tests/data/chr22_test.w32.db), built from the same genome.
+                // (chr22_test.w32.db, data/genomics/eukaryotes/homo_sapiens/srahumanscrubber/ on the modules branch of CDCgov/oamd-bio-test-data), built from the same genome.
                 { assert path(process.out.db[0][1]).md5 == 'afcb414500cc0c3e01d497f737c9739d' }
             )
         }

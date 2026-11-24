@@ -10,7 +10,7 @@ nextflow_process {
     tag "srahumanscrubber/scrub"
 
     // The database is a 1,245-k-mer STAT database of nf-core's 40 kb chr22 test genome
-    // (tests/data/README.md), so the real script runs in seconds; NCBI's human_filter.db
+    // (data/genomics/eukaryotes/homo_sapiens/srahumanscrubber/README.md on the modules branch of CDCgov/oamd-bio-test-data), so the real script runs in seconds; NCBI's human_filter.db
     // is about 1 GB.
 
     test("homo_sapiens - fastq - paired_end - remove") {
@@ -22,10 +22,10 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'human', single_end:false ],
-                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/human_chr22_1.fastq.gz", checkIfExists: true),
-                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/human_chr22_2.fastq.gz", checkIfExists: true) ]
+                    [ file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/human_chr22_1.fastq.gz', checkIfExists: true),
+                      file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/human_chr22_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
@@ -64,7 +64,7 @@ nextflow_process {
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
@@ -96,10 +96,10 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'mixed', single_end:false ],
-                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_1.fastq.gz", checkIfExists: true),
-                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_2.fastq.gz", checkIfExists: true) ]
+                    [ file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_1.fastq.gz', checkIfExists: true),
+                      file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
@@ -130,10 +130,10 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'mixed', single_end:false ],
-                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_1.fastq.gz", checkIfExists: true),
-                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_2.fastq.gz", checkIfExists: true) ]
+                    [ file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_1.fastq.gz', checkIfExists: true),
+                      file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
@@ -161,10 +161,10 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'mixed_mask', single_end:false ],
-                    [ file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_1.fastq.gz", checkIfExists: true),
-                      file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/mixed_2.fastq.gz", checkIfExists: true) ]
+                    [ file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_1.fastq.gz', checkIfExists: true),
+                      file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/mixed_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
@@ -192,9 +192,9 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'human_se', single_end:true ],
-                    file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/human_chr22_1.fastq.gz", checkIfExists: true)
+                    file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/human_chr22_1.fastq.gz', checkIfExists: true)
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
@@ -228,7 +228,7 @@ nextflow_process {
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = file("\${projectDir}/modules/amd-ph-core/srahumanscrubber/scrub/tests/data/chr22_test.w32.db", checkIfExists: true)
+                input[1] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber/chr22_test.w32.db', checkIfExists: true)
                 """
             }
         }
