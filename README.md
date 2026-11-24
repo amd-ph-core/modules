@@ -110,7 +110,7 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 
 ### Reference data
 
-- `datasets/summarygenome` - Enumerate the genome assemblies under an NCBI taxon as a flat metadata TSV
+- `datasets/summarygenome` - Enumerate the genome assemblies under an NCBI taxon: a gzipped JSON Lines assembly report and a sorted accession list
 
 ### BAM processing
 
