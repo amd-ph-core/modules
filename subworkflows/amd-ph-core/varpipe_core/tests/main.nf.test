@@ -48,7 +48,7 @@ nextflow_workflow {
             script "../../../../modules/nf-core/untar/main.nf"
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [id: "snpeff_cache"],
                     file(
                         params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/kb/snpeff_cache.tar.gz",
@@ -62,7 +62,7 @@ nextflow_workflow {
             script "../../../../modules/nf-core/cat/fastq/main.nf"
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:false ], // meta map
                     [
                     file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/fastqs/SRR24827267_1.part_001.fastq.gz"),

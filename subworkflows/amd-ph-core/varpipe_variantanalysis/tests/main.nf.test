@@ -30,7 +30,7 @@ nextflow_workflow {
             script "../../../../modules/nf-core/untar/main.nf"
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [id: "snpeff_cache"],
                     file(
                         params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/kb/snpeff_cache.tar.gz",
@@ -51,7 +51,7 @@ nextflow_workflow {
             workflow {
                 """
                 // Prepare input channels
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     [
                         [ id:'test' ],
                         file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/bam/test.bam", checkIfExists: true),
@@ -60,7 +60,7 @@ nextflow_workflow {
                     ]
                 )
 
-                input[1] = Channel.of(
+                input[1] = channel.of(
                     [
                         [ id:'test' ],
                         file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/bam/test.bam", checkIfExists: true),
@@ -68,21 +68,21 @@ nextflow_workflow {
                         file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/kb/varpipe/intervals.bed', checkIfExists: true) ]
                 )
 
-                input[2] = Channel.of(
+                input[2] = channel.of(
                     [
                         [ id:'test' ],
                         file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa.fai", checkIfExists: true)
                     ]
                 )
 
-                input[3] = Channel.of(
+                input[3] = channel.of(
                     [
                         [ id:'test' ],
                         file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/reference-index/ref2.dict", checkIfExists: true)
                     ]
                 )
 
-                input[4] = Channel.of(
+                input[4] = channel.of(
                     [
                         [ id:'fasta' ],
                         file(params.modules_testdata_base_path + "/genomics/bacterial/tuberculosis/genome/kb/varpipe/ref2.fa", checkIfExists: true)

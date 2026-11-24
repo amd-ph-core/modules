@@ -19,8 +19,8 @@ workflow VARPIPE_VARIANTANALYSIS {
     snpeff_cache        // path (mandatory): Path to SnpEff cache directory containing annotation databases
 
     main:
-    ch_versions = Channel.empty()
-    ch_multiqc_inputs = Channel.empty()
+    ch_versions = channel.empty()
+    ch_multiqc_inputs = channel.empty()
 
     // FULL GENOME ANALYSIS
     GATK4_MUTECT2_ALL (

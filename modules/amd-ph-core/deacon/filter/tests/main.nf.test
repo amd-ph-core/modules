@@ -15,7 +15,7 @@ nextflow_process {
             script "../../index/main.nf"
             process {
                 """
-                input[0] = Channel.value([
+                input[0] = channel.value([
                     [ id:'sarscov2' ],
                     file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
                 ])
@@ -29,7 +29,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:false ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
@@ -76,7 +76,7 @@ nextflow_process {
                 def r1 = file(base + '/test_1.fastq.gz', checkIfExists: true).copyTo(dot.resolve('sample.R1.fastq.gz'))
                 def r2 = file(base + '/test_2.fastq.gz', checkIfExists: true).copyTo(dot.resolve('sample.R2.fastq.gz'))
 
-                input[0] = Channel.of([ [ id:'test', single_end:false ], [ r2, r1 ] ])
+                input[0] = channel.of([ [ id:'test', single_end:false ], [ r2, r1 ] ])
                 input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
                 """
             }
@@ -105,7 +105,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ]
                 ])
@@ -132,7 +132,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:false ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
@@ -168,7 +168,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:false ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
@@ -197,7 +197,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ]
                 ])

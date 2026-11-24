@@ -18,7 +18,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     [ [ id:'name_sorted' ],  file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.name.sorted.bam', checkIfExists: true) ],
                     [ [ id:'coord_sorted' ], file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true) ]
                 )
@@ -83,7 +83,7 @@ nextflow_process {
             process {
                 """
                 def base = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/bam_input'
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     [ [ id:'unaligned' ], file(base + '/ubam_pe.bam', checkIfExists: true) ],
                     [ [ id:'aligned' ],   file(base + '/aligned_pe.sorted.bam', checkIfExists: true) ],
                     [ [ id:'orphans' ],   file(base + '/ubam_pe_orphans.bam', checkIfExists: true) ]
