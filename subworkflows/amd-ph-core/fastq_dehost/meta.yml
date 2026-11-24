@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "fastq_dehost"
+description: |
+  Remove host reads with one of four dehosters (deacon, the SRA Human Read Scrubber,
+  hostess or hostile), building the host index from a FASTA when one is given, or pass
+  reads through unchanged with `none`. There is one process per dehoster, whatever the
+  input's size: resources that should grow with the input belong in the pipeline's config,
+  as closures over the task's own reads, not in a second copy of the process. hostess and
+  hostile run as `_SHORT` (bowtie2) and `_LONG` (minimap2), which differ in aligner and index.
+keywords:
+  - dehosting
+  - host removal
+  - human read removal
+  - fastq
+components:
+  - deacon/index
+  - deacon/filter
+  - srahumanscrubber/builddb
+  - srahumanscrubber/scrub
+  - hostess
+  - bowtie2/build
+  - hostile/clean
+input:
+  - ch_reads:
+      type: file
+      description: |
+        Reads to dehost, with their read type.
+        Structure: [ val(meta), val(read_type), path(reads) ], read_type 'short' or 'long'.
+        read_type matters to hostess and hostile only (bowtie2 or minimap2).
+      pattern: "*.{fastq,fq}.gz"
+  - dehoster:
+      type: string
+      description: "deacon, sra_scrubber, hostess, hostile or none."
+  - host_fasta:
+      type: file
+      description: |
+        A host FASTA to build the dehoster's index from (deacon index, STAT database, or
+        bowtie2 index; minimap2 uses the FASTA itself), or [] to use host_index.
+      pattern: "*.{fa,fasta,fna}{,.gz}"
+  - host_index:
+      type: file
+      description: |
+        A prebuilt index, when host_fasta is []: a deacon .idx, a scrubber .db, or the
+        directory holding the hostile/hostess index.
+  - host_index_name:
+      type: string
+      description: "hostile and hostess only: the index name inside host_index (the bowtie2 prefix). '' otherwise."
+  - scrubber_window:
+      type: integer
+      description: "sra_scrubber only: the window SRAHUMANSCRUBBER_BUILDDB builds a database with (32 matches NCBI's)."
+output:
+  - reads:
+      type: file
+      description: |
+        Reads with host reads removed (masked, for the scrubber without -x), or unchanged for none.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.{fastq,fq}.gz"
+  - json:
+      type: file
+      description: |
+        The dehoster's own report (reads in, out and removed). Empty for none.
+        Structure: [ val(meta), path(json) ]
+      pattern: "*.json"
+  - host_bam:
+      type: file
+      description: |
+        hostess with --bam: the removed host reads, coordinate-sorted.
+        Structure: [ val(meta), path(bam) ]
+      pattern: "*.host.bam"
+  - host_bai:
+      type: file
+      description: |
+        Index of host_bam.
+        Structure: [ val(meta), path(bai) ]
+      pattern: "*.host.bam.bai"
+  - host_stats:
+      type: file
+      description: |
+        hostess with --bam: samtools stats of host_bam, for MultiQC.
+        Structure: [ val(meta), path(stats) ]
+      pattern: "*.host.stats.txt"
+  - host_reads:
+      type: file
+      description: |
+        sra_scrubber with -r: the identified (removed) reads, unmasked.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.removed*.fq.gz"
+# No `versions` output: every component reports to the `versions` topic.
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

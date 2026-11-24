@@ -1,0 +1,152 @@
+nextflow_workflow {
+
+    name "Test Subworkflow QQQ_READ_PREP"
+    script "../main.nf"
+    workflow "QQQ_READ_PREP"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/qqq_read_prep"
+    tag "subworkflows/bam_to_fastq"
+    tag "subworkflows/fastq_trim_merge"
+    tag "subworkflows/fastq_dehost"
+    tag "bbmap/bbduk"
+    tag "rasusa/reads"
+
+    // Samples:
+    //   A  two paired-end FASTQ runs (nf-core sarscov2 test and test2), merged
+    //   B  one unaligned paired BAM with 100 orphan read 1s (bam_input/ubam_pe_orphans.bam:
+    //      1,900 human pairs), so with keep_orphans the orphans become sample B_orphans
+    //   L  one long-read run (the SARS-CoV-2 amplicon reads qqq's test uses as long reads)
+    // The host is 40 kb of human chr22, so B's human reads go and A's and L's virus stays.
+
+    test("FASTQ, BAM with orphans kept, long reads; deacon; no rRNA, no downsampling") {
+
+        when {
+            workflow {
+                """
+                def sc2 = params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq'
+                def bam = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/bam_input'
+                input[0] = channel.of(
+                    [ [ id:'A_run1', single_end:false ], [ id:'A', run:1, runs:2 ], 'short',
+                      [ file(sc2 + '/test_1.fastq.gz', checkIfExists: true), file(sc2 + '/test_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'A_run2', single_end:false ], [ id:'A', run:2, runs:2 ], 'short',
+                      [ file(sc2 + '/test2_1.fastq.gz', checkIfExists: true), file(sc2 + '/test2_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'B_run1', single_end:null ], [ id:'B', run:1, runs:1, bam_runs:1, orphan_id:'B_orphans' ], 'short',
+                      file(bam + '/ubam_pe_orphans.bam', checkIfExists: true) ],
+                    [ [ id:'L_run1', single_end:true ], [ id:'L', run:1, runs:1 ], 'long',
+                      file('https://raw.githubusercontent.com/nf-core/test-datasets/5f09ab078a7459db38c1ec86712a98d369cf7863/illumina/amplicon/sample1_R1.fastq.gz', checkIfExists: true) ]
+                )
+                input[1]  = true    // keep_orphans
+                input[2]  = false   // run_falco
+                input[3]  = false   // skip_trim
+                input[4]  = true    // save_failed
+                input[5]  = []      // rrna_ref
+                input[6]  = 'deacon'
+                input[7]  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                input[8]  = []
+                input[9]  = ''
+                input[10] = 32
+                input[11] = 0       // max_reads: off
+                input[12] = 42
+                """
+            }
+        }
+
+        then {
+            def samples     = workflow.out.reads.collectEntries { meta, reads -> [ (meta.id): meta.single_end ] }
+            def runs        = workflow.out.runs.collectEntries { meta, sample, read_type, _reads -> [ (meta.id): [ sample.id, read_type, meta.single_end ] ] }
+            def conversions = workflow.out.conversions.collectEntries { meta, sample, bam, found -> [ (meta.id): [ sample.id, found.layout, found.orphan_reads ] ] }
+            def sources     = workflow.out.run_sources.collectEntries { id, files -> [ (id): files.collect { f -> file(f).name } ] }
+            assertAll(
+                { assert workflow.success },
+                { assert samples == [ A: false, B: false, B_orphans: true, L: true ] },
+                // every run as FASTQ, the orphans as a run of their own sample
+                { assert runs == [ A_run1: ['A', 'short', false], A_run2: ['A', 'short', false], B_run1: ['B', 'short', false],
+                                   B_orphans_run1: ['B_orphans', 'short', true], L_run1: ['L', 'long', true] ] },
+                { assert conversions == [ B_run1: ['B', 'paired-end', 100] ] },
+                // the samplesheet's own files: B's runs (and its orphans) came from the BAM
+                { assert sources.B_run1 == ['ubam_pe_orphans.bam'] && sources.B_orphans_run1 == ['ubam_pe_orphans.bam'] },
+                { assert workflow.out.merged*.getAt(0)*.id == ['A'] },
+                { assert workflow.out.dehost_json.size() == 4 },
+                { assert workflow.out.rrna_reads.size() == 0 && workflow.out.downsampled.size() == 0 },
+            )
+        }
+    }
+
+    test("rRNA depletion and downsampling: every sample goes through rasusa") {
+
+        when {
+            workflow {
+                """
+                def sc2 = params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq'
+                input[0] = channel.of(
+                    [ [ id:'A_run1', single_end:false ], [ id:'A', run:1, runs:1 ], 'short',
+                      [ file(sc2 + '/test_1.fastq.gz', checkIfExists: true), file(sc2 + '/test_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'C_run1', single_end:false ], [ id:'C', run:1, runs:1 ], 'short',
+                      [ file(sc2 + '/test2_1.fastq.gz', checkIfExists: true), file(sc2 + '/test2_2.fastq.gz', checkIfExists: true) ] ]
+                )
+                input[1]  = false
+                input[2]  = false
+                input[3]  = true    // skip_trim
+                input[4]  = false
+                // chr22 as the "rRNA" reference: SARS-CoV-2 reads share no 25-mers with it,
+                // so bbduk removes nothing and the wiring is what's under test
+                input[5]  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                input[6]  = 'none'
+                input[7]  = []
+                input[8]  = []
+                input[9]  = ''
+                input[10] = 32
+                input[11] = 1000    // above both samples' 100 pairs: rasusa still runs, and keeps all
+                input[12] = 42
+                """
+            }
+        }
+
+        then {
+            def final_pairs = workflow.out.reads.collectEntries { meta, reads -> [ (meta.id): [reads].flatten().collect { f -> path(f).linesGzip.size().intdiv(4) } ] }
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.rrna_reads.size() == 2 && workflow.out.rrna_stats.size() == 2 },
+                { assert workflow.out.downsampled*.getAt(0)*.id.sort() == ['A', 'C'] },
+                // under the cap: written out whole
+                { assert final_pairs == [ A: [100, 100], C: [100, 100] ] },
+            )
+        }
+    }
+
+    test("a long-read sample whose BAM holds read pairs is refused") {
+
+        when {
+            workflow {
+                """
+                def bam = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/bam_input'
+                input[0] = channel.of(
+                    [ [ id:'L_run1', single_end:null ], [ id:'L', run:1, runs:1, bam_runs:1, orphan_id:'L_orphans' ], 'long',
+                      file(bam + '/ubam_pe.bam', checkIfExists: true) ]
+                )
+                input[1]  = false
+                input[2]  = false
+                input[3]  = true
+                input[4]  = false
+                input[5]  = []
+                input[6]  = 'none'
+                input[7]  = []
+                input[8]  = []
+                input[9]  = ''
+                input[10] = 32
+                input[11] = 0
+                input[12] = 42
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.any { line -> line.contains('is long-read but its BAM holds read pairs') } || workflow.errorReport.contains('is long-read but its BAM holds read pairs') },
+            )
+        }
+    }
+}
