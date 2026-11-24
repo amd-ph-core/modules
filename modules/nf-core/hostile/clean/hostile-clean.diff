@@ -7,7 +7,7 @@ Changes in 'hostile/clean/main.nf':
      tuple val(meta)          , path(reads, stageAs: "input_reads/")
      tuple val(reference_name), path(reference_dir)
 +    val aligner
- 
+
      output:
      tuple val(meta), path('*.fastq.gz'), emit: fastq
 @@ -25,19 +26,35 @@
@@ -35,7 +35,7 @@ Changes in 'hostile/clean/main.nf':
      """
 -    export HOSTILE_CACHE_DIR=${reference_dir}
 +    export HOSTILE_CACHE_DIR=${cache_dir}
- 
+
      ## Reorder the reads for reproducibility
      ## Set offline as we never want this process to auto-download reference files as required input channel
      hostile \\
@@ -50,7 +50,7 @@ Changes in 'hostile/clean/main.nf':
          --reorder \\
          --airplane \\
 @@ -46,9 +63,10 @@
- 
+
      stub:
      def prefix       = task.ext.prefix ?: "${meta.id}"
 +    def cache_dir  = aligner == 'minimap2' ? '.' : reference_dir.toString()
@@ -60,7 +60,7 @@ Changes in 'hostile/clean/main.nf':
 +    export HOSTILE_CACHE_DIR=${cache_dir}
      echo "" | gzip > ${prefix}.clean_1.fastq.gz
      ${fake_read2}
- 
+
 Changes in 'hostile/clean/meta.yml':
 --- modules/nf-core/hostile/clean/meta.yml
 +++ modules/nf-core/hostile/clean/meta.yml
