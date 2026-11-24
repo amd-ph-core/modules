@@ -139,6 +139,57 @@ nextflow_process {
         }
     }
 
+    // samtools reads `-uf` as `-u -f`, so the clustered form has to be refused too.
+    test("collate -f is refused when clustered with other flags") {
+
+        config "./fast_mode_clustered.config"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.single_end.bam', checkIfExists: true)
+                ]
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert process.errorReport.contains('drops every unpaired read') || process.stdout.any { line -> line.contains('drops every unpaired read') } }
+            )
+        }
+    }
+
+    // A prefix containing a space stays one argument in the samtools command and the count.
+    test("sarscov2 - single-end - prefix with a space") {
+
+        config "./prefix_with_space.config"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.single_end.bam', checkIfExists: true)
+                ]
+                input[1] = [ [:], [], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.read_counts[0][1..4] == ['0', '0', '100', '0'] },
+                { assert file(process.out.fastq_other[0][1]).name == 'sample 1_other.fq.gz' }
+            )
+        }
+    }
+
     test("sarscov2 - paired-end - stub") {
 
         options "-stub"

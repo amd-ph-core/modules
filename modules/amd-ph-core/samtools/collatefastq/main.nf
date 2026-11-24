@@ -33,13 +33,19 @@ process SAMTOOLS_COLLATEFASTQ {
     def args   = task.ext.args ?: ''
     def args2  = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def reference = fasta ? "--reference ${fasta}" : ""
+    def reference = fasta ? "--reference ${shellQuote(fasta)}" : ""
     // collate's fast mode outputs only records that are paired: on a single-end BAM it
     // writes nothing and exits 0. Measured on samtools 1.22.1 -- 0 of 2,000 reads.
-    if (args.tokenize().contains('-f')) {
+    // -f is refused on its own and clustered with collate's other no-value flags
+    // (-O, -u), as in `-uf`, which samtools reads as `-u -f`.
+    if (args.tokenize().any { token -> token ==~ /-[Ouf]*f[Ouf]*/ }) {
         error "SAMTOOLS_COLLATEFASTQ: `samtools collate -f` drops every unpaired read, so a single-end input comes out empty. Remove -f from ext.args."
     }
     """
+    # A failure early in a pipe must fail the task: a collate that dies after the
+    # header would otherwise leave fastq writing a truncated conversion that exits 0.
+    set -o pipefail
+
     # Every input is collated, so mates are adjacent whatever the sort order: a
     # coordinate-sorted BAM fed straight to `samtools fastq` sends the mates that
     # are not adjacent to the singleton file. `samtools fastq` drops secondary and
@@ -49,22 +55,22 @@ process SAMTOOLS_COLLATEFASTQ {
         --threads ${task.cpus} \\
         ${reference} \\
         -O \\
-        ${input} \\
+        ${shellQuote(input)} \\
         collate_tmp |
     samtools fastq \\
         ${args2} \\
         --threads ${task.cpus} \\
         ${reference} \\
-        -1 ${prefix}_1.fq.gz \\
-        -2 ${prefix}_2.fq.gz \\
-        -0 ${prefix}_other.fq.gz \\
-        -s ${prefix}_singleton.fq.gz
+        -1 ${shellQuote("${prefix}_1.fq.gz")} \\
+        -2 ${shellQuote("${prefix}_2.fq.gz")} \\
+        -0 ${shellQuote("${prefix}_other.fq.gz")} \\
+        -s ${shellQuote("${prefix}_singleton.fq.gz")}
 
     # Count the reads written to each file. `samtools view -c` cannot do it: it
     # fails on a FASTQ that holds no reads instead of returning 0.
     mkdir read_counts
     for part in 1 2 other singleton; do
-        lines=\$(gzip -cd "${prefix}_\${part}.fq.gz" | wc -l)
+        lines=\$(gzip -cd ${shellQuote(prefix)}"_\${part}.fq.gz" | wc -l)
         echo \$(( lines / 4 )) > "read_counts/\${part}"
     done
     """
@@ -78,4 +84,12 @@ process SAMTOOLS_COLLATEFASTQ {
         echo 0 > "read_counts/\${part}"
     done
     """
+}
+
+//
+// Single-quote a path for the shell, closing and reopening around any embedded
+// quote, so a staged name or prefix containing whitespace stays one argument.
+//
+def shellQuote(path) {
+    return "'" + path.toString().replace("'", "'\\''") + "'"
 }
