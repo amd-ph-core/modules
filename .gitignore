@@ -33,7 +33,9 @@ modules/nf-core/*
 # qqq's modules.json by hand when updating:
 #   fastp 697192e  fastplong 7b3452a  cat/fastq 3ed7dba  bowtie2/build 796f297  hostile/clean 7b3452a
 # hostile/clean carries qqq's patch (hostile-clean.diff): the aligner is an input, so the same
-# module serves bowtie2 and minimap2.
+# module serves bowtie2 and minimap2, and mates sort on the full file name. As with minimap2 and
+# mmseqs, only main.nf, environment.yml and meta.yml are copied: nf-core's own tests assume
+# nf-core's test-data layout and modules this repo does not carry, and are run upstream.
 !modules/nf-core/bowtie2/
 !modules/nf-core/cat/
 !modules/nf-core/fastp/

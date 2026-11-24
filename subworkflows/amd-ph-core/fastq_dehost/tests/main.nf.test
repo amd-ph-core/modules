@@ -139,6 +139,8 @@ nextflow_workflow {
             assertAll(
                 { assert workflow.success },
                 { assert report.aligner == 'minimap2' },
+                // long reads only: no bowtie2 index is built
+                { assert !workflow.trace.tasks()*.name.any { n -> n.contains('BOWTIE2_BUILD') } },
                 // SARS-CoV-2 reads against a SARS-CoV-2 "host": nearly all go
                 { assert report.reads_in == 27721 },
                 { assert report.reads_out == kept && kept < report.reads_in / 10 },

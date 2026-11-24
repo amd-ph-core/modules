@@ -38,7 +38,10 @@ process HOSTILE_CLEAN {
         : reference_dir.toString())
     : reference_name
     def cache_dir = long_read ? '.' : reference_dir.toString()
-    def sorted_reads = meta.single_end ? [reads].flatten() : reads.sort { read -> read.simpleName }
+    // Sorted on the full file name so mate 1 is always first. simpleName strips every
+    // extension, so sample.R1.fastq.gz and sample.R2.fastq.gz both reduce to `sample`
+    // and a reversed pair would stay reversed, swapping the output mates.
+    def sorted_reads = meta.single_end ? [reads].flatten() : reads.sort { read -> read.name }
     def reads_cmd    = meta.single_end ? "--fastq1 ${sorted_reads[0]}" : "--fastq1 ${sorted_reads[0]} --fastq2 ${sorted_reads[1]}"
     """
     export HOSTILE_CACHE_DIR=${cache_dir}

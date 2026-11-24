@@ -81,17 +81,6 @@ workflow FASTQ_DEHOST {
         ch_host_reads = SRAHUMANSCRUBBER_SCRUB.out.removed
     }
     else {
-        // bowtie2 takes an index name inside a directory; minimap2 takes the FASTA
-        // (or a directory holding <name>.mmi), which is why the two references differ.
-        if (host_fasta) {
-            BOWTIE2_BUILD( channel.value([ [ id: file(host_fasta).baseName ], host_fasta ]) )
-            ch_ref_short = BOWTIE2_BUILD.out.index.map { meta, index -> [ meta.id, index ] }.first()
-            ch_ref_long  = channel.value([ file(host_fasta).name, host_fasta ])
-        }
-        else {
-            ch_ref_short = channel.value([ host_index_name, host_index ])
-            ch_ref_long  = channel.value([ host_index_name, host_index ])
-        }
         ch_by_type = ch_reads.branch { _meta, read_type, _reads ->
             short_reads: read_type == 'short'
             long_reads:  read_type == 'long'
@@ -102,6 +91,21 @@ workflow FASTQ_DEHOST {
         }
         ch_short = ch_by_type.short_reads.map { meta, _read_type, reads -> [ meta, reads ] }
         ch_long  = ch_by_type.long_reads.map  { meta, _read_type, reads -> [ meta, reads ] }
+
+        // bowtie2 takes an index name inside a directory; minimap2 takes the FASTA
+        // (or a directory holding <name>.mmi), which is why the two references differ.
+        // The bowtie2 index is built only when some sample is short-read: built from
+        // the first short-read sample's arrival, so a long-read-only run (or an empty
+        // one) never builds a human-genome index it would not use.
+        if (host_fasta) {
+            BOWTIE2_BUILD( ch_short.first().map { _meta, _reads -> [ [ id: file(host_fasta).baseName ], host_fasta ] } )
+            ch_ref_short = BOWTIE2_BUILD.out.index.map { meta, index -> [ meta.id, index ] }.first()
+            ch_ref_long  = channel.value([ file(host_fasta).name, host_fasta ])
+        }
+        else {
+            ch_ref_short = channel.value([ host_index_name, host_index ])
+            ch_ref_long  = channel.value([ host_index_name, host_index ])
+        }
 
         if (dehoster == 'hostess') {
             HOSTESS_SHORT( ch_short, ch_ref_short, 'bowtie2' )
