@@ -36,9 +36,12 @@ process SAMTOOLS_COLLATEFASTQ {
     def reference = fasta ? "--reference ${shellQuote(fasta)}" : ""
     // collate's fast mode outputs only records that are paired: on a single-end BAM it
     // writes nothing and exits 0. Measured on samtools 1.22.1 -- 0 of 2,000 reads.
-    // -f is refused on its own and clustered with collate's other no-value flags
-    // (-O, -u), as in `-uf`, which samtools reads as `-u -f`.
-    if (args.tokenize().any { token -> token ==~ /-[Ouf]*f[Ouf]*/ }) {
+    // -f is refused on its own and inside a cluster of short options. getopt reads a
+    // cluster letter by letter until a letter that takes a value (collate: -l -n -r
+    // -T -@), so `-uf` is `-u -f` and `-ufl1` is `-u -f -l 1`, while in `-l1f` the
+    // f belongs to -l's value. So: refuse when f appears in the leading run of
+    // collate's no-value flags (-h -u -O -f).
+    if (args.tokenize().any { token -> token =~ /^-[huOf]*f/ }) {
         error "SAMTOOLS_COLLATEFASTQ: `samtools collate -f` drops every unpaired read, so a single-end input comes out empty. Remove -f from ext.args."
     }
     """

@@ -139,7 +139,8 @@ nextflow_process {
         }
     }
 
-    // samtools reads `-uf` as `-u -f`, so the clustered form has to be refused too.
+    // samtools reads `-ufl1` as `-u -f -l 1`, so -f inside a cluster, even one that
+    // ends in an option taking a value, has to be refused too.
     test("collate -f is refused when clustered with other flags") {
 
         config "./fast_mode_clustered.config"
