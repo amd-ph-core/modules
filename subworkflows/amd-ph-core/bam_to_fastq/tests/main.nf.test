@@ -1,0 +1,45 @@
+nextflow_workflow {
+
+    name "Test Subworkflow BAM_TO_FASTQ"
+    script "../main.nf"
+    workflow "BAM_TO_FASTQ"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/bam_to_fastq"
+    tag "samtools/collatefastq"
+
+    // Fixtures: data/genomics/eukaryotes/homo_sapiens/bam_input/ on the modules branch of
+    // CDCgov/oamd-bio-test-data (README there): one human library as an unaligned BAM and as a
+    // coordinate-sorted alignment with secondary and supplementary records, and the unaligned
+    // BAM with 100 read 2s removed. Plus nf-core's sarscov2 single-end BAM.
+
+    test("layout from the records: unaligned, aligned, single-end, orphans") {
+
+        when {
+            workflow {
+                """
+                def base = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/bam_input'
+                input[0] = channel.of(
+                    [ [ id:'unaligned' ], file(base + '/ubam_pe.bam', checkIfExists: true) ],
+                    [ [ id:'aligned' ],   file(base + '/aligned_pe.sorted.bam', checkIfExists: true) ],
+                    [ [ id:'orphans' ],   file(base + '/ubam_pe_orphans.bam', checkIfExists: true) ],
+                    [ [ id:'single' ],    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/bam/test.single_end.bam', checkIfExists: true) ]
+                )
+                """
+            }
+        }
+
+        then {
+            def reads   = workflow.out.reads.collectEntries { meta, files -> [ (meta.id): [ meta.single_end, [files].flatten().collect { f -> path(f).linesGzip.size().intdiv(4) } ] ] }
+            def orphans = workflow.out.orphans.collectEntries { meta, files, n -> [ (meta.id): [ files.size(), n ] ] }
+            assertAll(
+                { assert workflow.success },
+                // [ single_end, reads per file ]
+                { assert reads == [ unaligned: [false, [2000, 2000]], aligned: [false, [2000, 2000]], orphans: [false, [1900, 1900]], single: [true, [100]] ] },
+                // [ orphan files, orphan reads ]
+                { assert orphans == [ unaligned: [0, 0], aligned: [0, 0], orphans: [1, 100], single: [0, 0] ] },
+            )
+        }
+    }
+}

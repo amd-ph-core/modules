@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "fastq_trim_merge"
+description: |
+  Per-run read QC and trimming, then each sample's runs merged into one set of reads. Falco
+  (optional) runs on the raw reads of each run; fastp (short reads) or fastplong (long reads)
+  trims and filters each run, keeping the reads its filter drops when asked; CAT_FASTQ
+  concatenates a sample's runs in run order, and a single-run sample passes through. A run
+  carries its sample's id, its place in it, and the sample's run count, which sizes the
+  groupKey so each sample merges as soon as its own runs are done. A sample mixing paired-end
+  and single-end runs, or short and long, is refused.
+keywords:
+  - fastq
+  - trimming
+  - quality control
+  - merge runs
+components:
+  - falco
+  - fastp
+  - fastplong
+  - cat/fastq
+input:
+  - ch_runs:
+      type: file
+      description: |
+        One element per sequencing run.
+        Structure: [ val(meta), val(sample), val(read_type), path(reads) ]
+        sample = [ id: merged sample id, run: 1-based order, runs: the sample's run count ];
+        read_type 'short' (fastp) or 'long' (fastplong).
+      pattern: "*.{fastq,fq}.gz"
+  - run_falco:
+      type: boolean
+      description: "Run Falco on each run's raw reads."
+  - skip_trim:
+      type: boolean
+      description: "Merge the runs untrimmed (no fastp or fastplong)."
+  - save_failed:
+      type: boolean
+      description: "Keep the reads fastp's or fastplong's filter removes (*.fail.fastq.gz)."
+output:
+  - reads:
+      type: file
+      description: |
+        One element per sample: its runs trimmed and merged.
+        Structure: [ val(meta), val(read_type), path(reads) ], meta.id is the sample id
+      pattern: "*.{fastq,fq}.gz"
+  - merged:
+      type: file
+      description: |
+        CAT_FASTQ's output, for multi-run samples only.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.merged.fastq.gz"
+  - trimmed:
+      type: file
+      description: |
+        fastp's or fastplong's reads, per run. Empty with skip_trim.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.{fastp,fastplong}.fastq.gz"
+  - fastp_json:
+      type: file
+      description: |
+        fastp's report, per short-read run.
+        Structure: [ val(meta), path(json) ]
+      pattern: "*.json"
+  - fastplong_json:
+      type: file
+      description: |
+        fastplong's report, per long-read run.
+        Structure: [ val(meta), path(json) ]
+      pattern: "*.json"
+  - fastp_fail:
+      type: file
+      description: |
+        With save_failed: the reads fastp's filter removed, per short-read run.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.fail.fastq.gz"
+  - fastplong_fail:
+      type: file
+      description: |
+        With save_failed: the reads fastplong's filter removed, per long-read run.
+        Structure: [ val(meta), path(reads) ]
+      pattern: "*.fail.fastq.gz"
+  - falco_txt:
+      type: file
+      description: |
+        With run_falco: Falco's FastQC-format data, per run (and per mate), for MultiQC.
+        Structure: [ val(meta), path(txt) ]
+      pattern: "*_fastqc_data.txt"
+# No `versions` output: every component reports to the `versions` topic.
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "bam_to_fastq"
+description: |
+  Convert BAMs to FASTQ without knowing their layout in advance. A BAM may be unaligned or
+  aligned, in any sort order. Whether it is paired is read from its records (the 0x1 flag) and
+  comes back as meta.single_end; secondary and supplementary records are dropped. Reads of a
+  paired BAM whose mate is missing (orphans) come out separately, with their count, for the
+  caller to drop or keep. A BAM with no primary reads, or with no pairs but both unflagged reads
+  and mateless flagged reads, is refused.
+keywords:
+  - bam
+  - unaligned bam
+  - fastq
+  - conversion
+components:
+  - samtools/collatefastq
+input:
+  - ch_bam:
+      type: file
+      description: |
+        BAMs to convert. meta.single_end is not read; it is set from the records.
+        Structure: [ val(meta), path(bam) ]
+      pattern: "*.{bam,sam}"
+output:
+  - reads:
+      type: file
+      description: |
+        The reads: read 1 and read 2 for a paired-end BAM, one file for a single-end BAM.
+        Structure: [ val(meta), path(reads) ], meta.single_end set from the records.
+      pattern: "*.fq.gz"
+  - orphans:
+      type: file
+      description: |
+        One element per BAM: the FASTQs holding reads whose mate is not in the BAM, and how
+        many reads they hold. An empty list and 0 when there are none.
+        Structure: [ val(meta), [ path(fastq) ], val(n_reads) ]
+      pattern: "*.fq.gz"
+# No `versions` output: samtools/collatefastq reports to the `versions` topic.
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

@@ -1,0 +1,188 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "qqq_read_prep"
+description: |
+  oamd-bio-qqq's read preparation, from samplesheet runs to each sample's final reads:
+  BAM_TO_FASTQ for runs given as a BAM (a paired BAM's orphans dropped, or kept as a
+  single-end sample of their own); FASTQ_TRIM_MERGE (Falco, fastp/fastplong, runs merged);
+  bbduk rRNA depletion when an rRNA reference is given; FASTQ_DEHOST; and rasusa
+  downsampling of every sample when max_reads is set, none otherwise (rasusa writes a sample
+  under the cap out whole). Every intermediate the qqq run report describes is emitted.
+keywords:
+  - fastq
+  - read preparation
+  - dehosting
+  - rrna depletion
+components:
+  - bam_to_fastq
+  - fastq_trim_merge
+  - fastq_dehost
+  - bbmap/bbduk
+  - rasusa/reads
+input:
+  - ch_runs:
+      type: file
+      description: |
+        One element per samplesheet run. reads is FASTQ(s), or one BAM (*.bam).
+        Structure: [ val(meta), val(sample), val(read_type), path(reads) ]
+        sample = [ id, run, runs ] (as FASTQ_TRIM_MERGE takes it), plus for a sample with BAM
+        runs: bam_runs (how many of its runs are BAMs) and orphan_id (the sample its orphans
+        become with keep_orphans).
+      pattern: "*.{fastq,fq}.gz,*.bam"
+  - keep_orphans:
+      type: boolean
+      description: "Keep a paired BAM's orphans as the single-end sample orphan_id, rather than dropping them."
+  - run_falco:
+      type: boolean
+      description: "FASTQ_TRIM_MERGE: run Falco on each run's raw reads."
+  - skip_trim:
+      type: boolean
+      description: "FASTQ_TRIM_MERGE: merge the runs untrimmed."
+  - save_failed:
+      type: boolean
+      description: "FASTQ_TRIM_MERGE: keep the reads the trimmers' filter removes."
+  - rrna_ref:
+      type: file
+      description: "rRNA reference FASTA for bbduk, or [] to skip rRNA depletion."
+      pattern: "*.{fa,fasta}{,.gz}"
+  - dehoster:
+      type: string
+      description: "FASTQ_DEHOST: deacon, sra_scrubber, hostess, hostile or none."
+  - host_fasta:
+      type: file
+      description: "FASTQ_DEHOST: a host FASTA to build the index from, or []."
+  - host_index:
+      type: file
+      description: "FASTQ_DEHOST: a prebuilt index, or []."
+  - host_index_name:
+      type: string
+      description: "FASTQ_DEHOST: the hostile/hostess index name, or ''."
+  - scrubber_window:
+      type: integer
+      description: "FASTQ_DEHOST: the scrubber database window."
+  - max_reads:
+      type: integer
+      description: "Downsample each sample to this many reads (pairs); 0 or null for no downsampling."
+  - seed:
+      type: integer
+      description: "rasusa's seed."
+output:
+  - reads:
+      type: file
+      description: |
+        Each sample's final reads, after every step that ran.
+        Structure: [ val(meta), path(reads) ]
+  - runs:
+      type: file
+      description: |
+        Every run as FASTQ: BAMs converted, kept orphans added as runs of their own sample.
+        Structure: [ val(meta), val(sample), val(read_type), path(reads) ]
+  - run_sources:
+      type: file
+      description: |
+        What each run's samplesheet row named: its FASTQs, or the BAM it came from.
+        Structure: [ val(run_id), [ path(file) ] ]
+  - conversions:
+      type: file
+      description: |
+        Per BAM run: the layout read from it, and its orphans.
+        Structure: [ val(meta), val(sample), path(bam), val([ layout, orphan_files, orphan_reads ]) ]
+  - trimmed:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: fastp's or fastplong's reads, per run.
+        Structure: [ val(meta), path(reads) ]
+  - fastp_json:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: fastp's report, per short-read run.
+        Structure: [ val(meta), path(json) ]
+  - fastplong_json:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: fastplong's report, per long-read run.
+        Structure: [ val(meta), path(json) ]
+  - fastp_fail:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: reads fastp's filter removed, with save_failed.
+        Structure: [ val(meta), path(reads) ]
+  - fastplong_fail:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: reads fastplong's filter removed, with save_failed.
+        Structure: [ val(meta), path(reads) ]
+  - falco_txt:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: Falco's data files, with run_falco.
+        Structure: [ val(meta), path(txt) ]
+  - merged:
+      type: file
+      description: |
+        FASTQ_TRIM_MERGE: CAT_FASTQ's output, multi-run samples only.
+        Structure: [ val(meta), path(reads) ]
+  - rrna_reads:
+      type: file
+      description: |
+        bbduk: the rRNA-depleted reads.
+        Structure: [ val(meta), path(reads) ]
+  - rrna_matched:
+      type: file
+      description: |
+        bbduk: the reads matching the rRNA reference.
+        Structure: [ val(meta), path(reads) ]
+  - rrna_stats:
+      type: file
+      description: |
+        bbduk: its stats file.
+        Structure: [ val(meta), path(txt) ]
+  - rrna_stats_mqc:
+      type: file
+      description: |
+        bbduk: the truncated stats file for MultiQC.
+        Structure: [ val(meta), path(txt) ]
+  - rrna_log:
+      type: file
+      description: |
+        bbduk: its stderr, with exact removal counts.
+        Structure: [ val(meta), path(log) ]
+  - dehosted:
+      type: file
+      description: |
+        FASTQ_DEHOST: reads with host reads removed.
+        Structure: [ val(meta), path(reads) ]
+  - dehost_json:
+      type: file
+      description: |
+        FASTQ_DEHOST: the dehoster's report.
+        Structure: [ val(meta), path(json) ]
+  - host_bam:
+      type: file
+      description: |
+        FASTQ_DEHOST: hostess's removed reads as a BAM, with --bam.
+        Structure: [ val(meta), path(bam) ]
+  - host_bai:
+      type: file
+      description: |
+        FASTQ_DEHOST: index of host_bam.
+        Structure: [ val(meta), path(bai) ]
+  - host_stats:
+      type: file
+      description: |
+        FASTQ_DEHOST: samtools stats of host_bam.
+        Structure: [ val(meta), path(stats) ]
+  - host_reads:
+      type: file
+      description: |
+        FASTQ_DEHOST: the scrubber's removed reads, with -r.
+        Structure: [ val(meta), path(reads) ]
+  - downsampled:
+      type: file
+      description: |
+        rasusa's output, every sample, when max_reads is set.
+        Structure: [ val(meta), path(reads) ]
+# No `versions` output: every component reports to the `versions` topic.
+authors:
+  - "@smagala"
+maintainers:
+  - "@smagala"

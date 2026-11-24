@@ -1,0 +1,233 @@
+nextflow_workflow {
+
+    name "Test Subworkflow FASTQ_DEHOST"
+    script "../main.nf"
+    workflow "FASTQ_DEHOST"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/fastq_dehost"
+    tag "deacon/index"
+    tag "deacon/filter"
+    tag "srahumanscrubber/builddb"
+    tag "srahumanscrubber/scrub"
+    tag "hostess"
+    tag "subworkflows/../../modules/nf-core/bowtie2/build"
+    tag "subworkflows/../../modules/nf-core/hostile/clean"
+
+    // The "host" is 40 kb of human chr22 (nf-core genomics/homo_sapiens/genome/genome.fasta)
+    // and the sample is 50 simulated human pairs from it plus 50 SARS-CoV-2 pairs
+    // (srahumanscrubber's mixed_{1,2}.fastq.gz). A dehoster that works removes the human
+    // pairs and keeps the virus: with every read human, or none, removing the wrong reads
+    // would look the same as removing the right ones.
+
+    test("deacon - index built from a host FASTA - mixed paired-end") {
+
+        when {
+            workflow {
+                """
+                def data = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber'
+                input[0] = channel.of([
+                    [ id:'mixed', single_end:false ], 'short',
+                    [ file(data + '/mixed_1.fastq.gz', checkIfExists: true), file(data + '/mixed_2.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = 'deacon'
+                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                input[3] = []
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            def reads = workflow.out.reads[0][1].collect { f -> path(f).linesGzip.size().intdiv(4) }
+            assertAll(
+                { assert workflow.success },
+                { assert reads == [50, 50] },
+                { assert workflow.out.json.size() == 1 },
+                { assert workflow.out.host_bam.size() == 0 && workflow.out.host_reads.size() == 0 },
+            )
+        }
+    }
+
+    test("sra_scrubber - prebuilt database - mixed paired-end - remove") {
+
+        // -x removes identified reads; without it the scrubber masks them with N.
+        config "./scrubber_remove.config"
+
+        when {
+            workflow {
+                """
+                def data = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber'
+                input[0] = channel.of([
+                    [ id:'mixed', single_end:false ], 'short',
+                    [ file(data + '/mixed_1.fastq.gz', checkIfExists: true), file(data + '/mixed_2.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = 'sra_scrubber'
+                input[2] = []
+                input[3] = file(data + '/chr22_test.w32.db', checkIfExists: true)
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            def reads = workflow.out.reads[0][1].collect { f -> path(f).linesGzip.size().intdiv(4) }
+            assertAll(
+                { assert workflow.success },
+                { assert reads == [50, 50] },
+                { assert workflow.out.json.size() == 1 },
+            )
+        }
+    }
+
+    test("hostile - short reads, bowtie2 index built from a host FASTA - mixed paired-end") {
+
+        when {
+            workflow {
+                """
+                def data = params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/srahumanscrubber'
+                input[0] = channel.of([
+                    [ id:'mixed', single_end:false ], 'short',
+                    [ file(data + '/mixed_1.fastq.gz', checkIfExists: true), file(data + '/mixed_2.fastq.gz', checkIfExists: true) ]
+                ])
+                input[1] = 'hostile'
+                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+                input[3] = []
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            def reads = workflow.out.reads[0][1].collect { f -> path(f).linesGzip.size().intdiv(4) }
+            assertAll(
+                { assert workflow.success },
+                { assert reads == [50, 50] },
+                { assert workflow.out.json.size() == 1 },
+            )
+        }
+    }
+
+    // Long reads take the _LONG alias, which hands minimap2 the FASTA itself. The reads are
+    // the SARS-CoV-2 amplicon reads qqq's own test sends down the long-read path; nf-core's
+    // sarscov2/nanopore/fastq/test.fastq.gz does not align to the SARS-CoV-2 genome at all.
+    test("hostile - long reads, minimap2 against a host FASTA") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'long', single_end:true ], 'long',
+                    file('https://raw.githubusercontent.com/nf-core/test-datasets/5f09ab078a7459db38c1ec86712a98d369cf7863/illumina/amplicon/sample1_R1.fastq.gz', checkIfExists: true)
+                ])
+                input[1] = 'hostile'
+                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                input[3] = []
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            def report = path(workflow.out.json[0][1]).json[0]
+            def kept   = path([workflow.out.reads[0][1]].flatten()[0]).linesGzip.size().intdiv(4)
+            assertAll(
+                { assert workflow.success },
+                { assert report.aligner == 'minimap2' },
+                // SARS-CoV-2 reads against a SARS-CoV-2 "host": nearly all go
+                { assert report.reads_in == 27721 },
+                { assert report.reads_out == kept && kept < report.reads_in / 10 },
+                { assert workflow.out.json.size() == 1 },
+            )
+        }
+    }
+
+    test("hostess - short and long - stub") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [ [ id:'short', single_end:false ], 'short',
+                      [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'long', single_end:true ], 'long',
+                      file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true) ]
+                )
+                input[1] = 'hostess'
+                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                input[3] = []
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                // one task per read type: the short sample through bowtie2, the long through minimap2
+                { assert workflow.trace.tasks()*.name.findAll { n -> n.contains('HOSTESS_') }.collect { n -> n.tokenize(':')[-1].tokenize(' ')[0] }.sort() == ['HOSTESS_LONG', 'HOSTESS_SHORT'] },
+                { assert workflow.out.reads*.getAt(0)*.id.sort() == ['long', 'short'] },
+            )
+        }
+    }
+
+    test("none - reads pass through unchanged") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:true ], 'short',
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true)
+                ])
+                input[1] = 'none'
+                input[2] = []
+                input[3] = []
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file(workflow.out.reads[0][1]).name == 'test_1.fastq.gz' },
+                { assert workflow.out.json.size() == 0 },
+                { assert workflow.trace.tasks().size() == 0 },
+            )
+        }
+    }
+
+    test("an unknown dehoster is refused") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = 'bowtie'
+                input[2] = []
+                input[3] = []
+                input[4] = ''
+                input[5] = 32
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.any { line -> line.contains("unknown dehoster 'bowtie'") } || workflow.errorReport.contains("unknown dehoster 'bowtie'") },
+            )
+        }
+    }
+}

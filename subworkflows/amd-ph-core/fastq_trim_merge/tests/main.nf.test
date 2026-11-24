@@ -1,0 +1,109 @@
+nextflow_workflow {
+
+    name "Test Subworkflow FASTQ_TRIM_MERGE"
+    script "../main.nf"
+    workflow "FASTQ_TRIM_MERGE"
+
+    tag "subworkflows"
+    tag "subworkflows_amdphcore"
+    tag "subworkflows/fastq_trim_merge"
+    tag "falco"
+    tag "subworkflows/../../modules/nf-core/fastp"
+    tag "subworkflows/../../modules/nf-core/fastplong"
+    tag "subworkflows/../../modules/nf-core/cat/fastq"
+
+    test("two runs merged, one passed through, one long-read run; Falco on, failed reads kept") {
+
+        when {
+            workflow {
+                """
+                def sc2 = params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq'
+                input[0] = channel.of(
+                    [ [ id:'A_run1', single_end:false ], [ id:'A', run:1, runs:2 ], 'short',
+                      [ file(sc2 + '/test_1.fastq.gz', checkIfExists: true), file(sc2 + '/test_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'A_run2', single_end:false ], [ id:'A', run:2, runs:2 ], 'short',
+                      [ file(sc2 + '/test2_1.fastq.gz', checkIfExists: true), file(sc2 + '/test2_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'B_run1', single_end:false ], [ id:'B', run:1, runs:1 ], 'short',
+                      [ file(sc2 + '/test_1.fastq.gz', checkIfExists: true), file(sc2 + '/test_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'L_run1', single_end:true ], [ id:'L', run:1, runs:1 ], 'long',
+                      file('https://raw.githubusercontent.com/nf-core/test-datasets/5f09ab078a7459db38c1ec86712a98d369cf7863/illumina/amplicon/sample1_R1.fastq.gz', checkIfExists: true) ]
+                )
+                input[1] = true   // run_falco
+                input[2] = false  // skip_trim
+                input[3] = true   // save_failed
+                """
+            }
+        }
+
+        then {
+            def samples = workflow.out.reads.collectEntries { meta, read_type, reads -> [ (meta.id): [ meta.single_end, read_type, [reads].flatten().size() ] ] }
+            def trimmed = workflow.out.trimmed.collectEntries { meta, reads -> [ (meta.id): [reads].flatten().collect { f -> path(f).linesGzip.size().intdiv(4) } ] }
+            def merged  = workflow.out.merged.collectEntries { meta, reads -> [ (meta.id): [reads].flatten().collect { f -> path(f).linesGzip.size().intdiv(4) } ] }
+            assertAll(
+                { assert workflow.success },
+                // one element per sample: [ single_end, read_type, files ]
+                { assert samples == [ A: [false, 'short', 2], B: [false, 'short', 2], L: [true, 'long', 1] ] },
+                // only A has two runs, so only A is concatenated, and it holds both trimmed runs
+                { assert merged.keySet() == ['A'] as Set },
+                { assert merged.A == [ trimmed.A_run1[0] + trimmed.A_run2[0], trimmed.A_run1[1] + trimmed.A_run2[1] ] },
+                { assert workflow.out.fastp_json.size() == 3 && workflow.out.fastplong_json.size() == 1 },
+                { assert workflow.out.falco_txt.size() == 4 },
+                { assert workflow.out.fastp_fail.size() == 3 },
+            )
+        }
+    }
+
+    test("skip_trim: runs merged untrimmed") {
+
+        when {
+            workflow {
+                """
+                def sc2 = params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq'
+                input[0] = channel.of(
+                    [ [ id:'A_run1', single_end:true ], [ id:'A', run:1, runs:2 ], 'short', file(sc2 + '/test_1.fastq.gz', checkIfExists: true) ],
+                    [ [ id:'A_run2', single_end:true ], [ id:'A', run:2, runs:2 ], 'short', file(sc2 + '/test2_1.fastq.gz', checkIfExists: true) ]
+                )
+                input[1] = false
+                input[2] = true
+                input[3] = false
+                """
+            }
+        }
+
+        then {
+            def merged = path([workflow.out.reads[0][2]].flatten()[0]).linesGzip.size().intdiv(4)
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.fastp_json.size() == 0 && workflow.out.trimmed.size() == 0 },
+                // test_1 (100 reads) then test2_1 (100 reads), untouched
+                { assert merged == 200 },
+            )
+        }
+    }
+
+    test("a sample mixing paired-end and single-end runs is refused") {
+
+        when {
+            workflow {
+                """
+                def sc2 = params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq'
+                input[0] = channel.of(
+                    [ [ id:'A_run1', single_end:false ], [ id:'A', run:1, runs:2 ], 'short',
+                      [ file(sc2 + '/test_1.fastq.gz', checkIfExists: true), file(sc2 + '/test_2.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'A_run2', single_end:true ], [ id:'A', run:2, runs:2 ], 'short', file(sc2 + '/test2_1.fastq.gz', checkIfExists: true) ]
+                )
+                input[1] = false
+                input[2] = true
+                input[3] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.any { line -> line.contains('mix of single-end and paired-end') } || workflow.errorReport.contains('mix of single-end and paired-end') },
+            )
+        }
+    }
+}
