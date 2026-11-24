@@ -39,8 +39,8 @@ workflow VARPIPE_CORE {
     // `channel.topic('versions')`. The VARPIPE_* processes that DO appear below are
     // template-script modules -- Nextflow forbids an `eval` output on a non-Bash interpreter,
     // so those keep writing a real versions.yml and keep feeding this channel.
-    ch_versions = Channel.empty()
-    ch_multiqc_inputs = Channel.empty()
+    ch_versions = channel.empty()
+    ch_multiqc_inputs = channel.empty()
 
     // Varpipe-specific pipeline version for stats file output and report generation
     // Maintained at subworkflow level for consistency across different workflow contexts
@@ -53,7 +53,7 @@ workflow VARPIPE_CORE {
     ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions)
     ch_multiqc_inputs = ch_multiqc_inputs.mix(TRIMMOMATIC.out.trimmed_reads.map { meta, reads -> reads })
 
-    ch_ref_fasta = Channel.fromPath(ref_fasta)
+    ch_ref_fasta = channel.fromPath(ref_fasta)
         .map { fasta -> [ [ id: 'reference' ], fasta] }
         .collect()
 
@@ -170,7 +170,7 @@ workflow VARPIPE_CORE {
     )
     ch_versions = ch_versions.mix(VARPIPE_PDF.out.versions.first())
 
-    ch_varpipe_outputs = Channel.empty()
+    ch_varpipe_outputs = channel.empty()
         .mix(
             VARPIPE_COVERAGEANALYSIS.out.stats,
             VARPIPE_COVERAGEANALYSIS.out.qc_failed,

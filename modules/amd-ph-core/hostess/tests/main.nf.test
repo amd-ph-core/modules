@@ -20,12 +20,12 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:false ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = Channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
+                input[1] = channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
                 input[2] = 'bowtie2'
                 """
             }
@@ -53,12 +53,12 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:false ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = Channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
+                input[1] = channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
                 input[2] = 'bowtie2'
                 """
             }
@@ -84,11 +84,11 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = Channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
+                input[1] = channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
                 input[2] = 'bowtie2'
                 """
             }
@@ -116,11 +116,11 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = Channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
+                input[1] = channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
                 input[2] = 'minimap2'
                 """
             }
@@ -151,11 +151,11 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = Channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
+                input[1] = channel.value(['genome', file("\${projectDir}/modules/amd-ph-core/hostess/tests/ref", checkIfExists: true)])
                 input[2] = 'auto'
                 """
             }

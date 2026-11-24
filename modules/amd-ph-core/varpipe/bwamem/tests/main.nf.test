@@ -47,7 +47,7 @@ nextflow_process {
 
                 input[1] = BWA_INDEX.out.index
                     .join(
-                        Channel.of([
+                        channel.of([
                         [ id:'test' ],
                         file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.dict', checkIfExists: true),
                         file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa.fai', checkIfExists: true),
@@ -89,7 +89,7 @@ nextflow_process {
 
                 input[1] = BWA_INDEX.out.index
                     .join(
-                        Channel.of([
+                        channel.of([
                         [ id:'test' ],
                         file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.dict', checkIfExists: true),
                         file(params.modules_testdata_base_path + '/genomics/bacterial/tuberculosis/genome/reference-index/ref2.fa.fai', checkIfExists: true),

@@ -113,7 +113,7 @@ workflow BINMAN_BIN_READS {
     //
     // TIER 2: translated search. Highest yield per unit compute of anything measured.
     //
-    // When a tier is off, its channel is a per-sample PLACEHOLDER rather than Channel.empty().
+    // When a tier is off, its channel is a per-sample PLACEHOLDER rather than channel.empty().
     // This is the fix for a real bug: joining against an empty channel, even with
     // `remainder: true`, dropped samples -- only 1 of 3 reached BINMAN_ASSIGNBINS. A
     // placeholder keyed by meta means the downstream join is a plain inner join that always
@@ -162,7 +162,7 @@ workflow BINMAN_BIN_READS {
     //
     // Plain inner joins, because every optional input above is guaranteed exactly one entry per
     // sample -- a disabled tier contributes a per-sample [] placeholder rather than
-    // Channel.empty(). That is deliberate: `join(remainder: true)` against a genuinely empty
+    // channel.empty(). That is deliberate: `join(remainder: true)` against a genuinely empty
     // channel dropped samples, leaving only 1 of 3 here, and chaining two such joins made the
     // tuple arity inconsistent on top of that. Keeping both sides one-entry-per-sample means
     // the join behaves identically whether a tier ran or not, with no remainder semantics to

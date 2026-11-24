@@ -25,7 +25,7 @@ workflow FASTQ_CLOCKWORK_DECONTAMINATE {
     // The emit stays because removing it would break any pipeline that reads
     // `FASTQ_CLOCKWORK_DECONTAMINATE.out.versions`. It can go once that is
     // confirmed unused.
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     CLOCKWORK_MINIMAP2 (
         ch_reads,

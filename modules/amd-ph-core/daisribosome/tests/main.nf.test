@@ -23,7 +23,7 @@ nextflow_process {
                 script "../tests/extract_reference/main.nf"
                 process {
                     """
-                    input[0] = Channel.of([ [ id:'influenza_full' ], "flu" ])
+                    input[0] = channel.of([ [ id:'influenza_full' ], "flu" ])
                     """
                 }
             }
@@ -75,7 +75,7 @@ nextflow_process {
                 script "../tests/extract_reference/main.nf"
                 process {
                     """
-                    input[0] = Channel.of([ [ id:'sarscov2_full' ], "cov" ])
+                    input[0] = channel.of([ [ id:'sarscov2_full' ], "cov" ])
                     """
                 }
             }
@@ -129,7 +129,7 @@ nextflow_process {
                 script "../tests/extract_reference/main.nf"
                 process {
                     """
-                    input[0] = Channel.of([ [ id:'cov_default_ctype' ], "cov" ])
+                    input[0] = channel.of([ [ id:'cov_default_ctype' ], "cov" ])
                     """
                 }
             }
@@ -169,7 +169,7 @@ nextflow_process {
                 """
                 def unsupportedCtype = new File("${outputDir}/sarscov2_unsupported_ctype.tsv")
                 unsupportedCtype.text = "bogus_record\\tNOT_A_CTYPE\\tACGTACGTACGT\\n"
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'sarscov2_unsupported_ctype' ],
                     file(unsupportedCtype.path)
                 ])
@@ -212,7 +212,7 @@ nextflow_process {
                 script "../tests/extract_reference/main.nf"
                 process {
                     """
-                    input[0] = Channel.of([ [ id:'rsv_full' ], "rsv" ])
+                    input[0] = channel.of([ [ id:'rsv_full' ], "rsv" ])
                     """
                 }
             }
@@ -265,7 +265,7 @@ nextflow_process {
                 script "../tests/extract_reference/main.nf"
                 process {
                     """
-                    input[0] = Channel.of([ [ id:'influenza_stub' ], "flu" ])
+                    input[0] = channel.of([ [ id:'influenza_stub' ], "flu" ])
                     """
                 }
             }

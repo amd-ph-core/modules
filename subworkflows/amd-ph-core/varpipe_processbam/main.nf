@@ -23,8 +23,8 @@ workflow VARPIPE_PROCESSBAM {
     // consuming pipeline collects globally via `channel.topic('versions')`, so
     // their versions do not travel through here and must not be mixed in -- the
     // `emit: versions` output they used to expose no longer exists.
-    ch_versions = Channel.empty()
-    ch_multiqc_inputs = Channel.empty()
+    ch_versions = channel.empty()
+    ch_multiqc_inputs = channel.empty()
 
     // ALIGNERS
     BWA_INDEX (
