@@ -138,7 +138,7 @@ process BBMAP_BBDUK {
     # Header (4 lines) plus the top `mqc_rows` records. The records are already
     # in descending read order, so this is the head of the distribution, not a
     # sample of it.
-    awk 'NR <= 4 || n++ < ${mqc_rows}' ${prefix}.bbduk.txt > ${prefix}.bbduk.summary.txt
+    head -n \$((4 + ${mqc_rows})) ${prefix}.bbduk.txt > ${prefix}.bbduk.summary.txt
     """
 
     stub:
