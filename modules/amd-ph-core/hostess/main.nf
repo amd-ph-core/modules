@@ -28,20 +28,14 @@ process HOSTESS {
     // what actually dehosts: recording only the wrapper's 0.1.0 omits the version
     // of the software that produced the result.
     //
-    // The `| grep .` is load-bearing, not decoration. In a pipeline the exit status
-    // is the LAST command's, so when the binary is absent `hostess: command not
-    // found` goes to stderr, sed reads empty stdin, and the pipeline exits 0 -- the
-    // version is recorded as an empty string with no error anywhere. A trailing
-    // `|| echo unknown` does NOT fix that, because there is no failure for it to
-    // catch; `grep .` supplies one by exiting non-zero on empty input. That empty
-    // string is what the committed snapshot held, and the stub tests run in a plain
-    // ubuntu image where neither binary exists, so it was reproducing silently.
-    //
-    // `sed -n "1s/^[^0-9]*//p"` strips any leading tool name and handles both output
-    // shapes: `hostess 0.1.0` and hostile's bare `2.0.2`. The previous
-    // `sed 's/.* //'` required a space and would have returned hostile's whole line.
-    tuple val("${task.process}"), val('hostess'), eval('hostess --version 2>/dev/null | sed -n "1s/^[^0-9]*//p" | grep . || echo unknown'), topic: versions, emit: versions_hostess
-    tuple val("${task.process}"), val('hostile'), eval('hostile --version 2>/dev/null | sed -n "1s/^[^0-9]*//p" | grep . || echo unknown'), topic: versions, emit: versions_hostile
+    // Each read from the installed package's own metadata rather than parsed out
+    // of `--version`, whose shape differs between the two (`hostess 0.1.0` against
+    // hostile's bare `2.0.2`). One command, no pipe, so its exit status is real: a
+    // missing python3 or package fails it and `|| echo unknown` records that, which
+    // is what the stub tests see in their plain ubuntu image. (A pipe would hide
+    // the failure behind the last command's success and record an empty string.)
+    tuple val("${task.process}"), val('hostess'), eval("python3 -c 'from importlib.metadata import version; print(version(\"hostess\"))' 2>/dev/null || echo unknown"), topic: versions, emit: versions_hostess
+    tuple val("${task.process}"), val('hostile'), eval("python3 -c 'from importlib.metadata import version; print(version(\"hostile\"))' 2>/dev/null || echo unknown"), topic: versions, emit: versions_hostile
 
     when:
     task.ext.when == null || task.ext.when
