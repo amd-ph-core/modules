@@ -154,7 +154,7 @@ output:
       - hostess:
           type: string
           description: Tool name, emitted to the `versions` topic channel
-      - hostess --version 2>/dev/null | sed -n "1s/^[^0-9]*//p" | grep . || echo unknown:
+      - "python3 -c 'from importlib.metadata import version; print(version(\"hostess\"))' 2>/dev/null || echo unknown":
           type: eval
           description: The expression to obtain the version of the tool
 
@@ -165,7 +165,7 @@ output:
       - hostile:
           type: string
           description: The name of the tool
-      - hostile --version 2>/dev/null | sed -n "1s/^[^0-9]*//p" | grep . || echo unknown:
+      - "python3 -c 'from importlib.metadata import version; print(version(\"hostile\"))' 2>/dev/null || echo unknown":
           type: eval
           description: The expression to obtain the version of the tool
 
@@ -177,7 +177,7 @@ topics:
       - hostess:
           type: string
           description: Tool name, emitted to the `versions` topic channel
-      - hostess --version 2>/dev/null | sed -n "1s/^[^0-9]*//p" | grep . || echo unknown:
+      - "python3 -c 'from importlib.metadata import version; print(version(\"hostess\"))' 2>/dev/null || echo unknown":
           type: eval
           description: The expression to obtain the version of the tool
 
@@ -187,7 +187,7 @@ topics:
       - hostile:
           type: string
           description: The name of the tool
-      - hostile --version 2>/dev/null | sed -n "1s/^[^0-9]*//p" | grep . || echo unknown:
+      - "python3 -c 'from importlib.metadata import version; print(version(\"hostile\"))' 2>/dev/null || echo unknown":
           type: eval
           description: The expression to obtain the version of the tool
 
