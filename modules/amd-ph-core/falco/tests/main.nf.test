@@ -110,6 +110,65 @@ nextflow_process {
         }
     }
 
+    // falco 2.x fails on a FASTQ with no reads (gzipped: exit 1, "failed to read header";
+    // plain: a floating-point exception). The module skips such a mate instead, so one
+    // empty sample does not stop a run; it simply has no report.
+    test("empty - fastq - single_end - gzipped and plain") {
+
+        when {
+            def dir = new File("${outputDir}/empty_input")
+            dir.mkdirs()
+            new java.util.zip.GZIPOutputStream(new FileOutputStream(new File(dir, 'empty.fastq.gz'))).close()
+            new File(dir, 'empty.fastq').text = ''
+            process {
+                """
+                input[0] = channel.of(
+                    [ [ id:'empty_gz', single_end:true ], [ file('${dir}/empty.fastq.gz', checkIfExists: true) ] ],
+                    [ [ id:'empty_plain', single_end:true ], [ file('${dir}/empty.fastq', checkIfExists: true) ] ]
+                )
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.trace.tasks().size() == 2 },
+                { assert process.out.txt.size() == 0 },
+                { assert process.out.summary.size() == 0 },
+                { assert process.out.html.size() == 0 }
+            )
+        }
+    }
+
+    test("sarscov2 - fastq - paired_end - one empty mate") {
+
+        when {
+            def dir = new File("${outputDir}/empty_mate")
+            dir.mkdirs()
+            new java.util.zip.GZIPOutputStream(new FileOutputStream(new File(dir, 'empty_2.fastq.gz'))).close()
+            process {
+                """
+                input[0] = channel.of([
+                    [ id:'test', single_end:false ],
+                    [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                      file('${dir}/empty_2.fastq.gz', checkIfExists: true) ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // R1 is reported as usual; R2, with no reads, is not.
+                { assert process.out.txt.size() == 1 },
+                { assert process.out.txt[0][1] ==~ ".*/test_R1_fastqc_data.txt" },
+                { assert path(process.out.txt[0][1]).text =~ /(?m)^Filename\ttest_R1\.fastq\.gz$/ }
+            )
+        }
+    }
+
     test("sarscov2 - fastq - single_end - stub") {
 
         options "-stub"
