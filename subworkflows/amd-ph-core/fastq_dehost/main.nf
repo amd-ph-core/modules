@@ -22,8 +22,8 @@ include { SRAHUMANSCRUBBER_SCRUB                       } from '../../../modules/
 include { BOWTIE2_BUILD                                } from '../../../modules/nf-core/bowtie2/build/main'
 include { HOSTESS as HOSTESS_SHORT                     } from '../../../modules/amd-ph-core/hostess/main'
 include { HOSTESS as HOSTESS_LONG                      } from '../../../modules/amd-ph-core/hostess/main'
-include { HOSTILE_CLEAN as HOSTILE_CLEAN_SHORT         } from '../../../modules/nf-core/hostile/clean/main'
-include { HOSTILE_CLEAN as HOSTILE_CLEAN_LONG          } from '../../../modules/nf-core/hostile/clean/main'
+include { HOSTILE_CLEAN as HOSTILE_CLEAN_SHORT         } from '../../../modules/amd-ph-core/hostile/clean/main'
+include { HOSTILE_CLEAN as HOSTILE_CLEAN_LONG          } from '../../../modules/amd-ph-core/hostile/clean/main'
 
 workflow FASTQ_DEHOST {
 

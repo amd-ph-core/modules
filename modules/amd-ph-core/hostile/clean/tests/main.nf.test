@@ -1,0 +1,183 @@
+nextflow_process {
+
+    name "Test Process HOSTILE_CLEAN"
+    script "../main.nf"
+    process "HOSTILE_CLEAN"
+    config "./nextflow.config"
+
+    tag "modules"
+    tag "modules_amdphcore"
+    tag "hostile"
+    tag "hostile/clean"
+    tag "nf-core/bowtie2/build"
+
+    // The bowtie2 cases align human reads against a SARS-CoV-2 index, so nothing is
+    // removed and every read comes back: they test the plumbing (index name, cache
+    // directory, mate order). The minimap2 case removes reads that do align.
+
+    setup {
+        run("BOWTIE2_BUILD") {
+            script "../../../../nf-core/bowtie2/build/main.nf"
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ]
+                """
+            }
+        }
+    }
+
+    test("bowtie2 - fastq - paired-end") {
+        when {
+            params {
+                module_args = ""
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_2.fastq.gz', checkIfExists: true),
+                    ],
+                ]
+                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[2] = 'bowtie2'
+                """
+            }
+        }
+
+        then {
+            def report = path(process.out.json[0][1]).json[0]
+            assertAll(
+                { assert process.success },
+                { assert report.aligner == 'bowtie2' },
+                { assert report.reads_removed == 0 },
+                { assert snapshot(process.out.fastq, process.out.versions_hostile).match() }
+            )
+        }
+    }
+
+    // hostile treats single-end input as long reads unless told otherwise, so this
+    // checks that the aligner input reaches the command line.
+    test("bowtie2 - fastq - single-end") {
+        when {
+            params {
+                module_args = ""
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:true ],
+                    [ file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ],
+                ]
+                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[2] = 'bowtie2'
+                """
+            }
+        }
+
+        then {
+            def report = path(process.out.json[0][1]).json[0]
+            assertAll(
+                { assert process.success },
+                { assert report.aligner == 'bowtie2' },
+                { assert report.reads_removed == 0 },
+                { assert snapshot(process.out.fastq, process.out.versions_hostile).match() }
+            )
+        }
+    }
+
+    // Mates named s.R1/s.R2 and given in reverse order. Both names have the same
+    // simpleName (`s`), so a sort on simpleName leaves them reversed and hostile
+    // would read mate 2 as mate 1; sorting on the full name puts R1 first.
+    test("bowtie2 - fastq - paired-end - mates given in reverse order") {
+        when {
+            params {
+                module_args = ""
+            }
+            process {
+                """
+                def dir = java.nio.file.Files.createTempDirectory('hostile_mates')
+                def r1  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_1.fastq.gz', checkIfExists: true).copyTo(dir.resolve('s.R1.fastq.gz'))
+                def r2  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_2.fastq.gz', checkIfExists: true).copyTo(dir.resolve('s.R2.fastq.gz'))
+                input[0] = [ [ id:'s', single_end:false ], [ r2, r1 ] ]
+                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[2] = 'bowtie2'
+                """
+            }
+        }
+
+        then {
+            def report = path(process.out.json[0][1]).json[0]
+            assertAll(
+                { assert process.success },
+                { assert report.fastq1_in_name == 's.R1.fastq.gz' },
+                { assert report.fastq2_in_name == 's.R2.fastq.gz' },
+            )
+        }
+    }
+
+    // minimap2 takes the host FASTA itself as the index. The reads are SARS-CoV-2
+    // amplicon reads, so against the SARS-CoV-2 genome most of them are removed.
+    test("minimap2 - fastq - single-end - host FASTA") {
+        when {
+            params {
+                module_args = ""
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'long', single_end:true ],
+                    [ file('https://raw.githubusercontent.com/nf-core/test-datasets/5f09ab078a7459db38c1ec86712a98d369cf7863/illumina/amplicon/sample1_R1.fastq.gz', checkIfExists: true) ],
+                ]
+                input[1] = [ 'genome', file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true) ]
+                input[2] = 'minimap2'
+                """
+            }
+        }
+
+        then {
+            def report = path(process.out.json[0][1]).json[0]
+            assertAll(
+                { assert process.success },
+                { assert report.aligner == 'minimap2' },
+                { assert report.reads_removed > 0 },
+                { assert report.reads_out == report.reads_in - report.reads_removed },
+            )
+        }
+    }
+
+    test("bowtie2 - fastq - paired-end - stub") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ""
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:false ],
+                    [
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                        file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_2.fastq.gz', checkIfExists: true),
+                    ],
+                ]
+                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[2] = 'bowtie2'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

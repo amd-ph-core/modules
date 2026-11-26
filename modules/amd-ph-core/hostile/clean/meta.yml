@@ -1,5 +1,9 @@
 name: "hostile_clean"
-description: Removes host reads from short- and long-read FASTQ sequencing files
+description: |
+  Removes host reads from short- and long-read FASTQ sequencing files.
+  Derived from nf-core/hostile/clean, with the aligner taken as an input (so the module
+  can pass the index the way bowtie2 or minimap2 needs it) and paired mates sorted on
+  their full file names.
 keywords:
   - hostile
   - decontamination

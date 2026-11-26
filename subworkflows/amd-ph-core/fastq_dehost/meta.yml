@@ -20,8 +20,7 @@ components:
   - hostess
   - bowtie2/build:
       git_remote: https://github.com/nf-core/modules.git
-  - hostile/clean:
-      git_remote: https://github.com/nf-core/modules.git
+  - hostile/clean
 input:
   - ch_reads:
       type: file

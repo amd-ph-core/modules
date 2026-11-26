@@ -1,5 +1,14 @@
-// Copyright (c) the nf-core community under an open-source MIT license.
-// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing.
+// Derived from nf-core/modules hostile/clean (7b3452a2), copyright (c) the nf-core
+// community under an open-source MIT license: https://github.com/nf-core/modules
+//
+// Kept as a fork rather than an nf-core patch because it adds an input, which a patch
+// cannot carry cleanly (nf-core lint checks a patched module's main.nf against the
+// unpatched meta.yml). The differences from upstream:
+//   - an `aligner` value as a third input; the module emits --aligner itself and uses it to pass the
+//     index the way each aligner needs (bowtie2: a name inside HOSTILE_CACHE_DIR;
+//     minimap2: a path to a FASTA or .mmi, with the task directory as the cache).
+//   - mates sorted on the full file name, not simpleName (sent upstream separately).
+// Same container, outputs and process name, so it drops in for HOSTILE_CLEAN.
 
 process HOSTILE_CLEAN {
     tag "${meta.id}"

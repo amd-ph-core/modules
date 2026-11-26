@@ -13,7 +13,7 @@ nextflow_workflow {
     tag "srahumanscrubber/scrub"
     tag "hostess"
     tag "subworkflows/../../modules/nf-core/bowtie2/build"
-    tag "subworkflows/../../modules/nf-core/hostile/clean"
+    tag "hostile/clean"
 
     // The "host" is 40 kb of human chr22 (nf-core genomics/homo_sapiens/genome/genome.fasta)
     // and the sample is 50 simulated human pairs from it plus 50 SARS-CoV-2 pairs
