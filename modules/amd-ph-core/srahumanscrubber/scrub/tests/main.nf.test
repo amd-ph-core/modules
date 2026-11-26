@@ -156,6 +156,8 @@ nextflow_process {
 
     test("mixed - fastq - paired_end - mask") {
 
+        config "./mask.config"
+
         when {
             process {
                 """
@@ -186,6 +188,8 @@ nextflow_process {
     }
 
     test("homo_sapiens - fastq - single_end - mask") {
+
+        config "./mask.config"
 
         when {
             process {
@@ -247,6 +251,8 @@ nextflow_process {
     }
 
     test("sarscov2 - fastq - paired_end - stub") {
+
+        config "./mask.config"
 
         options "-stub"
 
