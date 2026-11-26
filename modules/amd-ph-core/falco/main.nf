@@ -14,10 +14,12 @@ process FALCO {
     input:
     tuple val(meta), path(reads)
 
+    // Optional: a mate with no reads gets no report (falco 2.x fails on an empty
+    // file), so an empty sample emits nothing here rather than failing the task.
     output:
-    tuple val(meta), path("*_fastqc_report.html"), emit: html
-    tuple val(meta), path("*_fastqc_data.txt")   , emit: txt
-    tuple val(meta), path("*_summary.txt")       , emit: summary
+    tuple val(meta), path("*_fastqc_report.html"), emit: html   , optional: true
+    tuple val(meta), path("*_fastqc_data.txt")   , emit: txt    , optional: true
+    tuple val(meta), path("*_summary.txt")       , emit: summary, optional: true
     tuple val("${task.process}"), val('falco'), eval("falco --version | head -n 1"), topic: versions, emit: versions_falco
 
     when:
@@ -40,10 +42,17 @@ process FALCO {
         def link = "${name}${fastqExtension(read)}"
         def out  = "falco_${name}"
         links   << "ln -s \"\$(readlink -f ${shellQuote(read)})\" ${shellQuote(link)}"
-        runs    << "falco ${args} --threads 1 --output ${shellQuote(out)} ${shellQuote(link)} &\n    pids=\"\$pids \$!\""
-        renames << "mv ${shellQuote("${out}/${name}/fastqc_data.txt")} ${shellQuote("${name}_fastqc_data.txt")}"
-        renames << "mv ${shellQuote("${out}/${name}/summary.txt")} ${shellQuote("${name}_summary.txt")}"
-        renames << "mv ${shellQuote("${out}/${name}/fastqc_report.html")} ${shellQuote("${name}_fastqc_report.html")}"
+        runs    << """if has_reads ${shellQuote(link)}; then
+        falco ${args} --threads 1 --output ${shellQuote(out)} ${shellQuote(link)} &
+        pids="\$pids \$!"
+    else
+        echo FALCO: ${shellQuote(name)}: no reads, no report >&2
+    fi"""
+        renames << """if [ -d ${shellQuote("${out}/${name}")} ]; then
+        mv ${shellQuote("${out}/${name}/fastqc_data.txt")} ${shellQuote("${name}_fastqc_data.txt")}
+        mv ${shellQuote("${out}/${name}/summary.txt")} ${shellQuote("${name}_summary.txt")}
+        mv ${shellQuote("${out}/${name}/fastqc_report.html")} ${shellQuote("${name}_fastqc_report.html")}
+    fi"""
         outdirs << shellQuote(out)
     }
     // falco is handed a LINK named for the mate rather than the staged file. falco
@@ -67,7 +76,24 @@ process FALCO {
     // Each PID is waited on individually so its status is checked: a bare `wait`
     // returns zero however the children exited, which would leave a missing or
     // truncated report behind a task that reported success.
+    //
+    // A mate with no reads is skipped: falco 2.x fails on an empty file (2.0.4: exit 1,
+    // "failed to read header", gzipped; a floating-point exception, plain), which would
+    // stop a whole run over one empty sample. has_reads decompresses (or passes through)
+    // only the first byte; `|| true` keeps head's early close from failing the pipeline.
+    // A 0-byte file is empty (some gzip builds reject it as "invalid magic" even with -f).
+    // Any other file that yields no bytes is decompressed in full, with errors kept, so a
+    // damaged one (a gzip truncated to its header also yields nothing) fails the task
+    // instead of passing as empty. `exit` is explicit: errexit does not apply inside an
+    // `if` condition.
     """
+    has_reads() {
+        if [ ! -s "\$1" ]; then return 1; fi
+        if [ -n "\$(gzip -cdf -- "\$1" 2>/dev/null | head -c 1 || true)" ]; then return 0; fi
+        gzip -cdf -- "\$1" > /dev/null || { echo "FALCO: \$1: not a readable FASTQ" >&2; exit 1; }
+        return 1
+    }
+
     ${links.join('\n    ')}
 
     pids=''
