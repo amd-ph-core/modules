@@ -169,6 +169,31 @@ nextflow_process {
         }
     }
 
+    // A damaged file is not an empty one: a gzip cut off after its header also decompresses
+    // to nothing, and must fail the task rather than pass without a report.
+    test("truncated gzip - fastq - single_end - fails") {
+
+        when {
+            def dir = new File("${outputDir}/truncated_input")
+            dir.mkdirs()
+            new File(dir, 'truncated.fastq.gz').bytes = [0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 0, 3] as byte[]
+            process {
+                """
+                input[0] = channel.of(
+                    [ [ id:'truncated', single_end:true ], [ file('${dir}/truncated.fastq.gz', checkIfExists: true) ] ]
+                )
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert process.stdout.any { it.contains('not a readable FASTQ') } || process.errorReport.contains('not a readable FASTQ') }
+            )
+        }
+    }
+
     test("sarscov2 - fastq - single_end - stub") {
 
         options "-stub"

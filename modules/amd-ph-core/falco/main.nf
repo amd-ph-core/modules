@@ -81,8 +81,18 @@ process FALCO {
     // "failed to read header", gzipped; a floating-point exception, plain), which would
     // stop a whole run over one empty sample. has_reads decompresses (or passes through)
     // only the first byte; `|| true` keeps head's early close from failing the pipeline.
+    // A 0-byte file is empty (some gzip builds reject it as "invalid magic" even with -f).
+    // Any other file that yields no bytes is decompressed in full, with errors kept, so a
+    // damaged one (a gzip truncated to its header also yields nothing) fails the task
+    // instead of passing as empty. `exit` is explicit: errexit does not apply inside an
+    // `if` condition.
     """
-    has_reads() { [ -n "\$(gzip -cdf -- "\$1" 2>/dev/null | head -c 1 || true)" ]; }
+    has_reads() {
+        if [ ! -s "\$1" ]; then return 1; fi
+        if [ -n "\$(gzip -cdf -- "\$1" 2>/dev/null | head -c 1 || true)" ]; then return 0; fi
+        gzip -cdf -- "\$1" > /dev/null || { echo "FALCO: \$1: not a readable FASTQ" >&2; exit 1; }
+        return 1
+    }
 
     ${links.join('\n    ')}
 
