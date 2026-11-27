@@ -31,50 +31,50 @@ tools:
       identifier: biotools:samtools
   - call.py:
       description: Variant caller over the pileup, supporting the binomial and empirical-Bayes callers with depth-adaptive thresholds. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""
   - var_call_stats.py:
       description: Builds the per-position pileup consumed by the caller. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""
   - amend_consensus.py:
       description: Applies called variants to the consensus, emitting ambiguity codes above the ambiguity frequency. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""
   - generate_vcf.py:
       description: Writes a spec-compliant VCFv4.2 from the caller's tables via pysam. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""
   - phase.py:
       description: Variant phasing, emitting the EXPENRD/JACCARD/MUTUALD/NJOINTP square matrices. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""
   - complete_matrix.py:
       description: Completes a phasing square matrix. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""
   - get_pairing_stats.py:
       description: Summarises mate-pair merge statistics into the paired-error table used by the caller. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/call
       licence:
         - MIT
       identifier: ""

@@ -1,15 +1,14 @@
 // Real-path tests for SRAHUMANSCRUBBER_BUILDDB. Not run in CI: the STAT tools have no
 // public image. To run them, copy this file to real.nf.test and point the process at
-// the AMDP image, e.g. with a local build of oamd-infra-dockerfiles
-// bio/sra-human-scrubber/oamd-bio-sra-human-scrubber-2.2.1.dockerfile tagged
-// oamd-bio-sra-human-scrubber:2.2.1:
+// a local image that carries the scrubber and the STAT tools (ncbi/ngs-tools, tools/tax),
+// tagged sra-human-scrubber-stat:2.2.1:
 //
 //   cp real.nf.test.disabled real.nf.test
 //   nf-test test modules/amd-ph-core/srahumanscrubber/builddb/tests/real.nf.test \
 //       --profile docker --config real.config
 //
 // where real.config sets process.withName.SRAHUMANSCRUBBER_BUILDDB.container =
-// 'docker.io/library/oamd-bio-sra-human-scrubber:2.2.1'.
+// 'docker.io/library/sra-human-scrubber-stat:2.2.1'.
 nextflow_process {
 
     name "Test Process SRAHUMANSCRUBBER_BUILDDB (real)"

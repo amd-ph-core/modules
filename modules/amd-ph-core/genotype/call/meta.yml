@@ -24,8 +24,8 @@ keywords:
 tools:
   - genotype_call.py:
       description: Aggregates BLAST HSPs per subject, ranks by summed bitscore, and reports the best call with its runner-up and margin. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/genotype/call
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/genotype/call
       licence:
         - Apache-2.0
       identifier: ""

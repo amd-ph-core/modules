@@ -8,8 +8,8 @@ process HOSTESS {
     // a separate image would only duplicate the aligners.
     //
     // No public image exists: hostess has no conda package and no BioContainer.
-    // Consumers override the registry and the exact tag via their own config,
-    // as with the other AMDP images.
+    // The name is that of a private image; consumers map it, and set the
+    // registry and the exact tag, in their own config.
     container 'oamd-bio-hostile:2.0.2'
 
     input:

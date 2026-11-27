@@ -18,8 +18,8 @@ keywords:
 tools:
   - stitch_consensus.py:
       description: Projects an assembled consensus onto a full reference, reading depth from the reads-on-reference BAM via pysam to separate dropout from true deletion. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/stitch
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/stitch
       licence:
         - MIT
       identifier: ""

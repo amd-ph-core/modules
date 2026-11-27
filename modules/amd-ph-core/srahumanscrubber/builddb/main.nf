@@ -5,10 +5,10 @@ process SRAHUMANSCRUBBER_BUILDDB {
     // The STAT database tools (build_index_of_each_file, merge_db, subtract_db,
     // aligns_to) come from ncbi/ngs-tools (tools/tax) and have no conda package or
     // BioContainer: the bioconda sra-human-scrubber package ships aligns_to only.
-    // The AMDP sra-human-scrubber image carries them alongside the scrubber, built
+    // A private sra-human-scrubber image carries them alongside the scrubber, built
     // from the same aligns_to, so one image serves this module and scrub.
-    // Consumers override the registry and the exact tag via their own config, as
-    // with the other AMDP images.
+    // Consumers map the name, and set the registry and the exact tag, in their own
+    // config.
     container 'oamd-bio-sra-human-scrubber:2.2.1_a0267a0_v3'
 
     input:

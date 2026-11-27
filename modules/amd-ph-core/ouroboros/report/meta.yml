@@ -14,15 +14,15 @@ keywords:
 tools:
   - coverage_diagram.py:
       description: Plots per-position depth, overlaying minority variants when the variant table and paired stats are both available. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/report
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/report
       licence:
         - MIT
       identifier: ""
   - heuristic_diagram.py:
       description: Plots the caller's decision heuristics against the per-position allele table. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/report
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/report
       licence:
         - MIT
       identifier: ""

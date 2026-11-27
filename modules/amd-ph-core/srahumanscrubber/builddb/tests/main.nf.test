@@ -9,11 +9,11 @@ nextflow_process {
     tag "srahumanscrubber"
     tag "srahumanscrubber/builddb"
 
-    // Stub tests only. The STAT tools have no public image (only the AMDP image
-    // oamd-bio-sra-human-scrubber carries them), so the real script path cannot run in CI; tests/config/nf-test.config
+    // Stub tests only. The STAT tools have no public image, so the real script path
+    // cannot run in CI; tests/config/nf-test.config
     // points SRAHUMANSCRUBBER_BUILDDB at a generic ubuntu image, which is all the stub
-    // needs. real.nf.test.disabled holds the real-path tests, run locally against the
-    // AMDP image (see its header).
+    // needs. real.nf.test.disabled holds the real-path tests, run locally against
+    // an image that carries the STAT tools (see its header).
 
     test("homo_sapiens - fasta - window 32 - stub") {
 

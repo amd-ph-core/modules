@@ -46,15 +46,15 @@ tools:
       identifier: ""
   - winnow_pileup.py:
       description: Streams a SAM in one pass to winnow best-per-read alignments, sum the alignment score used as the convergence objective, and build the per-position pileup JSON. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/polish
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/polish
       licence:
         - MIT
       identifier: ""
   - combine_sam_stats.py:
       description: Amends a reference from a pileup JSON, folding indels above the given frequency thresholds and flagging whether any indel was folded. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/polish
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/polish
       licence:
         - MIT
       identifier: ""

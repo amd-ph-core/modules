@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: "qqq_read_prep"
 description: |
-  oamd-bio-qqq's read preparation, from samplesheet runs to each sample's final reads:
+  qqq's read preparation, from samplesheet runs to each sample's final reads:
   BAM_TO_FASTQ for runs given as a BAM (a paired BAM's orphans dropped, or kept as a
   single-end sample of their own); FASTQ_TRIM_MERGE (Falco, fastp/fastplong, runs merged);
   bbduk rRNA depletion when an rRNA reference is given; FASTQ_DEHOST; and rasusa
