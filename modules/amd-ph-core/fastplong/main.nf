@@ -1,6 +1,7 @@
 // Derived from nf-core/modules fastplong (MIT licence, the nf-core community).
-// One change: a zero-byte .gz output is replaced with a valid empty gzip (see the
-// script). Inputs, outputs, container and arguments are as nf-core has them.
+// Two changes: a zero-byte .gz output is replaced with a valid empty gzip (see the
+// script), and the container is fastplong 0.7.1, the latest release, which has
+// that bug. Inputs, outputs and arguments are as nf-core has them.
 
 process FASTPLONG {
     tag "$meta.id"
@@ -8,8 +9,8 @@ process FASTPLONG {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/e5/e53f2d854500cba9b85619f1ae987371c2890f28a6059f4957b1b95a7317b4c7/data':
-        'community.wave.seqera.io/library/fastplong:0.4.1--73e8274104613b58' }"
+        'https://depot.galaxyproject.org/singularity/fastplong:0.7.1':
+        'biocontainers/fastplong:0.7.1' }"
 
     input:
     tuple val(meta), path(reads)
@@ -53,10 +54,12 @@ process FASTPLONG {
     # gzip, when it writes no reads to an output: --failed_out when no read fails,
     # --out when every read does. Anything that reads it then fails ("unexpected
     # end of file"). fastp had the same bug until 1.4.0. An empty output is
-    # rewritten as a valid empty gzip, so it reads as zero reads.
+    # rewritten as a valid empty gzip, so it reads as zero reads. `>|`, because
+    # nf-core pipelines run tasks under bash -C (noclobber), where `>` refuses to
+    # replace the existing file and fails the task.
     for f in ${prefix}.fastplong.fastq.gz ${prefix}.fail.fastq.gz; do
         if [ -f "\$f" ] && [ ! -s "\$f" ]; then
-            gzip -c < /dev/null > "\$f"
+            gzip -c < /dev/null >| "\$f"
         fi
     done
     """

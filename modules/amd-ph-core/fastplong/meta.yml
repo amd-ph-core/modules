@@ -2,9 +2,9 @@
 name: "fastplong"
 description: |
   Perform adapter/quality trimming and QC on long sequencing reads (ONT, PacBio, etc.).
-  Derived from nf-core/fastplong, with one change: an output fastplong leaves as a
+  Derived from nf-core/fastplong, with two changes: an output fastplong leaves as a
   zero-byte file (it does when no read fails, or none passes), which is not valid gzip,
-  is rewritten as a valid empty gzip.
+  is rewritten as a valid empty gzip; and the container is fastplong 0.7.1.
 keywords:
   - trimming
   - quality control
@@ -14,8 +14,8 @@ tools:
   - "fastplong":
       description: "Ultra-fast preprocessing and quality control for long-read sequencing
         data."
-      homepage: "https://github.com/OpenGene/fastplong/blob/v0.4.1/README.md"
-      documentation: "https://github.com/OpenGene/fastplong/blob/v0.4.1/README.md"
+      homepage: "https://github.com/OpenGene/fastplong"
+      documentation: "https://github.com/OpenGene/fastplong/blob/v0.7.1/README.md"
       tool_dev_url: "https://github.com/OpenGene/fastplong"
       doi: 10.1002/imt2.107
       licence: ["MIT"]
