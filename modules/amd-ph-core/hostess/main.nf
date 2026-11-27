@@ -56,9 +56,16 @@ process HOSTESS {
     // would mean building a bowtie2-style prefix and then letting hostess pick
     // minimap2, or the reverse. Every unrecognised value fails here rather than
     // silently taking the bowtie2 branch below.
+    //
+    // The reference is a directory holding the index, or the index files themselves
+    // (<name>.*.bt2, or one <name>.mmi), which Nextflow stages into the task
+    // directory -- where test data served over HTTPS has to come from, since a
+    // directory cannot be fetched that way. Several files arrive as a List.
+    def staged    = reference_dir instanceof List
     def index_ref = aligner == 'minimap2'
-        ? (reference_dir.isDirectory() ? "${reference_dir}/${reference_name}.mmi" : reference_dir.toString())
-        : "${reference_dir}/${reference_name}"
+        ? (staged ? "${reference_name}.mmi"
+            : reference_dir.isDirectory() ? "${reference_dir}/${reference_name}.mmi" : reference_dir.toString())
+        : (staged ? reference_name : "${reference_dir}/${reference_name}")
     // Sorted so mate 1 is always first: the glob that stages the reads makes
     // no ordering promise, and passing them the wrong way round would swap the
     // output mates silently.

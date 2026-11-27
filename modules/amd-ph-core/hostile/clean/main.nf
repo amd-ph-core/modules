@@ -40,13 +40,21 @@ process HOSTILE_CLEAN {
     // knows which aligner each alias is for -- it feeds them from separate
     // branches with their own reference channels. bowtie2 wants an index
     // prefix, minimap2 a FASTA or a .mmi, which is why the two differ here.
+    //
+    // The reference is a directory holding the index, or the index files themselves
+    // (<name>.*.bt2, or one <name>.mmi), which Nextflow stages into the task
+    // directory -- where test data served over HTTPS has to come from, since a
+    // directory cannot be fetched that way.
     def long_read = aligner == 'minimap2'
+    def staged    = reference_dir instanceof List
     def index_ref = long_read
-    ? (reference_dir.isDirectory()
-        ? "${reference_dir}/${reference_name}.mmi"
-        : reference_dir.toString())
+    ? (staged
+        ? "${reference_name}.mmi"
+        : reference_dir.isDirectory()
+            ? "${reference_dir}/${reference_name}.mmi"
+            : reference_dir.toString())
     : reference_name
-    def cache_dir = long_read ? '.' : reference_dir.toString()
+    def cache_dir = long_read || staged ? '.' : reference_dir.toString()
     // Sorted on the full file name so mate 1 is always first. simpleName strips every
     // extension, so sample.R1.fastq.gz and sample.R2.fastq.gz both reduce to `sample`
     // and a reversed pair would stay reversed, swapping the output mates.
@@ -72,7 +80,7 @@ process HOSTILE_CLEAN {
 
     stub:
     def prefix       = task.ext.prefix ?: "${meta.id}"
-    def cache_dir  = aligner == 'minimap2' ? '.' : reference_dir.toString()
+    def cache_dir  = aligner == 'minimap2' || reference_dir instanceof List ? '.' : reference_dir.toString()
     def fake_read2   = !meta.single_end ? "echo '' | gzip > ${prefix}.clean_2.fastq.gz" : ""
     """
     export HOSTILE_CACHE_DIR=${cache_dir}

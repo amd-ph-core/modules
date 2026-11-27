@@ -59,8 +59,10 @@ jobs:
       matrix:
         shard: ${{ fromJson(needs.nf-test-changes.outputs.shard) }}
         profile: [docker]
+        # 26.04.6 is the required lane: the Nextflow the pipelines using these
+        # components run on. 24.x is not supported. latest-everything is advisory.
         NXF_VER:
-          - "24.10.5"
+          - "26.04.6"
           - "latest-everything"
     env:
       NXF_ANSI_LOG: false
