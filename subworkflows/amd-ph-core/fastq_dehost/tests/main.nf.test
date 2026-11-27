@@ -12,6 +12,20 @@ nextflow_workflow {
     tag "hostess"
     tag "hostile/clean"
 
+    // Each FASTQ in a channel item as [ name, reads, md5 of its sorted read names ], for the
+    // snapshot: it records which reads were kept, whatever order a multithreaded tool wrote
+    // them in. Meta maps and counts pass through unchanged.
+    def fastqFile = { v ->
+        if (!(v instanceof CharSequence || v instanceof java.nio.file.Path) || !(v.toString() =~ /\.f(ast)?q(\.gz)?$/)) {
+            return v
+        }
+        def f      = new File(v.toString())
+        def stream = v.toString().endsWith('.gz') ? new java.util.zip.GZIPInputStream(f.newInputStream()) : f.newInputStream()
+        def names  = stream.newReader().readLines().collate(4).collect { r -> r[0].tokenize(' \t')[0] }.sort()
+        [ f.name, names.size(), java.security.MessageDigest.getInstance('MD5').digest(names.join('\n').bytes).encodeHex().toString() ]
+    }
+    def fastqSummary = { item -> item.collect { v -> v instanceof List ? v.collect { x -> fastqFile(x) } : fastqFile(v) } }
+
     // The "host" is 40 kb of human chr22 (nf-core genomics/homo_sapiens/genome/genome.fasta)
     // and the sample is 50 simulated human pairs from it plus 50 SARS-CoV-2 pairs
     // (srahumanscrubber's mixed_{1,2}.fastq.gz). A dehoster that works removes the human
@@ -47,6 +61,9 @@ nextflow_workflow {
                 { assert reads == [50, 50] },
                 { assert workflow.out.json.size() == 1 },
                 { assert workflow.out.host_bam.size() == 0 && workflow.out.host_reads.size() == 0 },
+                { assert snapshot(
+                    workflow.out.reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id }
+                ).match() },
             )
         }
     }
@@ -77,6 +94,10 @@ nextflow_workflow {
                 { assert workflow.success },
                 { assert reads == [50, 50] },
                 { assert workflow.out.json.size() == 1 },
+                { assert snapshot(
+                    workflow.out.reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id },
+                    workflow.out.host_reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id }
+                ).match() },
             )
         }
     }
@@ -104,6 +125,9 @@ nextflow_workflow {
                 { assert workflow.success },
                 { assert reads == [50, 50] },
                 { assert workflow.out.json.size() == 1 },
+                { assert snapshot(
+                    workflow.out.reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id }
+                ).match() },
             )
         }
     }
@@ -137,6 +161,9 @@ nextflow_workflow {
                 { assert report.reads_in == 27721 },
                 { assert report.reads_out == kept && kept < report.reads_in / 10 },
                 { assert workflow.out.json.size() == 1 },
+                { assert snapshot(
+                    workflow.out.reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id }
+                ).match() },
             )
         }
     }

@@ -1,0 +1,86 @@
+{
+    "skip_trim: runs merged untrimmed": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "A",
+                        "single_end": true
+                    },
+                    "short",
+                    [
+                        "A.merged.fastq.gz",
+                        200,
+                        "d0704b3294ee5a02ba55863f17dff58a"
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:16:32.987766742",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "two runs merged, one passed through, one long-read run; Falco on, failed reads kept": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "A",
+                        "single_end": false
+                    },
+                    "short",
+                    [
+                        [
+                            "A_1.merged.fastq.gz",
+                            198,
+                            "00ab9fded3c995c441cf80136e764114"
+                        ],
+                        [
+                            "A_2.merged.fastq.gz",
+                            198,
+                            "00ab9fded3c995c441cf80136e764114"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "B",
+                        "single_end": false
+                    },
+                    "short",
+                    [
+                        [
+                            "B_run1_R1.fastp.fastq.gz",
+                            99,
+                            "cd7ca10971fce52e89cfbf3f1e792e57"
+                        ],
+                        [
+                            "B_run1_R2.fastp.fastq.gz",
+                            99,
+                            "cd7ca10971fce52e89cfbf3f1e792e57"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "L",
+                        "single_end": true
+                    },
+                    "long",
+                    [
+                        "L_run1.fastplong.fastq.gz",
+                        27686,
+                        "094097141a1a07d828a70e4e14a0169b"
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:16:27.84740396",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

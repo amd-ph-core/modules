@@ -19,12 +19,12 @@ include { CAT_FASTQ } from '../../../modules/nf-core/cat/fastq/main'
 workflow FASTQ_TRIM_MERGE {
 
     take:
-    ch_runs     // channel: [ val(meta), val(sample), val(read_type), path(reads) ], one per run;
-                //          sample = [ id: <merged sample id>, run: <1-based order>, runs: <run count> ],
-                //          read_type 'short' (fastp) or 'long' (fastplong)
-    run_falco   // value:   true to run Falco on the raw reads
-    skip_trim   // value:   true to merge the runs untrimmed
-    save_failed // value:   true to keep the reads fastp/fastplong's filter removes
+    ch_runs         // channel: [ val(meta), val(sample), val(read_type), path(reads) ], one per run;
+                    //          sample = [ id: <merged sample id>, run: <1-based order>, runs: <run count> ],
+                    //          read_type 'short' (fastp) or 'long' (fastplong)
+    val_run_falco   // value:   true to run Falco on the raw reads
+    val_skip_trim   // value:   true to merge the runs untrimmed
+    val_save_failed // value:   true to keep the reads fastp/fastplong's filter removes
 
     main:
     ch_falco_txt      = channel.empty()
@@ -34,13 +34,13 @@ workflow FASTQ_TRIM_MERGE {
     ch_fastplong_fail = channel.empty()
     ch_trimmed        = channel.empty()
 
-    if (run_falco) {
+    if (val_run_falco) {
         FALCO( ch_runs.map { meta, _sample, _read_type, reads -> [ meta, reads ] } )
         ch_falco_txt = FALCO.out.txt
     }
 
     ch_processed = ch_runs
-    if (!skip_trim) {
+    if (!val_skip_trim) {
         ch_by_type = ch_runs.branch { _meta, _sample, read_type, _reads ->
             short_reads: read_type == 'short'
             long_reads:  read_type == 'long'
@@ -52,14 +52,14 @@ workflow FASTQ_TRIM_MERGE {
         FASTP(
             ch_by_type.short_reads.map { meta, _sample, _read_type, reads -> [ meta, reads, [] ] },
             false,          // discard_trimmed_pass
-            save_failed,    // save_trimmed_fail
+            val_save_failed,    // save_trimmed_fail
             false           // save_merged
         )
         FASTPLONG(
             ch_by_type.long_reads.map { meta, _sample, _read_type, reads -> [ meta, reads ] },
             [],             // adapter_fasta
             false,          // discard_trimmed_pass
-            save_failed     // save_trimmed_fail
+            val_save_failed     // save_trimmed_fail
         )
         ch_fastp_json     = FASTP.out.json
         ch_fastplong_json = FASTPLONG.out.json
@@ -107,10 +107,10 @@ workflow FASTQ_TRIM_MERGE {
     emit:
     reads          = ch_merged          // channel: [ val(meta), val(read_type), path(reads) ], one per sample
     merged         = CAT_FASTQ.out.reads // channel: [ val(meta), path(reads) ], multi-run samples only
-    trimmed        = ch_trimmed         // channel: [ val(meta), path(reads) ], per run (empty with skip_trim)
+    trimmed        = ch_trimmed         // channel: [ val(meta), path(reads) ], per run (empty with val_skip_trim)
     fastp_json     = ch_fastp_json      // channel: [ val(meta), path(json) ], per short-read run
     fastplong_json = ch_fastplong_json  // channel: [ val(meta), path(json) ], per long-read run
-    fastp_fail     = ch_fastp_fail      // channel: [ val(meta), path(reads) ], with save_failed
-    fastplong_fail = ch_fastplong_fail  // channel: [ val(meta), path(reads) ], with save_failed
-    falco_txt      = ch_falco_txt       // channel: [ val(meta), path(txt) ], with run_falco
+    fastp_fail     = ch_fastp_fail      // channel: [ val(meta), path(reads) ], with val_save_failed
+    fastplong_fail = ch_fastplong_fail  // channel: [ val(meta), path(reads) ], with val_save_failed
+    falco_txt      = ch_falco_txt       // channel: [ val(meta), path(txt) ], with val_run_falco
 }

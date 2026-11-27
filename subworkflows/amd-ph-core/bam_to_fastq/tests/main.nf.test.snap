@@ -1,0 +1,124 @@
+{
+    "layout from the records: unaligned, aligned, single-end, orphans": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "aligned",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "aligned_1.fq.gz",
+                            2000,
+                            "d60f50e5d7871df6eb851fd74817a63d"
+                        ],
+                        [
+                            "aligned_2.fq.gz",
+                            2000,
+                            "d60f50e5d7871df6eb851fd74817a63d"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "orphans",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "orphans_1.fq.gz",
+                            1900,
+                            "c833d878cf85c8d82354c79e1fe5de14"
+                        ],
+                        [
+                            "orphans_2.fq.gz",
+                            1900,
+                            "c833d878cf85c8d82354c79e1fe5de14"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "single",
+                        "single_end": true
+                    },
+                    [
+                        "single_other.fq.gz",
+                        100,
+                        "2f386eb997014881cb2ea96f67a57898"
+                    ]
+                ],
+                [
+                    {
+                        "id": "unaligned",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "unaligned_1.fq.gz",
+                            2000,
+                            "d60f50e5d7871df6eb851fd74817a63d"
+                        ],
+                        [
+                            "unaligned_2.fq.gz",
+                            2000,
+                            "d60f50e5d7871df6eb851fd74817a63d"
+                        ]
+                    ]
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "aligned",
+                        "single_end": false
+                    },
+                    [
+                        
+                    ],
+                    0
+                ],
+                [
+                    {
+                        "id": "orphans",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "orphans_singleton.fq.gz",
+                            100,
+                            "96e905ce4969ca395a812f7e66bd2d23"
+                        ]
+                    ],
+                    100
+                ],
+                [
+                    {
+                        "id": "single",
+                        "single_end": true
+                    },
+                    [
+                        
+                    ],
+                    0
+                ],
+                [
+                    {
+                        "id": "unaligned",
+                        "single_end": false
+                    },
+                    [
+                        
+                    ],
+                    0
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:15:20.191882743",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

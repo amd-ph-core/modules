@@ -21,21 +21,21 @@ include { RASUSA_READS     } from '../../../modules/amd-ph-core/rasusa/reads/mai
 workflow QQQ_READ_PREP {
 
     take:
-    ch_runs         // channel: [ val(meta), val(sample), val(read_type), path(reads) ], one per samplesheet run.
-                    //          reads: FASTQ(s), or one BAM (named *.bam), whose layout is read from it.
-                    //          sample = [ id, run, runs ] as FASTQ_TRIM_MERGE takes it, plus for a sample with
-                    //          BAM runs: bam_runs (how many of its runs are BAMs) and orphan_id (the sample
-                    //          its orphans become with keep_orphans).
-    keep_orphans    // value:   true to keep a paired BAM's orphans as the sample orphan_id
-    run_falco       // value:   FASTQ_TRIM_MERGE
-    skip_trim       // value:   FASTQ_TRIM_MERGE
-    save_failed     // value:   FASTQ_TRIM_MERGE
-    rrna_ref        // value:   rRNA reference FASTA for bbduk, or [] to skip rRNA depletion
-    dehoster        // value:   FASTQ_DEHOST
-    host_index      // value:   FASTQ_DEHOST
-    host_index_name // value:   FASTQ_DEHOST
-    max_reads       // value:   downsample each sample to this many reads (pairs), or 0/null for none
-    seed            // value:   rasusa's seed
+    ch_runs             // channel: [ val(meta), val(sample), val(read_type), path(reads) ], one per samplesheet run.
+                        //          reads: FASTQ(s), or one BAM (named *.bam), whose layout is read from it.
+                        //          sample = [ id, run, runs ] as FASTQ_TRIM_MERGE takes it, plus for a sample with
+                        //          BAM runs: bam_runs (how many of its runs are BAMs) and orphan_id (the sample
+                        //          its orphans become with val_keep_orphans).
+    val_keep_orphans    // value:   true to keep a paired BAM's orphans as the sample orphan_id
+    val_run_falco       // value:   FASTQ_TRIM_MERGE
+    val_skip_trim       // value:   FASTQ_TRIM_MERGE
+    val_save_failed     // value:   FASTQ_TRIM_MERGE
+    val_rrna_ref        // value:   rRNA reference FASTA for bbduk, or [] to skip rRNA depletion
+    val_dehoster        // value:   FASTQ_DEHOST
+    val_host_index      // value:   FASTQ_DEHOST
+    val_host_index_name // value:   FASTQ_DEHOST
+    val_max_reads       // value:   downsample each sample to this many reads (pairs), or 0/null for none
+    val_seed            // value:   rasusa's seed
 
     main:
     ch_by_format = ch_runs.branch { _meta, _sample, _read_type, reads ->
@@ -73,7 +73,7 @@ workflow QQQ_READ_PREP {
     // from the samplesheet), then the runs that had any become runs of orphan_id.
     // How many that is exists only once the BAMs are read, so it is counted here.
     ch_orphan_runs = channel.empty()
-    if (keep_orphans) {
+    if (val_keep_orphans) {
         ch_orphan_runs = ch_conversions
             .map { _meta, sample, read_type, bam, found -> [ groupKey(sample.id, sample.bam_runs), sample, read_type, bam, found ] }
             .groupTuple(by: 0)
@@ -108,9 +108,9 @@ workflow QQQ_READ_PREP {
     //
     FASTQ_TRIM_MERGE(
         ch_fastq_runs,
-        run_falco,
-        skip_trim,
-        save_failed
+        val_run_falco,
+        val_skip_trim,
+        val_save_failed
     )
 
     //
@@ -122,10 +122,10 @@ workflow QQQ_READ_PREP {
     ch_rrna_mqc     = channel.empty()
     ch_rrna_log     = channel.empty()
     ch_predehost    = FASTQ_TRIM_MERGE.out.reads
-    if (rrna_ref) {
+    if (val_rrna_ref) {
         BBMAP_BBDUK(
             FASTQ_TRIM_MERGE.out.reads.map { meta, _read_type, reads -> [ meta, reads ] },
-            rrna_ref
+            val_rrna_ref
         )
         ch_rrna_reads   = BBMAP_BBDUK.out.reads
         ch_rrna_matched = BBMAP_BBDUK.out.matched
@@ -141,42 +141,42 @@ workflow QQQ_READ_PREP {
     //
     // 4. Host removal
     //
-    FASTQ_DEHOST( ch_predehost, dehoster, host_index, host_index_name )
+    FASTQ_DEHOST( ch_predehost, val_dehoster, val_host_index, val_host_index_name )
 
     //
     // 5. Downsampling: all samples or none, on the flag alone
     //
     ch_downsampled = channel.empty()
     ch_final       = FASTQ_DEHOST.out.reads
-    if (max_reads) {
-        RASUSA_READS( FASTQ_DEHOST.out.reads, max_reads, seed )
+    if (val_max_reads) {
+        RASUSA_READS( FASTQ_DEHOST.out.reads, val_max_reads, val_seed )
         ch_downsampled = RASUSA_READS.out.reads
         ch_final       = RASUSA_READS.out.reads
     }
 
     emit:
-    reads           = ch_final                       // [ meta, reads ], each sample's final reads
-    runs            = ch_fastq_runs                  // [ meta, sample, read_type, reads ], every run as FASTQ (BAMs converted)
-    run_sources     = ch_run_sources                 // [ run id, [ paths ] ], what each run's samplesheet row named
-    conversions     = ch_conversions.map { meta, sample, _read_type, bam, found -> [ meta, sample, bam, found ] }
-                                                     // [ meta, sample, bam, [ layout, orphan_files, orphan_reads ] ], per BAM run
-    trimmed         = FASTQ_TRIM_MERGE.out.trimmed
-    fastp_json      = FASTQ_TRIM_MERGE.out.fastp_json
-    fastplong_json  = FASTQ_TRIM_MERGE.out.fastplong_json
-    fastp_fail      = FASTQ_TRIM_MERGE.out.fastp_fail
-    fastplong_fail  = FASTQ_TRIM_MERGE.out.fastplong_fail
-    falco_txt       = FASTQ_TRIM_MERGE.out.falco_txt
-    merged          = FASTQ_TRIM_MERGE.out.merged
-    rrna_reads      = ch_rrna_reads
-    rrna_matched    = ch_rrna_matched
-    rrna_stats      = ch_rrna_stats
-    rrna_stats_mqc  = ch_rrna_mqc
-    rrna_log        = ch_rrna_log
-    dehosted        = FASTQ_DEHOST.out.reads
-    dehost_json     = FASTQ_DEHOST.out.json
-    host_bam        = FASTQ_DEHOST.out.host_bam
-    host_bai        = FASTQ_DEHOST.out.host_bai
-    host_stats      = FASTQ_DEHOST.out.host_stats
-    host_reads      = FASTQ_DEHOST.out.host_reads
-    downsampled     = ch_downsampled
+    reads          = ch_final                       // channel: [ val(meta), path(reads) ], each sample's final reads
+    runs           = ch_fastq_runs                  // channel: [ val(meta), val(sample), val(read_type), path(reads) ], every run as FASTQ (BAMs converted, kept orphans added)
+    run_sources    = ch_run_sources                 // channel: [ val(run_id), [ path(file) ] ], the FASTQs or BAM each run's samplesheet row named
+    conversions    = ch_conversions.map { meta, sample, _read_type, bam, found -> [ meta, sample, bam, found ] }
+                                                    // channel: [ val(meta), val(sample), path(bam), val([ layout, orphan_files, orphan_reads ]) ], per BAM run
+    trimmed        = FASTQ_TRIM_MERGE.out.trimmed        // channel: [ val(meta), path(reads) ], per run; empty with val_skip_trim
+    fastp_json     = FASTQ_TRIM_MERGE.out.fastp_json     // channel: [ val(meta), path(json) ], per short-read run
+    fastplong_json = FASTQ_TRIM_MERGE.out.fastplong_json // channel: [ val(meta), path(json) ], per long-read run
+    fastp_fail     = FASTQ_TRIM_MERGE.out.fastp_fail     // channel: [ val(meta), path(reads) ], per short-read run, with val_save_failed
+    fastplong_fail = FASTQ_TRIM_MERGE.out.fastplong_fail // channel: [ val(meta), path(reads) ], per long-read run, with val_save_failed
+    falco_txt      = FASTQ_TRIM_MERGE.out.falco_txt      // channel: [ val(meta), path(txt) ], per run, with val_run_falco
+    merged         = FASTQ_TRIM_MERGE.out.merged         // channel: [ val(meta), path(reads) ], multi-run samples only
+    rrna_reads     = ch_rrna_reads                  // channel: [ val(meta), path(reads) ], per sample, rRNA removed; empty without val_rrna_ref
+    rrna_matched   = ch_rrna_matched                // channel: [ val(meta), path(reads) ], the reads that matched the rRNA reference
+    rrna_stats     = ch_rrna_stats                  // channel: [ val(meta), path(txt) ], bbduk's match statistics
+    rrna_stats_mqc = ch_rrna_mqc                    // channel: [ val(meta), path(txt) ], bbduk's summary, for MultiQC
+    rrna_log       = ch_rrna_log                    // channel: [ val(meta), path(log) ], bbduk's log
+    dehosted       = FASTQ_DEHOST.out.reads         // channel: [ val(meta), path(reads) ], host reads removed, or for sra_scrubber without -x kept with their bases masked as N; unchanged for none
+    dehost_json    = FASTQ_DEHOST.out.json          // channel: [ val(meta), path(json) ], the dehoster's report; empty for none
+    host_bam       = FASTQ_DEHOST.out.host_bam      // channel: [ val(meta), path(bam) ], hostess with --bam only
+    host_bai       = FASTQ_DEHOST.out.host_bai      // channel: [ val(meta), path(bai) ], with host_bam
+    host_stats     = FASTQ_DEHOST.out.host_stats    // channel: [ val(meta), path(stats) ], samtools stats of the host BAM
+    host_reads     = FASTQ_DEHOST.out.host_reads    // channel: [ val(meta), path(reads) ], sra_scrubber's removed reads, with -r
+    downsampled    = ch_downsampled                 // channel: [ val(meta), path(reads) ], per sample; empty without val_max_reads
 }

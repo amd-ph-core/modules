@@ -26,19 +26,19 @@ include { HOSTILE_CLEAN as HOSTILE_CLEAN_LONG          } from '../../../modules/
 workflow FASTQ_DEHOST {
 
     take:
-    ch_reads        // channel: [ val(meta), val(read_type), path(reads) ], read_type 'short' or 'long'
-    dehoster        // value:   deacon | sra_scrubber | hostess | hostile | none
-    host_index      // value:   the dehoster's prebuilt index: a deacon .idx, a scrubber .db, or for
-                    //          hostile/hostess a directory holding the index, or its files
-                    //          (<name>.*.bt2 for short reads, <name>.mmi for long); [] for none
-    host_index_name // value:   hostile/hostess: the index name (bowtie2 prefix, .mmi basename); '' otherwise
+    ch_reads            // channel: [ val(meta), val(read_type), path(reads) ], read_type 'short' or 'long'
+    val_dehoster        // value:   deacon | sra_scrubber | hostess | hostile | none
+    val_host_index      // value:   the dehoster's prebuilt index: a deacon .idx, a scrubber .db, or for
+                        //          hostile/hostess a directory holding the index, or its files
+                        //          (<name>.*.bt2 for short reads, <name>.mmi for long); [] for none
+    val_host_index_name // value:   hostile/hostess: the index name (bowtie2 prefix, .mmi basename); '' otherwise
 
     main:
-    if (!(dehoster in ['deacon', 'sra_scrubber', 'hostess', 'hostile', 'none'])) {
-        error "FASTQ_DEHOST: unknown dehoster '${dehoster}'; expected deacon, sra_scrubber, hostess, hostile or none"
+    if (!(val_dehoster in ['deacon', 'sra_scrubber', 'hostess', 'hostile', 'none'])) {
+        error "FASTQ_DEHOST: unknown dehoster '${val_dehoster}'; expected deacon, sra_scrubber, hostess, hostile or none"
     }
-    if (dehoster != 'none' && !host_index) {
-        error "FASTQ_DEHOST: dehoster '${dehoster}' needs a prebuilt host index"
+    if (val_dehoster != 'none' && !val_host_index) {
+        error "FASTQ_DEHOST: dehoster '${val_dehoster}' needs a prebuilt host index"
     }
 
     ch_dehosted   = channel.empty()
@@ -49,16 +49,16 @@ workflow FASTQ_DEHOST {
     ch_host_reads = channel.empty()
     ch_fastq      = ch_reads.map { meta, _read_type, reads -> [ meta, reads ] }
 
-    if (dehoster == 'none') {
+    if (val_dehoster == 'none') {
         ch_dehosted = ch_fastq
     }
-    else if (dehoster == 'deacon') {
-        DEACON_FILTER( ch_fastq, channel.value(host_index) )
+    else if (val_dehoster == 'deacon') {
+        DEACON_FILTER( ch_fastq, channel.value(val_host_index) )
         ch_dehosted = DEACON_FILTER.out.fastq
         ch_json     = DEACON_FILTER.out.json
     }
-    else if (dehoster == 'sra_scrubber') {
-        SRAHUMANSCRUBBER_SCRUB( ch_fastq, channel.value(host_index) )
+    else if (val_dehoster == 'sra_scrubber') {
+        SRAHUMANSCRUBBER_SCRUB( ch_fastq, channel.value(val_host_index) )
         ch_dehosted   = SRAHUMANSCRUBBER_SCRUB.out.fastq
         ch_json       = SRAHUMANSCRUBBER_SCRUB.out.json
         ch_host_reads = SRAHUMANSCRUBBER_SCRUB.out.removed
@@ -80,13 +80,13 @@ workflow FASTQ_DEHOST {
         // short-read task never stages the minimap2 index (7.7 GB for the human
         // one) and a long-read task never stages the bowtie2 one. A directory is
         // handed to both as it is.
-        def index_files = host_index instanceof List ? host_index : null
-        ch_ref_short = channel.value([ host_index_name,
-            index_files ? index_files.findAll { f -> f.name.endsWith('.bt2') } : host_index ])
-        ch_ref_long  = channel.value([ host_index_name,
-            index_files ? index_files.find { f -> f.name.endsWith('.mmi') } : host_index ])
+        def index_files = val_host_index instanceof List ? val_host_index : null
+        ch_ref_short = channel.value([ val_host_index_name,
+            index_files ? index_files.findAll { f -> f.name.endsWith('.bt2') } : val_host_index ])
+        ch_ref_long  = channel.value([ val_host_index_name,
+            index_files ? index_files.find { f -> f.name.endsWith('.mmi') } : val_host_index ])
 
-        if (dehoster == 'hostess') {
+        if (val_dehoster == 'hostess') {
             HOSTESS_SHORT( ch_short, ch_ref_short, 'bowtie2' )
             HOSTESS_LONG ( ch_long,  ch_ref_long,  'minimap2' )
             ch_dehosted   = HOSTESS_SHORT.out.fastq.mix(HOSTESS_LONG.out.fastq)
@@ -104,7 +104,7 @@ workflow FASTQ_DEHOST {
     }
 
     emit:
-    reads      = ch_dehosted   // channel: [ val(meta), path(reads) ], host reads removed (unchanged for none)
+    reads      = ch_dehosted   // channel: [ val(meta), path(reads) ], host reads removed, or for sra_scrubber without -x kept with their bases masked as N; unchanged for none
     json       = ch_json       // channel: [ val(meta), path(json) ], the dehoster's report; empty for none
     host_bam   = ch_host_bam   // channel: [ val(meta), path(bam) ], hostess with --bam only
     host_bai   = ch_host_bai   // channel: [ val(meta), path(bai) ]

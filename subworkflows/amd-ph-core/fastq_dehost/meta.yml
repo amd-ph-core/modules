@@ -25,17 +25,17 @@ input:
         Structure: [ val(meta), val(read_type), path(reads) ], read_type 'short' or 'long'.
         read_type matters to hostess and hostile only (bowtie2 or minimap2).
       pattern: "*.{fastq,fq}.gz"
-  - dehoster:
+  - val_dehoster:
       type: string
       description: "deacon, sra_scrubber, hostess, hostile or none."
-  - host_index:
+  - val_host_index:
       type: file
       description: |
         The dehoster's prebuilt index: a deacon .idx, a scrubber .db, or for hostile and
         hostess a directory holding the index or the index files themselves
         (<name>.*.bt2 for short reads, <name>.mmi for long reads). Given the files,
         each aligner stages only its own. [] for none.
-  - host_index_name:
+  - val_host_index_name:
       type: string
       description: "hostile and hostess only: the index name (the bowtie2 prefix and the .mmi basename). '' otherwise."
 output:

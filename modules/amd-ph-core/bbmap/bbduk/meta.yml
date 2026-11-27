@@ -58,14 +58,14 @@ input:
           Groovy Map containing sample information, e.g. `[ id:'sample1', single_end:false ]`
     - reads:
         type: file
-        description: One FASTQ file for single-end input, two for paired-end.
+        description: Mandatory. One FASTQ file for single-end input, two for paired-end.
         pattern: "*.{fq,fastq}{,.gz}"
         ontologies:
           - edam: http://edamontology.org/format_1930 # FASTQ
   - ref:
       type: file
       description: |
-        FASTA of the sequence to match against. For ribodepletion this is the rRNA
+        Mandatory. FASTA of the sequence to match against. For ribodepletion this is the rRNA
         panel; it may be as redundant as it likes, which is the point.
       pattern: "*.{fa,fasta}{,.gz}"
       ontologies: []

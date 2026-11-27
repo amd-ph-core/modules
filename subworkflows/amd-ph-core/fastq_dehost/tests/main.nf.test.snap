@@ -1,0 +1,114 @@
+{
+    "deacon - prebuilt index - mixed paired-end": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "mixed.clean_1.fq.gz",
+                            50,
+                            "3f9b374341f49d42d6e4d6b0026eae9f"
+                        ],
+                        [
+                            "mixed.clean_2.fq.gz",
+                            50,
+                            "3f9b374341f49d42d6e4d6b0026eae9f"
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:15:49.63746421",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sra_scrubber - prebuilt database - mixed paired-end - remove": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "mixed.clean_1.fq.gz",
+                            50,
+                            "3f9b374341f49d42d6e4d6b0026eae9f"
+                        ],
+                        [
+                            "mixed.clean_2.fq.gz",
+                            50,
+                            "3f9b374341f49d42d6e4d6b0026eae9f"
+                        ]
+                    ]
+                ]
+            ],
+            [
+                
+            ]
+        ],
+        "timestamp": "2026-11-27T09:15:53.703724484",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "hostile - long reads, minimap2 against a prebuilt .mmi": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "long",
+                        "single_end": true
+                    },
+                    [
+                        "sample1_R1.clean.fastq.gz",
+                        178,
+                        "7c8cbd7bf353927af7df8749fd91d171"
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:16:06.801399711",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "hostile - short reads, prebuilt bowtie2 index - mixed paired-end": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "mixed",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "mixed_1.clean_1.fastq.gz",
+                            50,
+                            "e5a0e78753de61b23e38f1ebfc714e09"
+                        ],
+                        [
+                            "mixed_2.clean_2.fastq.gz",
+                            50,
+                            "d444df908f8f5f61918d7580fe92ee85"
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:16:00.799910187",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
