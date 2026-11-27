@@ -10,8 +10,7 @@ process BBMAP_BBDUK {
     // bbduk output MultiQC can actually parse. Installing both into one pipeline
     // would collide on the process name; install this one.
     conda "${moduleDir}/environment.yml"
-    // 40.05, and not the newest build in AMDP ECR, which is
-    // oamd-bio-bbtools:39.76_3ceaa9c_v3. 39.76 and 39.91 both carry a race in
+    // 40.05, and not an earlier 39.x build. 39.76 and 39.91 both carry a race in
     // the paired read streamer that aborts a run on two FASTQs:
     //
     //   java.lang.AssertionError: List size mismatch: 1149 vs 1148
@@ -21,9 +20,8 @@ process BBMAP_BBDUK {
     // output at 2,304 of 535,442 reads and then exited non-zero; bbduk.sh runs
     // java with -ea, so the assertion is always live. 40.04 and 40.05 both
     // process the same input cleanly at one and at two threads, and produce
-    // byte-identical stats files on a 38.8M-read library. ECR holds no 40.x
-    // build at all and should be rebuilt at 40.05 before an AMDP config points
-    // this module back at it.
+    // byte-identical stats files on a 38.8M-read library. A deployment that maps
+    // this module to its own image should use 40.04 or later.
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
         ? 'https://depot.galaxyproject.org/singularity/bbmap:40.05--h09cc210_0'
         : 'biocontainers/bbmap:40.05--h09cc210_0'}"

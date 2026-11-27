@@ -5,8 +5,8 @@ process FADSO {
     // Upstream (hkuwahara/sleaping) publishes no releases or tags, so the
     // container is built from a pinned commit and there is no conda package.
     // No public image exists: fadso has no conda package and no BioContainer,
-    // and upstream publishes no releases. This is the AMDP ECR repository being
-    // created for it; consumers override the registry via their own config.
+    // and upstream publishes no releases. The name is that of a private image;
+    // consumers map it, and set the registry, in their own config.
     container 'oamd-bio-fadso:20230810_1fedb59_v0'
 
     input:

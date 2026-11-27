@@ -122,7 +122,7 @@ topics:
           type: eval
           description: The expression to obtain the version of the tool
 authors:
-  - "@smagala (James Smagala, gpa1@cdc.gov)"
+  - "@smagala"
 maintainers:
-  - "@smagala (James Smagala, gpa1@cdc.gov)"
-  - "@tstark-cdc (Thomas Stark, ynh4@cdc.gov)"
+  - "@smagala"
+  - "@tstark-cdc"

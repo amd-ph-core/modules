@@ -26,8 +26,8 @@ tools:
       identifier: ""
   - genome_report.py:
       description: Tabulates per-genome read count, length, percent called, identity and aligned fraction from the per-target alignments. Ships in this module's resources/usr/bin.
-      homepage: https://github.com/cdcent/oamd-bio-ouroboros
-      documentation: https://github.com/cdcent/oamd-bio-ouroboros
+      homepage: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/genomereport
+      documentation: https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/ouroboros/genomereport
       licence:
         - MIT
       identifier: ""

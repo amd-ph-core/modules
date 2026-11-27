@@ -18,7 +18,7 @@ description: |
   rather than scrub.sh: the bioconda build of 2.2.1 rewrites scrub.sh and drops the pair flag from
   the FASTA conversion, so with `-s` it numbers spots per read, cuts per pair, and removes the wrong
   reads from any sample that is only partly human. Passing the flag to both helpers gives the
-  release's behaviour in the BioContainer and the AMDP image alike.
+  release's behaviour in the BioContainer and in images that run the release scripts alike.
 keywords:
   - dehosting
   - host depletion
@@ -173,7 +173,7 @@ topics:
           type: eval
           description: The expression to obtain the version of the tool
 authors:
-  - "@smagala (James Smagala, gpa1@cdc.gov)"
+  - "@smagala"
 maintainers:
-  - "@smagala (James Smagala, gpa1@cdc.gov)"
-  - "@tstark-cdc (Thomas Stark, ynh4@cdc.gov)"
+  - "@smagala"
+  - "@tstark-cdc"

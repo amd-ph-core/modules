@@ -10,7 +10,7 @@ process BINMAN_ASSIGNBINS {
     tag "${meta.id}"
     label 'process_medium'
 
-    // Public, and deliberately not the AMDP `oamd-bio-python:3.12-orb` image this module used
+    // Public, and deliberately not the private Python image this module used
     // while it lived in the binman pipeline. The script is pure standard library -- argparse,
     // collections, csv, gzip, pathlib, shlex -- so it has no claim on a bespoke image, and a
     // module offered to other pipelines should not drag an ECR dependency along with it. The

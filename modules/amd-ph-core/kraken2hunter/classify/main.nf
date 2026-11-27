@@ -23,7 +23,9 @@ process KRAKEN2HUNTER_CLASSIFY {
     tag "${meta.id}"
     label 'process_high'
 
-    container '025066257930.dkr.ecr.us-east-1.amazonaws.com/oamd-bio-kraken2-hunter:2.17.1-23af0bd'
+    // A private image (kraken2-hunter has no public one); consumers map the name, and set
+    // the registry, in their own config.
+    container 'oamd-bio-kraken2-hunter:2.17.1-23af0bd'
 
     input:
     tuple val(meta), path(reads)

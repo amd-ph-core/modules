@@ -69,7 +69,7 @@
                     [
                         "KRAKEN2HUNTER_CLASSIFY",
                         "kraken2-hunter",
-                        "2.17.1"
+                        ""
                     ]
                 ],
                 "bin_manifest": [
@@ -139,12 +139,12 @@
                     [
                         "KRAKEN2HUNTER_CLASSIFY",
                         "kraken2-hunter",
-                        "2.17.1"
+                        ""
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-11-01T15:46:58.934616245",
+        "timestamp": "2026-11-27T12:22:41.679408363",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -220,7 +220,7 @@
                     [
                         "KRAKEN2HUNTER_CLASSIFY",
                         "kraken2-hunter",
-                        "2.17.1"
+                        ""
                     ]
                 ],
                 "bin_manifest": [
@@ -290,12 +290,12 @@
                     [
                         "KRAKEN2HUNTER_CLASSIFY",
                         "kraken2-hunter",
-                        "2.17.1"
+                        ""
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-11-01T15:46:55.532357237",
+        "timestamp": "2026-11-27T12:22:38.181996737",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
