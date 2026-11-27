@@ -9,9 +9,8 @@ nextflow_process {
     tag "rasusa"
     tag "rasusa/reads"
 
-    // rasusa is on bioconda and the module pins the BioContainer at the same
-    // version AMDP ECR carries, so the real script path runs here rather than
-    // being left to the stub. The test inputs hold 100 reads each.
+    // rasusa is on bioconda and the module pins the BioContainer, so the real
+    // script path runs here rather than being left to the stub. The test inputs hold 100 reads each.
 
     test("sarscov2 - fastq - paired_end - downsample to 10 pairs") {
 

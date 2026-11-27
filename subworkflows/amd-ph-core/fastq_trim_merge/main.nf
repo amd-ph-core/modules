@@ -13,7 +13,7 @@
 //
 include { FALCO     } from '../../../modules/amd-ph-core/falco/main'
 include { FASTP     } from '../../../modules/nf-core/fastp/main'
-include { FASTPLONG } from '../../../modules/nf-core/fastplong/main'
+include { FASTPLONG } from '../../../modules/amd-ph-core/fastplong/main'
 include { CAT_FASTQ } from '../../../modules/nf-core/cat/fastq/main'
 
 workflow FASTQ_TRIM_MERGE {
@@ -69,7 +69,7 @@ workflow FASTQ_TRIM_MERGE {
 
         // The trimmers drop the sample and read type, so they rejoin on the run's meta.
         ch_processed = ch_trimmed
-            .join(ch_runs.map { meta, sample, read_type, _reads -> [ meta, sample, read_type ] })
+            .join(ch_runs.map { meta, sample, read_type, _reads -> [ meta, sample, read_type ] }, failOnMismatch: true, failOnDuplicate: true)
             .map { meta, reads, sample, read_type -> [ meta, sample, read_type, reads ] }
     }
 
@@ -100,7 +100,7 @@ workflow FASTQ_TRIM_MERGE {
     CAT_FASTQ( ch_grouped.multiple.map { meta, _read_type, runs -> [ meta, runs.flatten() ] } )
 
     ch_merged = CAT_FASTQ.out.reads
-        .join(ch_grouped.multiple.map { meta, read_type, _runs -> [ meta, read_type ] })
+        .join(ch_grouped.multiple.map { meta, read_type, _runs -> [ meta, read_type ] }, failOnMismatch: true, failOnDuplicate: true)
         .map { meta, reads, read_type -> [ meta, read_type, reads ] }
         .mix(ch_grouped.single.map { meta, read_type, runs -> [ meta, read_type, runs[0] ] })
 

@@ -21,6 +21,7 @@ process DEACON_FILTER {
 
     script:
     def args   = task.ext.args ?: ''
+    def args2  = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     // Sorted so mate 1 is always first: the glob that stages the reads makes
     // no ordering promise, and passing them the wrong way round would swap the
@@ -43,8 +44,15 @@ process DEACON_FILTER {
     def out_flags    = ['-o', '-O']
     def gz_args      = (0..<outputs.size()).collect { i -> "${out_flags[i]} ${outputs[i]}" }.join(' ')
     def fifo_args    = (0..<fifos.size()).collect { i -> "${out_flags[i]} ${fifos[i]}" }.join(' ')
+    // On the bgzip path the task's CPUs are shared, not handed to every program:
+    // half to deacon, half split across the bgzip streams (one per mate). Giving
+    // each its own task.cpus ran three times as many threads as CPUs for a pair.
+    // The output does not depend on the split: BGZF blocks are the same at any
+    // thread count, and deacon runs --ordered.
+    def bgzip_cpus   = Math.max(1, task.cpus.intdiv(2 * outputs.size()))
+    def deacon_cpus  = Math.max(1, task.cpus - bgzip_cpus * outputs.size())
     def consumers    = (0..<outputs.size()).collect { i ->
-        "bgzip --threads ${task.cpus} -c < ${fifos[i]} > ${outputs[i]} &\n        bgzip_pid_${i}=\$!"
+        "bgzip ${args2} --threads ${bgzip_cpus} -c < ${fifos[i]} > ${outputs[i]} &\n        bgzip_pid_${i}=\$!"
     }.join('\n        ')
     def waits        = (0..<outputs.size()).collect { i -> "wait \$bgzip_pid_${i}" }.join('\n        ')
     """
@@ -53,9 +61,9 @@ process DEACON_FILTER {
     # tools can index it and read it in parallel. It is also what hostess
     # produces, through samtools, so the two dehosters emit the same format.
     #
-    # Not every image carries bgzip — the public BioContainer does not, the AMDP
-    # image does — so it is used when present and deacon's own parallel gzip
-    # writer is the fallback. The reads are identical either way.
+    # Not every image carries bgzip (the public BioContainer does not), so it is
+    # used when present and deacon's own parallel gzip writer, with all the
+    # task's CPUs, is the fallback. The reads are identical either way.
     #
     # The bgzip path streams through FIFOs rather than writing the FASTQ out and
     # compressing it afterwards, which would put the whole uncompressed sample
@@ -64,12 +72,12 @@ process DEACON_FILTER {
     run_deacon() {
         deacon filter \\
             ${args} \\
-            --threads ${task.cpus} \\
+            --threads "\$1" \\
             --deplete \\
             --summary ${prefix}.deacon.json \\
             ${index} \\
             ${reads_cmd} \\
-            "\$@"
+            "\${@:2}"
     }
 
     if command -v bgzip > /dev/null 2>&1; then
@@ -79,10 +87,10 @@ process DEACON_FILTER {
         trap 'rm -f ${fifos.join(' ')}; jobs -p | xargs -r kill 2>/dev/null || true' EXIT
         mkfifo ${fifos.join(' ')}
         ${consumers}
-        run_deacon ${fifo_args}
+        run_deacon ${deacon_cpus} ${fifo_args}
         ${waits}
     else
-        run_deacon ${gz_args}
+        run_deacon ${task.cpus} ${gz_args}
     fi
     """
 

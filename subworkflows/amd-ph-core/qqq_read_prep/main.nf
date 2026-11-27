@@ -53,7 +53,7 @@ workflow QQQ_READ_PREP {
 
     ch_converted = BAM_TO_FASTQ.out.reads
         .map { meta, reads -> [ meta.id, meta, reads ] }
-        .join(ch_bam_runs)
+        .join(ch_bam_runs, failOnMismatch: true, failOnDuplicate: true)
         .map { _id, meta, reads, sample, read_type, _bam ->
             if (read_type == 'long' && !meta.single_end) {
                 error "QQQ_READ_PREP: sample '${sample.id}' is long-read but its BAM holds read pairs. Long-read samples must be single-end."
@@ -64,7 +64,7 @@ workflow QQQ_READ_PREP {
     // Per BAM run: what the conversion found, for the run report and the orphan sample.
     ch_conversions = BAM_TO_FASTQ.out.orphans
         .map { meta, files, n_orphans -> [ meta.id, meta, files, n_orphans ] }
-        .join(ch_bam_runs)
+        .join(ch_bam_runs, failOnMismatch: true, failOnDuplicate: true)
         .map { _id, meta, files, n_orphans, sample, read_type, bam ->
             [ meta, sample, read_type, bam, [ layout: meta.single_end ? 'single-end' : 'paired-end', orphan_files: files, orphan_reads: n_orphans ] ]
         }
@@ -134,7 +134,7 @@ workflow QQQ_READ_PREP {
         ch_rrna_log     = BBMAP_BBDUK.out.log
         // bbduk drops the read type, which the dehoster needs; it rejoins on meta.
         ch_predehost = BBMAP_BBDUK.out.reads
-            .join(FASTQ_TRIM_MERGE.out.reads.map { meta, read_type, _reads -> [ meta, read_type ] })
+            .join(FASTQ_TRIM_MERGE.out.reads.map { meta, read_type, _reads -> [ meta, read_type ] }, failOnMismatch: true, failOnDuplicate: true)
             .map { meta, reads, read_type -> [ meta, read_type, reads ] }
     }
 

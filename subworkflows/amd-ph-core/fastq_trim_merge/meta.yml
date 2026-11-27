@@ -17,8 +17,7 @@ components:
   - falco
   - fastp:
       git_remote: https://github.com/nf-core/modules.git
-  - fastplong:
-      git_remote: https://github.com/nf-core/modules.git
+  - fastplong
   - cat/fastq:
       git_remote: https://github.com/nf-core/modules.git
 input:
