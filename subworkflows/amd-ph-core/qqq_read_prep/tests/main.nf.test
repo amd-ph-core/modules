@@ -13,6 +13,20 @@ nextflow_workflow {
     tag "bbmap/bbduk"
     tag "rasusa/reads"
 
+    // Each FASTQ in a channel item as [ name, reads, md5 of its sorted read names ], for the
+    // snapshot: it records which reads were kept, whatever order a multithreaded tool wrote
+    // them in. Meta maps and counts pass through unchanged.
+    def fastqFile = { v ->
+        if (!(v instanceof CharSequence || v instanceof java.nio.file.Path) || !(v.toString() =~ /\.f(ast)?q(\.gz)?$/)) {
+            return v
+        }
+        def f      = new File(v.toString())
+        def stream = v.toString().endsWith('.gz') ? new java.util.zip.GZIPInputStream(f.newInputStream()) : f.newInputStream()
+        def names  = stream.newReader().readLines().collate(4).collect { r -> r[0].tokenize(' \t')[0] }.sort()
+        [ f.name, names.size(), java.security.MessageDigest.getInstance('MD5').digest(names.join('\n').bytes).encodeHex().toString() ]
+    }
+    def fastqSummary = { item -> item.collect { v -> v instanceof List ? v.collect { x -> fastqFile(x) } : fastqFile(v) } }
+
     // Samples:
     //   A  two paired-end FASTQ runs (nf-core sarscov2 test and test2), merged
     //   B  one unaligned paired BAM with 100 orphan read 1s (bam_input/ubam_pe_orphans.bam:
@@ -68,6 +82,9 @@ nextflow_workflow {
                 { assert workflow.out.merged*.getAt(0)*.id == ['A'] },
                 { assert workflow.out.dehost_json.size() == 4 },
                 { assert workflow.out.rrna_reads.size() == 0 && workflow.out.downsampled.size() == 0 },
+                { assert snapshot(
+                    workflow.out.reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id }
+                ).match() },
             )
         }
     }
@@ -108,6 +125,9 @@ nextflow_workflow {
                 { assert workflow.out.downsampled*.getAt(0)*.id.sort() == ['A', 'C'] },
                 // under the cap: written out whole
                 { assert final_pairs == [ A: [100, 100], C: [100, 100] ] },
+                { assert snapshot(
+                    workflow.out.reads.collect { item -> fastqSummary(item) }.sort { item -> item[0].id }
+                ).match() },
             )
         }
     }

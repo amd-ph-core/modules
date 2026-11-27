@@ -39,18 +39,18 @@ input:
           `single_end` is not read.
     - input:
         type: file
-        description: BAM, SAM or CRAM file
+        description: Mandatory. BAM, SAM or CRAM file
         pattern: "*.{bam,cram,sam}"
   - - meta2:
         type: map
-        description: Groovy Map containing reference information, e.g. [ id:'genome' ]
+        description: Optional. Groovy Map containing reference information, e.g. [ id:'genome' ]; `[:]` for none
     - fasta:
         type: file
-        description: Reference FASTA, needed only to decode a CRAM
+        description: Optional. Reference FASTA, needed only to decode a CRAM; `[]` for none
         pattern: "*.{fa,fasta}"
     - fai:
         type: file
-        description: Index of the reference FASTA
+        description: Optional. Index of the reference FASTA; `[]` for none
         pattern: "*.fai"
 output:
   fastq:

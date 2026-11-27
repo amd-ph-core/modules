@@ -1,0 +1,118 @@
+{
+    "rRNA depletion and downsampling: every sample goes through rasusa": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "A",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "A_1.downsampled.fastq.gz",
+                            100,
+                            "2f386eb997014881cb2ea96f67a57898"
+                        ],
+                        [
+                            "A_2.downsampled.fastq.gz",
+                            100,
+                            "2f386eb997014881cb2ea96f67a57898"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "C",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "C_1.downsampled.fastq.gz",
+                            100,
+                            "2f386eb997014881cb2ea96f67a57898"
+                        ],
+                        [
+                            "C_2.downsampled.fastq.gz",
+                            100,
+                            "2f386eb997014881cb2ea96f67a57898"
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:16:53.376288955",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "FASTQ, BAM with orphans kept, long reads; deacon; no rRNA, no downsampling": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "A",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "A.clean_1.fq.gz",
+                            198,
+                            "00ab9fded3c995c441cf80136e764114"
+                        ],
+                        [
+                            "A.clean_2.fq.gz",
+                            198,
+                            "00ab9fded3c995c441cf80136e764114"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "B",
+                        "single_end": false
+                    },
+                    [
+                        [
+                            "B.clean_1.fq.gz",
+                            1900,
+                            "c833d878cf85c8d82354c79e1fe5de14"
+                        ],
+                        [
+                            "B.clean_2.fq.gz",
+                            1900,
+                            "c833d878cf85c8d82354c79e1fe5de14"
+                        ]
+                    ]
+                ],
+                [
+                    {
+                        "id": "B_orphans",
+                        "single_end": true
+                    },
+                    [
+                        "B_orphans.clean.fq.gz",
+                        100,
+                        "96e905ce4969ca395a812f7e66bd2d23"
+                    ]
+                ],
+                [
+                    {
+                        "id": "L",
+                        "single_end": true
+                    },
+                    [
+                        "L.clean.fq.gz",
+                        27686,
+                        "094097141a1a07d828a70e4e14a0169b"
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-11-27T09:16:47.118594106",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

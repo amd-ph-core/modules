@@ -39,6 +39,18 @@ tools:
         - "Public Domain"
       identifier: ""
       args_id: "$args"
+  - bgzip:
+      description: |
+        Block-gzip compression from HTSlib. Used for the output FASTQs only when the
+        image provides it; plain gzip otherwise. It takes no arguments.
+      homepage: "https://www.htslib.org"
+      documentation: "https://www.htslib.org/doc/bgzip.html"
+      tool_dev_url: "https://github.com/samtools/htslib"
+      doi: "10.1093/gigascience/giab007"
+      licence:
+        - "MIT"
+      identifier: "biotools:htslib"
+      args_id: ""
 input:
   - - meta:
         type: map
@@ -48,14 +60,14 @@ input:
     - reads:
         type: file
         description: |
-          One FASTQ file for single-end or long reads, or two for paired-end, gzipped or not. Paired
+          Mandatory. One FASTQ file for single-end or long reads, or two for paired-end, gzipped or not. Paired
           reads are sorted by name so mate 1 is always first, and must hold the same number of records.
         pattern: "*.{fastq,fq}{,.gz}"
         ontologies:
           - edam: "http://edamontology.org/format_1930" # FASTQ
   - db:
       type: file
-      description: STAT k-mer database (k = 32), such as NCBI's human_filter.db
+      description: Mandatory. STAT k-mer database (k = 32), such as NCBI's human_filter.db
       pattern: "*"
       ontologies:
         - edam: "http://edamontology.org/data_3210" # Genome index

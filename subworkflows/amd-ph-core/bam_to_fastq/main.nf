@@ -12,6 +12,13 @@
 //                                record is flagged paired but no mate is present)
 //   no reads, or no pairs and both unpaired files hold reads   refused
 //
+// One module, on purpose. The guideline that a subworkflow chains two or more modules
+// is there so a subworkflow adds something its module does not; what this one adds is
+// the layout decision above, which is channel logic on the module's outputs, not
+// another tool. Inlined, that logic would be copied into each pipeline that converts
+// BAMs, and could not be tested on its own; as a subworkflow it is written once and
+// tested here.
+//
 include { SAMTOOLS_COLLATEFASTQ } from '../../../modules/amd-ph-core/samtools/collatefastq/main'
 
 workflow BAM_TO_FASTQ {
