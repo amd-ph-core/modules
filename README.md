@@ -120,6 +120,10 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 - `picard/samformatconverter` - Convert between SAM/BAM formats
 - `picard/sortsam` - Sort SAM/BAM files
 
+### Read classification
+
+- `kraken2/extractreads` - Kraken2 classification and taxon-based read extraction in one task
+
 ### TB varpipe analysis
 
 - `varpipe/bwamem` - BWA-MEM alignment for TB variant pipeline
