@@ -143,7 +143,7 @@ output:
   - dehosted:
       type: file
       description: |
-        FASTQ_DEHOST: reads with host reads removed.
+        FASTQ_DEHOST: reads with host reads removed (masked with N instead, for sra_scrubber without -x), or unchanged for none.
         Structure: [ val(meta), path(reads) ]
   - dehost_json:
       type: file

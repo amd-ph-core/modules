@@ -104,7 +104,7 @@ workflow FASTQ_DEHOST {
     }
 
     emit:
-    reads      = ch_dehosted   // channel: [ val(meta), path(reads) ], host reads removed (unchanged for none)
+    reads      = ch_dehosted   // channel: [ val(meta), path(reads) ], host reads removed, or for sra_scrubber without -x kept with their bases masked as N; unchanged for none
     json       = ch_json       // channel: [ val(meta), path(json) ], the dehoster's report; empty for none
     host_bam   = ch_host_bam   // channel: [ val(meta), path(bam) ], hostess with --bam only
     host_bai   = ch_host_bai   // channel: [ val(meta), path(bai) ]

@@ -172,7 +172,7 @@ workflow QQQ_READ_PREP {
     rrna_stats     = ch_rrna_stats                  // channel: [ val(meta), path(txt) ], bbduk's match statistics
     rrna_stats_mqc = ch_rrna_mqc                    // channel: [ val(meta), path(txt) ], bbduk's summary, for MultiQC
     rrna_log       = ch_rrna_log                    // channel: [ val(meta), path(log) ], bbduk's log
-    dehosted       = FASTQ_DEHOST.out.reads         // channel: [ val(meta), path(reads) ], host reads removed (unchanged for none)
+    dehosted       = FASTQ_DEHOST.out.reads         // channel: [ val(meta), path(reads) ], host reads removed, or for sra_scrubber without -x kept with their bases masked as N; unchanged for none
     dehost_json    = FASTQ_DEHOST.out.json          // channel: [ val(meta), path(json) ], the dehoster's report; empty for none
     host_bam       = FASTQ_DEHOST.out.host_bam      // channel: [ val(meta), path(bam) ], hostess with --bam only
     host_bai       = FASTQ_DEHOST.out.host_bai      // channel: [ val(meta), path(bai) ], with host_bam
