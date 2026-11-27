@@ -9,25 +9,15 @@ nextflow_process {
     tag "modules_amdphcore"
     tag "hostile"
     tag "hostile/clean"
-    tag "nf-core/bowtie2/build"
 
     // The bowtie2 cases align human reads against a SARS-CoV-2 index, so nothing is
     // removed and every read comes back: they test the plumbing (index name, cache
     // directory, mate order). The minimap2 case removes reads that do align.
-
-    setup {
-        run("BOWTIE2_BUILD") {
-            script "../../../../nf-core/bowtie2/build/main.nf"
-            process {
-                """
-                input[0] = [
-                    [ id:'test' ],
-                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
-                ]
-                """
-            }
-        }
-    }
+    //
+    // The indexes are prebuilt (oamd-bio-test-data, genomics/sars-cov-2/genome/index,
+    // whose README gives the commands): tests run against a prebuilt index the way
+    // production does, and never build one. They are passed as the index files
+    // themselves, since a directory cannot be fetched over HTTPS.
 
     test("bowtie2 - fastq - paired-end") {
         when {
@@ -43,7 +33,7 @@ nextflow_process {
                         file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_2.fastq.gz', checkIfExists: true),
                     ],
                 ]
-                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[1] = [ 'genome', [ '1', '2', '3', '4', 'rev.1', 'rev.2' ].collect { e -> file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/bowtie2/genome.' + e + '.bt2', checkIfExists: true) } ]
                 input[2] = 'bowtie2'
                 """
             }
@@ -73,7 +63,7 @@ nextflow_process {
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ],
                 ]
-                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[1] = [ 'genome', [ '1', '2', '3', '4', 'rev.1', 'rev.2' ].collect { e -> file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/bowtie2/genome.' + e + '.bt2', checkIfExists: true) } ]
                 input[2] = 'bowtie2'
                 """
             }
@@ -104,7 +94,7 @@ nextflow_process {
                 def r1  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_1.fastq.gz', checkIfExists: true).copyTo(dir.resolve('s.R1.fastq.gz'))
                 def r2  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_2.fastq.gz', checkIfExists: true).copyTo(dir.resolve('s.R2.fastq.gz'))
                 input[0] = [ [ id:'s', single_end:false ], [ r2, r1 ] ]
-                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[1] = [ 'genome', [ '1', '2', '3', '4', 'rev.1', 'rev.2' ].collect { e -> file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/bowtie2/genome.' + e + '.bt2', checkIfExists: true) } ]
                 input[2] = 'bowtie2'
                 """
             }
@@ -120,9 +110,9 @@ nextflow_process {
         }
     }
 
-    // minimap2 takes the host FASTA itself as the index. The reads are SARS-CoV-2
-    // amplicon reads, so against the SARS-CoV-2 genome most of them are removed.
-    test("minimap2 - fastq - single-end - host FASTA") {
+    // minimap2 against a prebuilt .mmi. The reads are SARS-CoV-2 amplicon reads, so
+    // against the SARS-CoV-2 genome most of them are removed.
+    test("minimap2 - fastq - single-end - prebuilt .mmi") {
         when {
             params {
                 module_args = ""
@@ -133,7 +123,7 @@ nextflow_process {
                     [ id:'long', single_end:true ],
                     [ file('https://raw.githubusercontent.com/nf-core/test-datasets/5f09ab078a7459db38c1ec86712a98d369cf7863/illumina/amplicon/sample1_R1.fastq.gz', checkIfExists: true) ],
                 ]
-                input[1] = [ 'genome', file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true) ]
+                input[1] = [ 'genome', file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/minimap2/genome.mmi', checkIfExists: true) ]
                 input[2] = 'minimap2'
                 """
             }
@@ -167,7 +157,7 @@ nextflow_process {
                         file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/illumina/fastq/test_2.fastq.gz', checkIfExists: true),
                     ],
                 ]
-                input[1] = BOWTIE2_BUILD.out.index.map { _meta, index -> [ 'genome', index ] }
+                input[1] = [ 'genome', [ '1', '2', '3', '4', 'rev.1', 'rev.2' ].collect { e -> file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/bowtie2/genome.' + e + '.bt2', checkIfExists: true) } ]
                 input[2] = 'bowtie2'
                 """
             }

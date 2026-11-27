@@ -47,18 +47,12 @@ input:
   - dehoster:
       type: string
       description: "FASTQ_DEHOST: deacon, sra_scrubber, hostess, hostile or none."
-  - host_fasta:
-      type: file
-      description: "FASTQ_DEHOST: a host FASTA to build the index from, or []."
   - host_index:
       type: file
-      description: "FASTQ_DEHOST: a prebuilt index, or []."
+      description: "FASTQ_DEHOST: the dehoster's prebuilt index, or [] for none."
   - host_index_name:
       type: string
       description: "FASTQ_DEHOST: the hostile/hostess index name, or ''."
-  - scrubber_window:
-      type: integer
-      description: "FASTQ_DEHOST: the scrubber database window."
   - max_reads:
       type: integer
       description: "Downsample each sample to this many reads (pairs); 0 or null for no downsampling."

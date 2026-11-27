@@ -7,12 +7,9 @@ nextflow_workflow {
     tag "subworkflows"
     tag "subworkflows_amdphcore"
     tag "subworkflows/fastq_dehost"
-    tag "deacon/index"
     tag "deacon/filter"
-    tag "srahumanscrubber/builddb"
     tag "srahumanscrubber/scrub"
     tag "hostess"
-    tag "subworkflows/../../modules/nf-core/bowtie2/build"
     tag "hostile/clean"
 
     // The "host" is 40 kb of human chr22 (nf-core genomics/homo_sapiens/genome/genome.fasta)
@@ -20,8 +17,13 @@ nextflow_workflow {
     // (srahumanscrubber's mixed_{1,2}.fastq.gz). A dehoster that works removes the human
     // pairs and keeps the virus: with every read human, or none, removing the wrong reads
     // would look the same as removing the right ones.
+    //
+    // Every index is prebuilt (oamd-bio-test-data, genomics/*/genome/index, whose READMEs
+    // give the commands): FASTQ_DEHOST never builds one, the way production never does.
+    // hostile/hostess get the index files themselves, since a directory cannot be fetched
+    // over HTTPS.
 
-    test("deacon - index built from a host FASTA - mixed paired-end") {
+    test("deacon - prebuilt index - mixed paired-end") {
 
         when {
             workflow {
@@ -32,10 +34,8 @@ nextflow_workflow {
                     [ file(data + '/mixed_1.fastq.gz', checkIfExists: true), file(data + '/mixed_2.fastq.gz', checkIfExists: true) ]
                 ])
                 input[1] = 'deacon'
-                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
-                input[3] = []
-                input[4] = ''
-                input[5] = 32
+                input[2] = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
+                input[3] = ''
                 """
             }
         }
@@ -65,10 +65,8 @@ nextflow_workflow {
                     [ file(data + '/mixed_1.fastq.gz', checkIfExists: true), file(data + '/mixed_2.fastq.gz', checkIfExists: true) ]
                 ])
                 input[1] = 'sra_scrubber'
-                input[2] = []
-                input[3] = file(data + '/chr22_test.w32.db', checkIfExists: true)
-                input[4] = ''
-                input[5] = 32
+                input[2] = file(data + '/chr22_test.w32.db', checkIfExists: true)
+                input[3] = ''
                 """
             }
         }
@@ -83,7 +81,7 @@ nextflow_workflow {
         }
     }
 
-    test("hostile - short reads, bowtie2 index built from a host FASTA - mixed paired-end") {
+    test("hostile - short reads, prebuilt bowtie2 index - mixed paired-end") {
 
         when {
             workflow {
@@ -94,10 +92,8 @@ nextflow_workflow {
                     [ file(data + '/mixed_1.fastq.gz', checkIfExists: true), file(data + '/mixed_2.fastq.gz', checkIfExists: true) ]
                 ])
                 input[1] = 'hostile'
-                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
-                input[3] = []
-                input[4] = ''
-                input[5] = 32
+                input[2] = [ '1', '2', '3', '4', 'rev.1', 'rev.2' ].collect { e -> file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/genome/index/bowtie2/genome.' + e + '.bt2', checkIfExists: true) }
+                input[3] = 'genome'
                 """
             }
         }
@@ -112,10 +108,10 @@ nextflow_workflow {
         }
     }
 
-    // Long reads take the _LONG alias, which hands minimap2 the FASTA itself. The reads are
+    // Long reads take the _LONG alias, which hands minimap2 a prebuilt .mmi. The reads are
     // the SARS-CoV-2 amplicon reads qqq's own test sends down the long-read path; nf-core's
     // sarscov2/nanopore/fastq/test.fastq.gz does not align to the SARS-CoV-2 genome at all.
-    test("hostile - long reads, minimap2 against a host FASTA") {
+    test("hostile - long reads, minimap2 against a prebuilt .mmi") {
 
         when {
             workflow {
@@ -125,10 +121,8 @@ nextflow_workflow {
                     file('https://raw.githubusercontent.com/nf-core/test-datasets/5f09ab078a7459db38c1ec86712a98d369cf7863/illumina/amplicon/sample1_R1.fastq.gz', checkIfExists: true)
                 ])
                 input[1] = 'hostile'
-                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
-                input[3] = []
-                input[4] = ''
-                input[5] = 32
+                input[2] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/minimap2/genome.mmi', checkIfExists: true)
+                input[3] = 'genome'
                 """
             }
         }
@@ -139,8 +133,6 @@ nextflow_workflow {
             assertAll(
                 { assert workflow.success },
                 { assert report.aligner == 'minimap2' },
-                // long reads only: no bowtie2 index is built
-                { assert !workflow.trace.tasks()*.name.any { n -> n.contains('BOWTIE2_BUILD') } },
                 // SARS-CoV-2 reads against a SARS-CoV-2 "host": nearly all go
                 { assert report.reads_in == 27721 },
                 { assert report.reads_out == kept && kept < report.reads_in / 10 },
@@ -164,10 +156,9 @@ nextflow_workflow {
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true) ]
                 )
                 input[1] = 'hostess'
-                input[2] = file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
-                input[3] = []
-                input[4] = ''
-                input[5] = 32
+                input[2] = [ '1', '2', '3', '4', 'rev.1', 'rev.2' ].collect { e -> file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/bowtie2/genome.' + e + '.bt2', checkIfExists: true) } +
+                    [ file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/minimap2/genome.mmi', checkIfExists: true) ]
+                input[3] = 'genome'
                 """
             }
         }
@@ -193,9 +184,7 @@ nextflow_workflow {
                 ])
                 input[1] = 'none'
                 input[2] = []
-                input[3] = []
-                input[4] = ''
-                input[5] = 32
+                input[3] = ''
                 """
             }
         }
@@ -218,9 +207,7 @@ nextflow_workflow {
                 input[0] = channel.empty()
                 input[1] = 'bowtie'
                 input[2] = []
-                input[3] = []
-                input[4] = ''
-                input[5] = 32
+                input[3] = ''
                 """
             }
         }

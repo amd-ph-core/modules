@@ -32,10 +32,8 @@ workflow QQQ_READ_PREP {
     save_failed     // value:   FASTQ_TRIM_MERGE
     rrna_ref        // value:   rRNA reference FASTA for bbduk, or [] to skip rRNA depletion
     dehoster        // value:   FASTQ_DEHOST
-    host_fasta      // value:   FASTQ_DEHOST
     host_index      // value:   FASTQ_DEHOST
     host_index_name // value:   FASTQ_DEHOST
-    scrubber_window // value:   FASTQ_DEHOST
     max_reads       // value:   downsample each sample to this many reads (pairs), or 0/null for none
     seed            // value:   rasusa's seed
 
@@ -143,7 +141,7 @@ workflow QQQ_READ_PREP {
     //
     // 4. Host removal
     //
-    FASTQ_DEHOST( ch_predehost, dehoster, host_fasta, host_index, host_index_name, scrubber_window )
+    FASTQ_DEHOST( ch_predehost, dehoster, host_index, host_index_name )
 
     //
     // 5. Downsampling: all samples or none, on the flag alone

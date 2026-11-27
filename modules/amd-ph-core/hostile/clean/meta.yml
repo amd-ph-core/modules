@@ -39,7 +39,8 @@ input:
     - reference_dir:
         type: directory
         description: |
-          Directory containing index file(s) corresponding to the preferred aligner (bowtie2 short reads or minimap for long reads).
+          Directory containing index file(s) corresponding to the preferred aligner (bowtie2 short reads or minimap for long reads),
+          or the index files themselves (<name>.*.bt2, or one <name>.mmi), which are staged into the task directory.
           Note that single end data is assumed to be long reads. If you have single-end short read you must supply both the BowTie2
           indices AND explicitly specify the `aligner` input below.
         ontologies:

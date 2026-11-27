@@ -52,7 +52,8 @@ input:
         type: directory
         description: |
           Mandatory. Directory holding the index files themselves, not its
-          parent.
+          parent; or the index files (<name>.*.bt2, or one <name>.mmi), which
+          are staged into the task directory.
   - aligner:
       type: string
       description: |

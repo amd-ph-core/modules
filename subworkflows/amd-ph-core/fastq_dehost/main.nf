@@ -1,6 +1,7 @@
 //
-// Remove host reads with one of four dehosters, building the host index from a
-// FASTA when one is given.
+// Remove host reads with one of four dehosters, against a prebuilt host index.
+// Nothing here builds an index: production always runs against prebuilt,
+// versioned ones, so the tests do too.
 //
 //   deacon        minimizer matching against a deacon index
 //   sra_scrubber  NCBI's SRA Human Read Scrubber: STAT k-mers, reads removed
@@ -15,11 +16,8 @@
 // dehosters run as _SHORT (bowtie2) and _LONG (minimap2), which differ in the
 // aligner and the index they are handed, not just in resources.
 //
-include { DEACON_INDEX                                 } from '../../../modules/amd-ph-core/deacon/index/main'
 include { DEACON_FILTER                                } from '../../../modules/amd-ph-core/deacon/filter/main'
-include { SRAHUMANSCRUBBER_BUILDDB                     } from '../../../modules/amd-ph-core/srahumanscrubber/builddb/main'
 include { SRAHUMANSCRUBBER_SCRUB                       } from '../../../modules/amd-ph-core/srahumanscrubber/scrub/main'
-include { BOWTIE2_BUILD                                } from '../../../modules/nf-core/bowtie2/build/main'
 include { HOSTESS as HOSTESS_SHORT                     } from '../../../modules/amd-ph-core/hostess/main'
 include { HOSTESS as HOSTESS_LONG                      } from '../../../modules/amd-ph-core/hostess/main'
 include { HOSTILE_CLEAN as HOSTILE_CLEAN_SHORT         } from '../../../modules/amd-ph-core/hostile/clean/main'
@@ -30,18 +28,17 @@ workflow FASTQ_DEHOST {
     take:
     ch_reads        // channel: [ val(meta), val(read_type), path(reads) ], read_type 'short' or 'long'
     dehoster        // value:   deacon | sra_scrubber | hostess | hostile | none
-    host_fasta      // value:   a host FASTA to build the index from, or [] to use host_index
-    host_index      // value:   a prebuilt index for the dehoster: deacon .idx, scrubber .db, or the
-                    //          hostile/hostess index directory; [] when host_fasta is given
-    host_index_name // value:   hostile/hostess: the index name inside host_index (bowtie2 prefix); '' otherwise
-    scrubber_window // value:   sra_scrubber: the window SRAHUMANSCRUBBER_BUILDDB builds with
+    host_index      // value:   the dehoster's prebuilt index: a deacon .idx, a scrubber .db, or for
+                    //          hostile/hostess a directory holding the index, or its files
+                    //          (<name>.*.bt2 for short reads, <name>.mmi for long); [] for none
+    host_index_name // value:   hostile/hostess: the index name (bowtie2 prefix, .mmi basename); '' otherwise
 
     main:
     if (!(dehoster in ['deacon', 'sra_scrubber', 'hostess', 'hostile', 'none'])) {
         error "FASTQ_DEHOST: unknown dehoster '${dehoster}'; expected deacon, sra_scrubber, hostess, hostile or none"
     }
-    if (dehoster != 'none' && !host_fasta && !host_index) {
-        error "FASTQ_DEHOST: dehoster '${dehoster}' needs either a host FASTA to build an index from or a prebuilt index"
+    if (dehoster != 'none' && !host_index) {
+        error "FASTQ_DEHOST: dehoster '${dehoster}' needs a prebuilt host index"
     }
 
     ch_dehosted   = channel.empty()
@@ -56,26 +53,12 @@ workflow FASTQ_DEHOST {
         ch_dehosted = ch_fastq
     }
     else if (dehoster == 'deacon') {
-        if (host_fasta) {
-            DEACON_INDEX( channel.value([ [ id: file(host_fasta).baseName ], host_fasta ]) )
-            ch_index = DEACON_INDEX.out.index.map { _meta, index -> index }.first()
-        }
-        else {
-            ch_index = channel.value(host_index)
-        }
-        DEACON_FILTER( ch_fastq, ch_index )
+        DEACON_FILTER( ch_fastq, channel.value(host_index) )
         ch_dehosted = DEACON_FILTER.out.fastq
         ch_json     = DEACON_FILTER.out.json
     }
     else if (dehoster == 'sra_scrubber') {
-        if (host_fasta) {
-            SRAHUMANSCRUBBER_BUILDDB( channel.value([ [ id: file(host_fasta).baseName ], host_fasta ]), [], scrubber_window )
-            ch_db = SRAHUMANSCRUBBER_BUILDDB.out.db.map { _meta, db -> db }.first()
-        }
-        else {
-            ch_db = channel.value(host_index)
-        }
-        SRAHUMANSCRUBBER_SCRUB( ch_fastq, ch_db )
+        SRAHUMANSCRUBBER_SCRUB( ch_fastq, channel.value(host_index) )
         ch_dehosted   = SRAHUMANSCRUBBER_SCRUB.out.fastq
         ch_json       = SRAHUMANSCRUBBER_SCRUB.out.json
         ch_host_reads = SRAHUMANSCRUBBER_SCRUB.out.removed
@@ -92,20 +75,16 @@ workflow FASTQ_DEHOST {
         ch_short = ch_by_type.short_reads.map { meta, _read_type, reads -> [ meta, reads ] }
         ch_long  = ch_by_type.long_reads.map  { meta, _read_type, reads -> [ meta, reads ] }
 
-        // bowtie2 takes an index name inside a directory; minimap2 takes the FASTA
-        // (or a directory holding <name>.mmi), which is why the two references differ.
-        // The bowtie2 index is built only when some sample is short-read: built from
-        // the first short-read sample's arrival, so a long-read-only run (or an empty
-        // one) never builds a human-genome index it would not use.
-        if (host_fasta) {
-            BOWTIE2_BUILD( ch_short.first().map { _meta, _reads -> [ [ id: file(host_fasta).baseName ], host_fasta ] } )
-            ch_ref_short = BOWTIE2_BUILD.out.index.map { meta, index -> [ meta.id, index ] }.first()
-            ch_ref_long  = channel.value([ file(host_fasta).name, host_fasta ])
-        }
-        else {
-            ch_ref_short = channel.value([ host_index_name, host_index ])
-            ch_ref_long  = channel.value([ host_index_name, host_index ])
-        }
+        // bowtie2 reads <name>.*.bt2 and minimap2 <name>.mmi. Given the index files
+        // rather than their directory, each alias gets only its own aligner's, so a
+        // short-read task never stages the minimap2 index (7.7 GB for the human
+        // one) and a long-read task never stages the bowtie2 one. A directory is
+        // handed to both as it is.
+        def index_files = host_index instanceof List ? host_index : null
+        ch_ref_short = channel.value([ host_index_name,
+            index_files ? index_files.findAll { f -> f.name.endsWith('.bt2') } : host_index ])
+        ch_ref_long  = channel.value([ host_index_name,
+            index_files ? index_files.find { f -> f.name.endsWith('.mmi') } : host_index ])
 
         if (dehoster == 'hostess') {
             HOSTESS_SHORT( ch_short, ch_ref_short, 'bowtie2' )

@@ -8,21 +8,9 @@ nextflow_process {
     tag "modules_amdphcore"
     tag "deacon"
     tag "deacon/filter"
-    tag "deacon/index"
 
-    setup {
-        run("DEACON_INDEX") {
-            script "../../index/main.nf"
-            process {
-                """
-                input[0] = channel.value([
-                    [ id:'sarscov2' ],
-                    file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
-                ])
-                """
-            }
-        }
-    }
+    // Against a prebuilt index (oamd-bio-test-data, genomics/sars-cov-2/genome/index,
+    // whose README gives the command), the way production runs: tests never build one.
 
     test("sarscov2 - fastq - paired_end") {
 
@@ -34,7 +22,7 @@ nextflow_process {
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[1] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
                 """
             }
         }
@@ -77,7 +65,7 @@ nextflow_process {
                 def r2 = file(base + '/test_2.fastq.gz', checkIfExists: true).copyTo(dot.resolve('sample.R2.fastq.gz'))
 
                 input[0] = channel.of([ [ id:'test', single_end:false ], [ r2, r1 ] ])
-                input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[1] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
                 """
             }
         }
@@ -109,7 +97,7 @@ nextflow_process {
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[1] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
                 """
             }
         }
@@ -137,7 +125,7 @@ nextflow_process {
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[1] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
                 """
             }
         }
@@ -173,7 +161,7 @@ nextflow_process {
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
                       file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[1] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
                 """
             }
         }
@@ -201,7 +189,7 @@ nextflow_process {
                     [ id:'test', single_end:true ],
                     [ file(params.nfcore_modules_testdata_base_path + '/genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true) ]
                 ])
-                input[1] = DEACON_INDEX.out.index.map { _meta, index -> index }
+                input[1] = file(params.modules_testdata_base_path + '/genomics/sars-cov-2/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)
                 """
             }
         }

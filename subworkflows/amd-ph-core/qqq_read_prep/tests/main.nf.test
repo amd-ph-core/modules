@@ -43,12 +43,10 @@ nextflow_workflow {
                 input[4]  = true    // save_failed
                 input[5]  = []      // rrna_ref
                 input[6]  = 'deacon'
-                input[7]  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
-                input[8]  = []
-                input[9]  = ''
-                input[10] = 32
-                input[11] = 0       // max_reads: off
-                input[12] = 42
+                input[7]  = file(params.modules_testdata_base_path + '/genomics/eukaryotes/homo_sapiens/genome/index/deacon/genome.k31w15.idx', checkIfExists: true)   // prebuilt, never built here
+                input[8]  = ''
+                input[9]  = 0       // max_reads: off
+                input[10] = 42
                 """
             }
         }
@@ -95,11 +93,9 @@ nextflow_workflow {
                 input[5]  = file(params.nfcore_modules_testdata_base_path + '/genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
                 input[6]  = 'none'
                 input[7]  = []
-                input[8]  = []
-                input[9]  = ''
-                input[10] = 32
-                input[11] = 1000    // above both samples' 100 pairs: rasusa still runs, and keeps all
-                input[12] = 42
+                input[8]  = ''
+                input[9]  = 1000    // above both samples' 100 pairs: rasusa still runs, and keeps all
+                input[10] = 42
                 """
             }
         }
@@ -133,11 +129,9 @@ nextflow_workflow {
                 input[5]  = []
                 input[6]  = 'none'
                 input[7]  = []
-                input[8]  = []
-                input[9]  = ''
-                input[10] = 32
-                input[11] = 0
-                input[12] = 42
+                input[8]  = ''
+                input[9]  = 0
+                input[10] = 42
                 """
             }
         }
