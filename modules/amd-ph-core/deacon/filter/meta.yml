@@ -39,7 +39,7 @@ tools:
   - bgzip:
       description: |
         Block-gzip compression from HTSlib. Used for the output FASTQs only when the
-        image provides it; plain gzip otherwise. It takes no arguments.
+        image provides it; plain gzip otherwise.
       homepage: "https://www.htslib.org"
       documentation: "https://www.htslib.org/doc/bgzip.html"
       tool_dev_url: "https://github.com/samtools/htslib"
@@ -47,7 +47,7 @@ tools:
       licence:
         - "MIT"
       identifier: "biotools:htslib"
-      args_id: ""
+      args_id: "$args2"
 input:
   - - meta:
         type: map

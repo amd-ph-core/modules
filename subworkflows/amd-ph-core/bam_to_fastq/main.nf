@@ -35,10 +35,10 @@ workflow BAM_TO_FASTQ {
     // Every output is emitted for every BAM with the meta it was given, so they
     // join on meta as they are.
     SAMTOOLS_COLLATEFASTQ.out.read_counts
-        .join(SAMTOOLS_COLLATEFASTQ.out.fastq)
-        .join(SAMTOOLS_COLLATEFASTQ.out.fastq_other)
-        .join(SAMTOOLS_COLLATEFASTQ.out.fastq_singleton)
-        .join(ch_bam)
+        .join(SAMTOOLS_COLLATEFASTQ.out.fastq, failOnMismatch: true, failOnDuplicate: true)
+        .join(SAMTOOLS_COLLATEFASTQ.out.fastq_other, failOnMismatch: true, failOnDuplicate: true)
+        .join(SAMTOOLS_COLLATEFASTQ.out.fastq_singleton, failOnMismatch: true, failOnDuplicate: true)
+        .join(ch_bam, failOnMismatch: true, failOnDuplicate: true)
         .multiMap { meta, n_1, _n_2, n_other, n_singleton, pair, other, singleton, bam ->
             def paired   = (n_1 as long) > 0
             def unpaired = [ [ other, n_other as long ], [ singleton, n_singleton as long ] ].findAll { _f, n -> n > 0 }

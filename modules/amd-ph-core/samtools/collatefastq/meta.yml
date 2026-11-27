@@ -14,8 +14,8 @@ description: |
     - drops the `interleave` input;
     - refuses `samtools collate -f` in `ext.args`, because fast mode outputs
       only paired records and returns no reads at all from a single-end input;
-    - pins the samtools BioContainer rather than a Wave image. AMDP runs the
-      version nf-configs maps (oamd-bio-samtools), not this default.
+    - pins the samtools BioContainer rather than a Wave image; a deployment can
+      map its own samtools image instead.
 keywords:
   - bam2fq
   - samtools

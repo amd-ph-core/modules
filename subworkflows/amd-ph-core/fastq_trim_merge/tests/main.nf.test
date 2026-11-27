@@ -9,8 +9,8 @@ nextflow_workflow {
     tag "subworkflows/fastq_trim_merge"
     tag "falco"
     tag "subworkflows/../../modules/nf-core/fastp"
-    tag "subworkflows/../../modules/nf-core/fastplong"
     tag "subworkflows/../../modules/nf-core/cat/fastq"
+    tag "fastplong"
 
     // Each FASTQ in a channel item as [ name, reads, md5 of its sorted read names ], for the
     // snapshot: it records which reads were kept, whatever order a multithreaded tool wrote
