@@ -1,0 +1,71 @@
+name: "minimap2_validateindex"
+description: |
+  Checks that a prebuilt minimap2 index (.mmi) matches a reference FASTA and a
+  minimap2 preset before it is used for alignment. Every stored reference name,
+  length and sequence must match the FASTA, in order, and the index k-mer size,
+  window and flags must match the preset. The task fails with a message if
+  anything differs; otherwise the index is passed on unchanged.
+keywords:
+  - minimap2
+  - index
+  - mmi
+  - validation
+  - reference
+tools:
+  - "validate_minimap2_index":
+      description: "Python template (standard library only) that reads the MMI2 index format and compares it with a reference FASTA"
+      homepage: "https://github.com/amd-ph-core/modules/tree/main/modules/amd-ph-core/minimap2/validateindex/templates"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference information
+          e.g. `[ id:'reference' ]`
+    - index:
+        type: file
+        description: Prebuilt minimap2 index, built with the minimap2 version the pipeline uses (MMI2 format) and without `--idx-no-seq`
+        pattern: "*.mmi"
+        ontologies: []
+    - fasta:
+        type: file
+        description: Reference FASTA the index is expected to have been built from
+        pattern: "*.{fa,fasta,fna}"
+        ontologies:
+          - edam: http://edamontology.org/format_1929 # FASTA
+  - preset:
+      type: string
+      description: |
+        minimap2 preset the index must have been built with. Supported values:
+        `sr` (k=21, w=11) and `asm20` (k=19, w=10).
+output:
+  index:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference information
+            e.g. `[ id:'reference' ]`
+      - "validated/*":
+          type: file
+          description: The validated index, unchanged, linked under `validated/`
+          pattern: "validated/*.mmi"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+topics:
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@fchen-cdc"
+maintainers:
+  - "@fchen-cdc"

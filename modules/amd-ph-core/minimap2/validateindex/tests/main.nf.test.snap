@@ -1,0 +1,61 @@
+{
+    "sarscov2 - sr index - matching fasta - sr": {
+        "content": [
+            "genome.mmi",
+            [
+                "versions.yml:md5,9787c18336f6e5cc4cccd9d84eec8e38"
+            ]
+        ],
+        "timestamp": "2026-11-17T09:12:23.287578762",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - asm20 index - matching fasta - asm20": {
+        "content": [
+            "genome.mmi",
+            [
+                "versions.yml:md5,9787c18336f6e5cc4cccd9d84eec8e38"
+            ]
+        ],
+        "timestamp": "2026-11-17T09:12:30.135630607",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    },
+    "sarscov2 - sr index - sr - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "genome.mmi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,12909b4e7fc2b783ac44ced795bcc868"
+                ],
+                "index": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "genome.mmi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,12909b4e7fc2b783ac44ced795bcc868"
+                ]
+            }
+        ],
+        "timestamp": "2026-11-17T09:12:51.104503924",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    }
+}

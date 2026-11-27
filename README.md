@@ -120,6 +120,10 @@ We use the `nf-core/tools` package with a custom `--git-remote` to manage module
 - `picard/samformatconverter` - Convert between SAM/BAM formats
 - `picard/sortsam` - Sort SAM/BAM files
 
+### Reference preparation
+
+- `minimap2/validateindex` - Check a prebuilt minimap2 index against its reference FASTA and preset
+
 ### TB varpipe analysis
 
 - `varpipe/bwamem` - BWA-MEM alignment for TB variant pipeline
